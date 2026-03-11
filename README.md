@@ -1,8 +1,9 @@
 # Game Design Document (GDD)
+
 # Capsturing
 
-**Aluno:** Nicolas Robert de Oliveira Borges
-**Email:** nicolas.borges@catolicasc.edu.br
+**Aluno:** Nicolas Robert de Oliveira Borges  
+**Email:** nicolas.borges@catolicasc.edu.br  
 
 ## Enredo Base
 O personagem jogável, um frágil praticante de magia que visa se tornar um verdadeiro mago, se especializa na arte arriscada e pouco desenvolvida de monsturgia, uma arte de domar e trabalhar com monstros mágicos, chamados rúnicos em seu mundo, que existem fora da lei natural dos animais com habilidades e características sobrenaturais. 
