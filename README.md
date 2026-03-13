@@ -51,6 +51,64 @@ Jogadores em busca de algo que compense habilidade dentre 16 a 35 anos.
 
 Ambos Pokemon e Palworld compartilham do mesmo gênero base de jogo de captura de monstros. Pokemon é famoso por seus designs icônicos e charmosos, e recompensa estratégia em como o jogador faz uso dos traços e capacidades individuais de seus monstros, enquanto Palworld possui mecânicas de gameplay divertidas em como o jogador participa do combate ao lado de seus companheiros. Osu, um jogo de ritmo, é a inspiração principal para as mecânicas de magia de Capsturing, exigindo foco e destreza, para jogar e garantindo bons desafios aos jogadores com sua gameplay punitiva mas que garante uma sensação de triumfo quando se obtem sucesso.
 
+# 4. Hipótese de Design
+
+| Hipótese | Método de Teste |
+| Jogadores preferem mecânicas que testem sua habilidade a chance aleatória | Playtest comparando captura baseada em ritmo vs captura puramente probabilísticaPlaytest com mecânica de captura que requer um nivel de habilidade |
+| Jogadores conseguem aprender o sistema de captura baseado em ritmo sem tutorial longo | Playtest inicial observando taxa de erro e tempo de aprendizado |
+| Usar rúnicos para exploração (montarias ou habilidades) incentiva mais exploração do mapa | Telemetria ou observação do tempo gasto explorando |
+| Participação ativa do personagem jogável junto de um rúnico aliado é mais satisfatório comparado a combate com apenas um ou outro | Observação de reação e feedback após capturas ou combates difíceis |
+
+# 5. Gameplay
+
+## Core Loop
+
+Explorar -> Enfrentar ou capturar rúnicos selvagens -> Treinar rúnicos -> Desenvolver novas melhorias -> Continuar Explorando
+
+## Mecânicas Principais
+
+| Movimentação | Andar, correr, pular, montarias |
+| Combate | Convocar e comandar rúnico, desviar |
+| Interação | Feitiços |
+
+## Regras do Jogo
+
+**Vitória**
+
+Capturar um rúnico de alta raridade.
+
+**Derrota**
+
+HP cai para 0.
+
+**Progressão**
+
+Capturar novos rúnicos, treinar rúnicos capturados, desbloquear novas melhorias
+
+# 6. Escopo do Projeto
+
+## Inclui
+
+- Ao menos 6 regiões para explorar
+- Ao menos 24 tipos de rúnicos diferentes
+- 3 rúnicos únicos de alta raridade
+- Ao menos 3 feitiços usáveis em combate
+- Ao menos 3 feitiços para interação com o mundo
+- Sistema de Captura de rúnicos
+- Armazenamento de rúnicos
+- Melhorias desbloqueaveis com experiência obtida enfrentando rúnicos selvagens
+
+## Não Inclui
+
+- Sistema de crafting
+- Multiplayer
+- Geração Procedural
+- Mecânicas de sobrevivência
+ 
+# 7. Prototipagem
+
+Nada ainda
+
 ## Enredo Base
 O personagem jogável, um frágil praticante de magia que visa se tornar um verdadeiro mago, se especializa na arte arriscada e pouco desenvolvida de monsturgia, uma arte de domar e trabalhar com monstros mágicos, chamados rúnicos em seu mundo, que existem fora da lei natural dos animais com habilidades e características sobrenaturais. 
 
