@@ -9,7 +9,7 @@
 Pesquisa
 
 **Versão de Documento:** v0.1  
-**Última Atualização:** 11/03/2026
+**Última Atualização:** 09/04/2026
 
 # 1. Visão Geral
 
@@ -35,7 +35,7 @@ Jogadores em busca de algo que compense habilidade dentre 16 a 35 anos.
 
 | Item | Link |
 |-----|-----|
-| Build jogável | Itch.io / WebGL / Download |
+| Build jogável | Itch.io / Download |
 | Repositório | GitHub |
 | Instruções de execução | Requisitos técnicos |
 
@@ -89,14 +89,11 @@ Capturar novos rúnicos, treinar rúnicos capturados, desbloquear novas melhoria
 
 ## Inclui
 
-- Ao menos 6 regiões para explorar
-- Ao menos 24 tipos de rúnicos diferentes
+- Ao menos 2 regiões para explorar
+- Ao menos 9 tipos de rúnicos diferentes
 - 3 rúnicos únicos de alta raridade
-- Ao menos 3 feitiços usáveis em combate
-- Ao menos 3 feitiços para interação com o mundo
 - Sistema de Captura de rúnicos
 - Armazenamento de rúnicos
-- Melhorias desbloqueaveis com experiência obtida enfrentando rúnicos selvagens
 
 ## Não Inclui
 
@@ -107,7 +104,9 @@ Capturar novos rúnicos, treinar rúnicos capturados, desbloquear novas melhoria
  
 # 7. Prototipagem
 
-Nada ainda
+| Protótipo | Objetivo | Resultado |
+| Movimento Básico | Validar Controle | Sob ajustes |
+| Minigame de ritmo | Testar funcionalidade | Sob desenvolvimento |
 
 ## Enredo Base
 O personagem jogável, um frágil praticante de magia que visa se tornar um verdadeiro mago, se especializa na arte arriscada e pouco desenvolvida de monsturgia, uma arte de domar e trabalhar com monstros mágicos, chamados rúnicos em seu mundo, que existem fora da lei natural dos animais com habilidades e características sobrenaturais. 
@@ -115,8 +114,6 @@ O personagem jogável, um frágil praticante de magia que visa se tornar um verd
 Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um nível de aptidão em sua área de estudo através de algum feito considerável relacionado a sua área, e como foi instruído por seu mestre mago, para isto, ele precisará demonstrar que pode domar e treinar algum tipo de rúnico extraordinário, que apenas um professional poderia, como demonstração de estar pronto para estar intitulado de mago.
 
 ## Mecânicas do Jogo (RF)
-* Movimentação & Exploração: O jogador corre, pula e escala através de um mundo 3D aberto para explorar. Certos rúnicos também podem servir de ajuda na exploração, sendo como montarias ou de outras formas.
+* Movimentação & Exploração: O jogador corre, pula e escala através de um mundo 3D aberto para explorar.
 * Combate: O jogador pode ser atacado por, ou atacar, um rúnico, no qual caso sua opção principal sera comandar um rúnico próprio para lutar. O jogador pode tanto desviar para evitar ataques quanto comandar seu rúnico aliado a desviar, comandá-lo a atacar diretamente ou manter-se na defensiva, e pode comandar o rúnico aliado a usar alguma habilidade disponível.
 * Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso.
-* Feitiços: Além de depender de aliados rúnicos, o jogador pode aprender feitiços básicos para interagir com o mundo, com seus rúnicos aliados e rúnicos inimigos com seu mestre mago e com outros praticantes de magia no mundo, incluindo feitiços como *'Dardo Mágico'* e *'Escudo Protetor'*.
-* Árvore de Melhorias: O jogador pode desbloquear melhorias ao seu personagem, chamadas de *'Fundamentos Monstúrgicos'* através de interação com o mestre mago do personagem jogável e *'Teorias Monstúrgicas'* através de estudo e desenvolvimento pessoal que abrem novas opções para, e aprimoram o treinamento e comando de rúnicos.
