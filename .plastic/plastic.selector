@@ -1,4 +1,0 @@
-repository "Capsturing/Capsturing@4674004690424@cloud"
-  path "/"
-    br "/main"
-    co "/main"
