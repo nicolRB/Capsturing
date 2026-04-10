@@ -14,6 +14,8 @@ Diferente de jogos tradicionais do gênero, a captura depende da habilidade do j
 
 ## Preview
 
+[Minigame](images/minigame_demonstration.png)
+
 ## Como Jogar
 
 ## Game Design Document
