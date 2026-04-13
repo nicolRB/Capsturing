@@ -14,6 +14,10 @@ Diferente de jogos tradicionais do gênero, a captura depende da habilidade do j
 
 ## Preview
 
+<img src="images/minigame_demonstration.png" width="300" Height="600">  <img src="images/chapel3d.png" width="600" Height="1200">
+
+<img src="images/water cat.jpg" width="300" Height="600">
+
 ## Como Jogar
 
 ## Game Design Document
