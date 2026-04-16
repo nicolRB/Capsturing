@@ -40,6 +40,8 @@ public class PlayerController : MonoBehaviour
     private CapsuleCollider capsule;
     private Animator animator;
 
+    public bool casting = true;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -79,10 +81,10 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = Vector2.zero;
 
-        if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) moveInput.y += 1f;
-        if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) moveInput.y -= 1f;
-        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) moveInput.x -= 1f;
-        if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) moveInput.x += 1f;
+        if (!casting && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
+        if (!casting && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
+        if (!casting && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
+        if (!casting && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
 
         moveInput = moveInput.normalized;
         Vector3 movement = transform.forward * moveInput.y + transform.right * moveInput.x;
@@ -104,25 +106,25 @@ public class PlayerController : MonoBehaviour
     private void HandleDashInput()
     {
         Vector2 moveInput = Vector2.zero;
-        if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) moveInput.y += 1f;
-        if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) moveInput.y -= 1f;
-        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) moveInput.x -= 1f;
-        if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) moveInput.x += 1f;
+        if (!casting && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
+        if (!casting && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
+        if (!casting && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
+        if (!casting && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
 
         Vector3 movement = transform.forward * moveInput.y + transform.right * moveInput.x;
 
-        if (Keyboard.current.leftShiftKey.wasPressedThisFrame)
+        if (!casting && Keyboard.current.leftShiftKey.wasPressedThisFrame)
         {
             shiftPressedTime = 0f;
             isHoldingShift = true;
         }
 
-        if (isHoldingShift && Keyboard.current.leftShiftKey.isPressed)
+        if (!casting && isHoldingShift && Keyboard.current.leftShiftKey.isPressed)
         {
             shiftPressedTime += Time.deltaTime;
         }
 
-        if (isHoldingShift && Keyboard.current.leftShiftKey.wasReleasedThisFrame)
+        if (!casting && isHoldingShift && Keyboard.current.leftShiftKey.wasReleasedThisFrame)
         {
             if (shiftPressedTime <= tapThreshold && cooldownTimer <= 0f && !isDashing)
             {
@@ -148,7 +150,7 @@ public class PlayerController : MonoBehaviour
     // ---------------- JUMP ----------------
     private void HandleJumpInput()
     {
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (!casting && Keyboard.current.spaceKey.wasPressedThisFrame)
             jumpBufferTimer = jumpBufferTime;
         else
             jumpBufferTimer -= Time.deltaTime;
@@ -177,7 +179,7 @@ public class PlayerController : MonoBehaviour
     // ---------------- ROTATION ----------------
     private void HandleRotation()
     {
-        if (!isDashing)
+        if (!casting && !isDashing)
         {
             float mouseX = Mouse.current.delta.x.ReadValue() * mouseSensitivity * Time.deltaTime;
             transform.Rotate(0f, mouseX, 0f);
@@ -209,10 +211,10 @@ public class PlayerController : MonoBehaviour
         // -------- INPUT --------
         Vector2 moveInput = Vector2.zero;
 
-        if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) moveInput.y += 1f;
-        if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) moveInput.y -= 1f;
-        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) moveInput.x -= 1f;
-        if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) moveInput.x += 1f;
+        if (!casting && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
+        if (!casting && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
+        if (!casting && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
+        if (!casting && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
 
         float inputAmount = moveInput.magnitude;
 

@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 
-public class ClickableCircle : MonoBehaviour, IPointerClickHandler
+public class TargetScript : MonoBehaviour, IPointerClickHandler
 {
     [Header("Settings")]
     public float size = 1f;
@@ -46,7 +46,7 @@ public class ClickableCircle : MonoBehaviour, IPointerClickHandler
 
         if (targetRing == null || timingRing == null)
         {
-            Debug.LogError("ClickableCircle requires targetRing and timingRing references.", this);
+            Debug.LogError("TargetScript requires targetRing and timingRing references.", this);
             enabled = false;
             return;
         }

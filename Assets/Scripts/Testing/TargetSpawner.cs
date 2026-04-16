@@ -50,8 +50,8 @@ public class TargetSpawner : MonoBehaviour
                 spawnPoint.y + Random.Range(-spawnRange.y / 2, spawnRange.y / 2)
             );
 
-            // 👇 Get the ClickableCircle script
-            ClickableCircle circle = obj.GetComponent<ClickableCircle>();
+            // 👇 Get the TargetScript script
+            TargetScript circle = obj.GetComponent<TargetScript>();
 
             if (circle != null)
             {

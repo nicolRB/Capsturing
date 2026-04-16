@@ -17,17 +17,20 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        float mouseY = Mouse.current.delta.y.ReadValue()
-                       * playerController.mouseSensitivity
-                       * Time.deltaTime;
+        if (!playerController.casting)
+        {
+            float mouseY = Mouse.current.delta.y.ReadValue()
+                           * playerController.mouseSensitivity
+                           * Time.deltaTime;
 
-        // acumula rotação vertical
-        xRotation -= mouseY;
+            // acumula rotação vertical
+            xRotation -= mouseY;
 
-        // limita ângulo (evita virar de cabeça pra baixo)
-        xRotation = Mathf.Clamp(xRotation, -85f, 85f);
+            // limita ângulo (evita virar de cabeça pra baixo)
+            xRotation = Mathf.Clamp(xRotation, -85f, 85f);
 
-        // aplica no PAI (pivot), não na câmera
-        transform.parent.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            // aplica no PAI (pivot), não na câmera
+            transform.parent.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        }
     }
 }
