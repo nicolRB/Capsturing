@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
+using NUnit.Framework.Interfaces;
 
 public class TargetScript : MonoBehaviour, IPointerClickHandler
 {
@@ -24,6 +25,7 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
     public Transform targetRingTransform;
     public Image timingRing;
     private CastingGameScript cast;
+    private FeedBackUI feedBack;
     public Image rootImage;
 
     private const float InactiveTargetAlpha = 0.35f;
@@ -40,9 +42,17 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
 
     private bool IsCurrentTarget => cast != null && cast.currentTargetIndex == targetIndex;
 
+    public enum HitResult
+    {
+        Perfect,
+        Good,
+        Miss
+    }
+
     void Start()
     {
         cast = FindFirstObjectByType<CastingGameScript>();
+        feedBack = FindFirstObjectByType<FeedBackUI>();
 
         if (targetRing == null || timingRing == null)
         {
@@ -79,6 +89,8 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
     {
         if (clicked || missed) return;
 
+        clicked = true;
+
         if (cast == null || cast.currentTargetIndex != targetIndex)
             return;
 
@@ -100,37 +112,39 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
         float timeSinceSpawn = Time.time - spawnTime;
         float timeAfterActivation = timeSinceSpawn - activationTime;
 
+        HitResult result;
+
         if (timeAfterActivation < 0f)
         {
-            Debug.Log("Too early!");
-            if (cast != null) cast.RegisterMiss();
-            return;
-        }
-
-        float diff = Mathf.Abs(timeAfterActivation - lifetime);
-
-        if (diff <= perfectWindow)
-        {
-            Debug.Log("Perfect hit!");
-            clicked = true;
-            if (cast != null) cast.RegisterHit(true);
-            StartCoroutine(HitEffect());
-        }
-        else if (diff <= hitWindow)
-        {
-            Debug.Log("Hit!");
-            clicked = true;
-            if (cast != null) cast.RegisterHit(false);
-            StartCoroutine(HitEffect());
-        }
-        else
-        {
-            Debug.Log("Miss!");
-            missed = true;
-            missStartTime = Time.time;
+            result = HitResult.Miss;
             if (cast != null) cast.RegisterMiss();
             StartCoroutine(MissEffect());
         }
+        else
+        {
+            float diff = Mathf.Abs(timeAfterActivation - lifetime);
+
+            if (diff <= perfectWindow)
+            {
+                result = HitResult.Perfect;
+                if (cast != null) cast.RegisterHit(true);
+                StartCoroutine(HitEffect());
+            }
+            else if (diff <= hitWindow)
+            {
+                result = HitResult.Good;
+                if (cast != null) cast.RegisterHit(false);
+                StartCoroutine(HitEffect());
+            }
+            else
+            {
+                result = HitResult.Miss;
+                if (cast != null) cast.RegisterMiss();
+                StartCoroutine(MissEffect());
+            }
+        }
+
+        feedBack.Show(result, transform.position);
     }
 
     void Update()
@@ -245,6 +259,7 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
             missStartTime = Time.time;
             if (cast != null) cast.RegisterMiss();
             StartCoroutine(MissEffect());
+            feedBack.Show(TargetScript.HitResult.Miss, transform.position);
         }
     }
 
