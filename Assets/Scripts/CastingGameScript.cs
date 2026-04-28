@@ -9,18 +9,23 @@ public class CastingGameScript : MonoBehaviour
     public int hits;
     public int perfects;
     public int misses;
+    public PlayerController player;
 
     public ComboCounter comboCounter;
 
     // Update is called once per frame
     void Update()
     {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        if (player.casting == true) 
         {
-            ResetCast();
+            if (Keyboard.current.eKey.wasPressedThisFrame)
+            {
+                ResetCast();
+            }
+        }
+        else
+        {
+            gameObject.SetActive(false);
         }
     }
 
@@ -55,5 +60,13 @@ public class CastingGameScript : MonoBehaviour
         comboCounter.ResetCombo();
 
         Debug.Log("New cast started");
+
+        foreach (Transform child in transform)
+        {
+            if (child.CompareTag("Target"))
+            {
+                Destroy(child.gameObject);
+            }
+        }
     }
 }

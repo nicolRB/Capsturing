@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8011984740889848172}
   m_Layer: 5
   m_Name: PopupText
-  m_TagString: Untagged
+  m_TagString: Target
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -152,3 +152,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PopupText
   duration: 0.6
   riseDistance: 50
+  startPosition: {x: 0, y: 0}

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TargetSpawner : MonoBehaviour
 {
@@ -35,6 +36,11 @@ public class TargetSpawner : MonoBehaviour
         {
             SpawnObject();
             nextSpawnTime = Time.time + spawnInterval + Random.Range(-spawnIntervalVariance, spawnIntervalVariance);
+        }
+
+        if(Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            nextTargetIndex = 0;
         }
     }
 

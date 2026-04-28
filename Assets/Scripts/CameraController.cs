@@ -11,8 +11,16 @@ public class CameraController : MonoBehaviour
     {
         playerController = GetComponentInParent<PlayerController>();
 
-        // Cursor.lockState = CursorLockMode.Locked;
-        // Cursor.visible = false;
+        if (playerController.casting == false)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 
     void Update()
