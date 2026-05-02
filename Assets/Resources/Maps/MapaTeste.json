@@ -1,0 +1,12 @@
+{
+  "targets": [
+    {
+      "spawnTime": 0.0,
+      "position": { "x": 0, "y": 0 },
+      "size": 1.0,
+      "lifetime": 2.5,
+      "activationTime": 2.5,
+      "fadeInDuration": 2.5
+    }
+  ]
+}

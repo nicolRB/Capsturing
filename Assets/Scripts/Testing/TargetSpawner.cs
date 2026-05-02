@@ -7,6 +7,8 @@ public class TargetSpawner : MonoBehaviour
     public GameObject target;
     public int nextTargetIndex = 0;
 
+    private CastingGameScript castingGameScript;
+
     [Header("Target Properties")]
     public float targetSize = 1f;
     public float targetLifetime = 2f;
@@ -32,13 +34,23 @@ public class TargetSpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (castingGameScript == null)
+        {
+            castingGameScript = Object.FindFirstObjectByType<CastingGameScript>();
+        }
+
+        if (castingGameScript.castingMode != 1) return;
+
         if (Time.time >= nextSpawnTime)
         {
             SpawnObject();
-            nextSpawnTime = Time.time + spawnInterval + Random.Range(-spawnIntervalVariance, spawnIntervalVariance);
+            nextSpawnTime = Time.time + spawnInterval + 
+            Random.Range(-spawnIntervalVariance, spawnIntervalVariance);
         }
 
-        if(Keyboard.current.eKey.wasPressedThisFrame)
+        if(Keyboard.current.eKey.wasPressedThisFrame ||
+        Keyboard.current.digit2Key.wasPressedThisFrame ||
+        Keyboard.current.digit1Key.wasPressedThisFrame)
         {
             nextTargetIndex = 0;
         }

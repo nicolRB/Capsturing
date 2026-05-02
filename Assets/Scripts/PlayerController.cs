@@ -42,6 +42,8 @@ public class PlayerController : MonoBehaviour
 
     public bool casting = true;
 
+    public GameObject castingUI;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -59,6 +61,10 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         currentSpeed = walkSpeed;
+        if (castingUI != null)
+        {
+            castingUI.SetActive(casting);
+        }
     }
 
     private void Update()
@@ -69,6 +75,24 @@ public class PlayerController : MonoBehaviour
         HandleRotation();
         UpdateCooldowns();
         UpdateAnimator();
+
+        // flips casting state when E is pressed
+        if (Keyboard.current.eKey.wasPressedThisFrame)        
+        {
+            casting = !casting;
+            Debug.Log($"Casting state toggled: {casting}");
+            if (castingUI != null)
+            {
+                foreach (Transform child in castingUI.transform)
+                {
+                    if (child.CompareTag("Target"))
+                    {
+                        Destroy(child.gameObject);
+                    }
+                }
+                castingUI.SetActive(casting);
+            }
+        }
     }
 
     private void FixedUpdate()

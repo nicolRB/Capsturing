@@ -10,17 +10,6 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         playerController = GetComponentInParent<PlayerController>();
-
-        if (playerController.casting == false)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
     }
 
     void Update()
@@ -39,6 +28,17 @@ public class CameraController : MonoBehaviour
 
             // aplica no PAI (pivot), não na câmera
             transform.parent.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        }
+
+        if (playerController.casting == false)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 }
