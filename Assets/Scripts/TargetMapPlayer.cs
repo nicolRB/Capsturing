@@ -2,6 +2,20 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
+public enum EventType
+{
+    Target,
+    Line
+}
+
+[System.Serializable]
+public class MapSettings
+{
+    public float hitWindow;
+    public float perfectWindow;
+    public string name;
+}
+
 [System.Serializable]
 public class TargetData
 {
@@ -23,6 +37,51 @@ public class TargetData
     }
 }
 
+[System.Serializable]
+public class MapEvent
+{
+    public EventType type;
+
+    public float spawnTime;
+
+    // target
+    public Vector2 position;
+    public float size;
+    public float lifetime;
+    public float activationTime;
+    public float fadeInDuration;
+
+    // line
+    public LineSettings line;
+    public TargetSettings target;
+}
+
+[System.Serializable]
+public class LineSettings
+{
+    public Vector2 startPos;
+    public Vector2 endPos;
+    public int amount;
+    public float arc;
+    public float duration;
+}
+
+[System.Serializable]
+public class TargetSettings
+{
+    public float size;
+    public float lifetime;
+    public float activationTime;
+    public float fadeInDuration;
+}
+
+[System.Serializable]
+public class MapWrapper
+{
+    public MapEvent[] events;
+    public MapSettings[] MapSettings;
+}
+
 public class TargetMapPlayer : MonoBehaviour
 {
     public GameObject targetPrefab;
@@ -34,6 +93,8 @@ public class TargetMapPlayer : MonoBehaviour
 
     private float startTime;
     private int currentIndex = 0;
+    private float mapHitWindow;
+    private float mapPerfectWindow;
 
     void Start()
     {
@@ -56,7 +117,7 @@ public class TargetMapPlayer : MonoBehaviour
 
             while (currentIndex < map.Count && elapsed >= map[currentIndex].spawnTime)
             {
-                SpawnTarget(map[currentIndex]);
+                SpawnTarget(map[currentIndex], currentIndex);
                 currentIndex++;
             }
         }
@@ -71,7 +132,7 @@ public class TargetMapPlayer : MonoBehaviour
         }
     }
 
-    void SpawnTarget(TargetData data)
+    void SpawnTarget(TargetData data, int index)
     {
         GameObject obj = Instantiate(targetPrefab, transform);
 
@@ -87,45 +148,98 @@ public class TargetMapPlayer : MonoBehaviour
             targetScript.activationTime = data.activationTime;
             targetScript.fadeInDuration = data.fadeInDuration;
 
-            targetScript.perfectWindow = 0.08f;
-            targetScript.hitWindow = 0.2f;
+            targetScript.perfectWindow = mapPerfectWindow > 0 ? mapPerfectWindow : 0.01f;
+            targetScript.hitWindow = mapHitWindow > 0 ? mapHitWindow : 0.2f;
             targetScript.missDuration = 0.2f;
-            targetScript.targetIndex = currentIndex;
+
+            targetScript.targetIndex = index;
         }
     }
 
     // Loads a target map from a JSON file and populates the map list
     public void LoadMap(string mapPath)
     {
-        try
+        TextAsset jsonAsset = Resources.Load<TextAsset>(mapPath);
+
+        if (jsonAsset == null)
         {
-            TextAsset jsonAsset = Resources.Load<TextAsset>(mapPath);
-            if (jsonAsset == null)
-            {
-                Debug.LogError($"Map file not found: {mapPath}");
-                return;
-            }
-            string json = jsonAsset.text;
-            TargetMapWrapper wrapper = JsonUtility.FromJson<TargetMapWrapper>(json);
-            if (wrapper == null || wrapper.targets == null)
-            {
-                Debug.LogError("Invalid JSON format: missing targets array.");
-                return;
-            }
-            map = new List<TargetData>(wrapper.targets);
-            map.Sort((a, b) => a.spawnTime.CompareTo(b.spawnTime)); // Ensure sorted by spawnTime
-            Debug.Log($"Loaded map with {map.Count} targets.");
+            Debug.LogError($"Map file not found: {mapPath}");
+            return;
         }
-        catch (System.Exception e)
+
+        MapWrapper wrapper = JsonUtility.FromJson<MapWrapper>(jsonAsset.text);
+
+        map = new List<TargetData>();
+
+        foreach (var e in wrapper.events)
         {
-            Debug.LogError($"Failed to load map: {e.Message}");
+            if (e.type == EventType.Target)
+            {
+                map.Add(new TargetData(
+                    e.spawnTime,
+                    e.position,
+                    e.size,
+                    e.lifetime,
+                    e.activationTime,
+                    e.fadeInDuration
+                ));
+            }
+            else if (e.type == EventType.Line)
+            {
+                GenerateLineTargets(e);
+            }
         }
+
+        if (wrapper.MapSettings != null && wrapper.MapSettings.Length > 0)
+        {
+            mapHitWindow = wrapper.MapSettings[0].hitWindow;
+            mapPerfectWindow = wrapper.MapSettings[0].perfectWindow;
+        }
+        else
+        {
+            Debug.LogWarning("MapSettings not found, using default values.");
+            mapHitWindow = 0.2f;
+            mapPerfectWindow = 0.08f;
+        }        
+
+        map.Sort((a, b) => a.spawnTime.CompareTo(b.spawnTime));
+
+        Debug.Log($"Loaded map with {map.Count} targets (after expansion).");
     }
 
-    [System.Serializable]
-    public class TargetMapWrapper
+    void GenerateLineTargets(MapEvent e)
     {
-        public TargetData[] targets;
+        var line = e.line;
+        var tgt = e.target;
+
+        int count = line.amount;
+        if (count <= 0) return;
+
+        Vector2 dir = line.endPos - line.startPos;
+        Vector2 perp = new Vector2(-dir.y, dir.x).normalized;
+
+        for (int i = 0; i < count; i++)
+        {
+            float t = count > 1 ? (float)i / (count - 1) : 0.5f;
+
+            Vector2 pos = Vector2.Lerp(line.startPos, line.endPos, t);
+
+            float arcOffset = Mathf.Sin(t * Mathf.PI) * line.arc;
+            pos += perp * arcOffset;
+
+            float spawnTime = count > 1
+                ? e.spawnTime + t * line.duration
+                : e.spawnTime;
+
+            map.Add(new TargetData(
+                spawnTime,
+                pos,
+                tgt.size,
+                tgt.lifetime,
+                tgt.activationTime,
+                tgt.fadeInDuration
+            ));
+        }
     }
 
     void ResetMap()

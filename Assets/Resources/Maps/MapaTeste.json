@@ -1,12 +1,97 @@
 {
-  "targets": [
+  "events": [
     {
-      "spawnTime": 0.0,
-      "position": { "x": 0, "y": 0 },
+      "type": 0,
+      "spawnTime": 0,
       "size": 1.0,
-      "lifetime": 2.5,
-      "activationTime": 2.5,
-      "fadeInDuration": 2.5
+      "lifetime": 2,
+      "activationTime": 0.5,
+      "fadeInDuration": 1.0,
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "type": 1,
+      "spawnTime": 1.5,
+      "line": {
+        "startPos": { "x": -200, "y": 200 },
+        "endPos": { "x": 200, "y": 200 },
+        "amount": 5,
+        "arc": 0,
+        "duration": 2
+      },
+      "target": {
+        "size": 1.0,
+        "lifetime": 1,
+        "activationTime": 0.5,
+        "fadeInDuration": 0.3
+      }
+    },
+    {
+      "type": 1,
+      "spawnTime": 4.75,
+      "line": {
+        "startPos": { "x": 200, "y": 200 },
+        "endPos": { "x": 200, "y": -200 },
+        "amount": 5,
+        "arc": 0,
+        "duration": 2
+      },
+      "target": {
+        "size": 1.0,
+        "lifetime": 1,
+        "activationTime": 0.5,
+        "fadeInDuration": 0.3
+      }
+    },
+    {
+      "type": 1,
+      "spawnTime": 8.5,
+      "line": {
+        "startPos": { "x": 200, "y": -200 },
+        "endPos": { "x": -200, "y": -200 },
+        "amount": 5,
+        "arc": 0,
+        "duration": 2
+      },
+      "target": {
+        "size": 1.0,
+        "lifetime": 1,
+        "activationTime": 0.5,
+        "fadeInDuration": 0.3
+      }
+    },
+    {
+      "type": 1,
+      "spawnTime": 12.25,
+      "line": {
+        "startPos": { "x": -200, "y": -200 },
+        "endPos": { "x": -200, "y": 200 },
+        "amount": 5,
+        "arc": 0,
+        "duration": 2
+      },
+      "target": {
+        "size": 1.0,
+        "lifetime": 1,
+        "activationTime": 0.5,
+        "fadeInDuration": 0.3
+      }
+    },
+    {
+      "type": 0,
+      "spawnTime": 16,
+      "size": 1.0,
+      "lifetime": 0.75,
+      "activationTime": 0.5,
+      "fadeInDuration": 1.0,
+      "position": { "x": 0, "y": 0 }
+    }
+  ],
+  "MapSettings": [
+    {
+      "hitWindow": 0.08,
+      "perfectWindow": 0.025,
+      "name": "MapaTeste"
     }
   ]
 }

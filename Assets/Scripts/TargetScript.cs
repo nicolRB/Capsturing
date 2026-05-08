@@ -9,8 +9,8 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
     [Header("Settings")]
     public float size = 1f;
     public float lifetime = 2f;
-    public float perfectWindow = 0.08f;
-    public float hitWindow = 0.16f;
+    public float perfectWindow = 0.1f;
+    public float hitWindow = 0.2f;
 
     [Header("Activation")]
     public float activationTime = 0.5f;
@@ -75,8 +75,9 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
         targetRing.color = targetColor;
 
         // Timing ring setup
-        timingStartScale = Vector3.one * 3f;
-        timingEndScale = Vector3.one;
+        timingStartScale = Vector3.one * 2.5f;
+        // timingEndScale = Vector3.one;
+        timingEndScale = timingRing.transform.localScale;
 
         timingRing.transform.localScale = timingStartScale;
 
@@ -104,6 +105,12 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
             out localPoint
         );
 
+        // Primeiro garante que está dentro do retângulo do UI
+        if (!RectTransformUtility.RectangleContainsScreenPoint(
+            rect, eventData.position, eventData.pressEventCamera))
+            return;
+
+        // Depois filtra para círculo
         float radius = rect.rect.width * 0.5f;
 
         if (localPoint.magnitude > radius)
@@ -190,6 +197,11 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
         float elapsed = timeAfterActivation;
         float timeToPerfect = lifetime;
 
+        if (timeToPerfect <= 0f)
+        {
+            timeToPerfect = 0.001f;
+        }
+
         // -------- ROTATION (starts at fade-in start, accelerates to full speed by fade-in end)
         float baseSpeed = 540f / timeToPerfect;
         float minSpeed = baseSpeed * 0.15f;
@@ -217,13 +229,19 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
 
         if (tActivation > 0f) // Only show timing ring after activation starts
         {
+            /*
             if (t <= 1f)
             {
                 float curvedT = Mathf.SmoothStep(0f, 1f, t); // Ease out
 
                 // Scale timing ring from large to normal
+                // timingRing.transform.localScale =
+                //   Vector3.Lerp(timingStartScale, timingEndScale, curvedT);
+                
+
+                // Linear scale down from start to end scale
                 timingRing.transform.localScale =
-                    Vector3.Lerp(timingStartScale, timingEndScale, curvedT);
+                    Vector3.Lerp(timingStartScale, timingEndScale, t);
 
                 // Fade in timing ring only after activation
                 Color c = timingRing.color;
@@ -237,6 +255,52 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
                 extraT = Mathf.Clamp01(extraT);
 
                 // Scale down timing ring from normal to zero
+                // timingRing.transform.localScale =
+                //    Vector3.Lerp(timingEndScale, Vector3.zero, extraT);
+                
+                // Linear scale down from end scale to zero
+                timingRing.transform.localScale =
+                    Vector3.Lerp(timingEndScale, Vector3.zero, extraT*0.5f);
+
+                // Fade out timing ring
+                Color c = timingRing.color;
+                c.a = Mathf.Lerp(1f, 0f, extraT);
+                timingRing.color = c;
+            }
+            */
+
+            /* Timing ring scales down linearly from start to end scale over the lifetime
+            from activation time to latter hit window, then fades out.
+            The ring should be scaled to it's original size at the perfect hit time, 
+            then continue scaling down until the end of the hit window,
+            at which point it will fade out completely by the end of the hit window. 
+            */
+
+            if (t <= 1f)
+            {
+                // Linear scale down from start to end scale
+                timingRing.transform.localScale =
+                    Vector3.Lerp(timingStartScale, timingEndScale, t);
+
+                // Fade in timing ring only after activation
+                // Time where the hit window starts
+                float hitWindowStart = lifetime - hitWindow;
+
+                // Alpha progression:
+                // 0 -> 1 from activation until hit window start
+                float alphaT = Mathf.Clamp01(adjustedElapsed / hitWindowStart);
+
+                Color c = timingRing.color;
+                c.a = alphaT * tActivation;
+                timingRing.color = c;
+            }
+            else
+            {
+                // After perfect time, scale down and fade out timing ring
+                float extraT = (elapsed - timeToPerfect) / hitWindow;
+                extraT = Mathf.Clamp01(extraT);
+
+                // Linear scale down from end scale to zero
                 timingRing.transform.localScale =
                     Vector3.Lerp(timingEndScale, Vector3.zero, extraT);
 

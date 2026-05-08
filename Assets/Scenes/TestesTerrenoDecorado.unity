@@ -1243,6 +1243,10 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1305051288}
+    - target: {fileID: 6788685908181520997, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+      propertyPath: targetMapPlayer
+      value: 
+      objectReference: {fileID: 911875567}
     - target: {fileID: 8483797766939456846, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
       propertyPath: m_Name
       value: Canvas
@@ -1251,8 +1255,60 @@ PrefabInstance:
     - {fileID: 2101798001647540355, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5612042043934145682, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 911875567}
+    - targetCorrespondingSourceObject: {fileID: 5612042043934145682, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 911875566}
   m_SourcePrefab: {fileID: 100100000, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+--- !u!1 &911875565 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5612042043934145682, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+  m_PrefabInstance: {fileID: 911875564}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &911875566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911875565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1edc298e26e7894ab91dca4d5e7b0dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TargetSpawner
+  target: {fileID: 4672179235600711493, guid: 26cc30555fb400740bec3fdbbd1e8c2b, type: 3}
+  nextTargetIndex: 0
+  targetSize: 1
+  targetLifetime: 2
+  targetPerfectWindow: 0.04
+  targetHitWindow: 0.08
+  targetActivationTime: 0.5
+  targetFadeInDuration: 0.5
+  targetMissDuration: 0.2
+  targetSizeVariance: 0.2
+  targetLifetimeVariance: 0.5
+  spawnPoint: {x: 0, y: 0}
+  spawnRange: {x: 100, y: 100}
+  spawnInterval: 2
+  spawnIntervalVariance: 0.5
+--- !u!114 &911875567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911875565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22be60235b6e37e4880913b73f8c1c7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TargetMapPlayer
+  targetPrefab: {fileID: 4672179235600711493, guid: 26cc30555fb400740bec3fdbbd1e8c2b, type: 3}
+  map: []
 --- !u!1001 &947660760
 PrefabInstance:
   m_ObjectHideFlags: 0

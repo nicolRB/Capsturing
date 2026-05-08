@@ -883,6 +883,20 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5612042043934145682, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
   m_PrefabInstance: {fileID: 7028064692290927979}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1956730515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1956730511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22be60235b6e37e4880913b73f8c1c7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TargetMapPlayer
+  targetPrefab: {fileID: 4672179235600711493, guid: 26cc30555fb400740bec3fdbbd1e8c2b, type: 3}
+  map: []
 --- !u!1001 &2120683361
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1069,10 +1083,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -33.303
       objectReference: {fileID: 0}
+    - target: {fileID: 2101798001647540355, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+      propertyPath: targetLifetime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2101798001647540355, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+      propertyPath: targetHitWindow
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 2101798001647540355, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+      propertyPath: targetPerfectWindow
+      value: 0.02
+      objectReference: {fileID: 0}
     - target: {fileID: 6788685908181520997, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
       propertyPath: player
       value: 
       objectReference: {fileID: 1104680374}
+    - target: {fileID: 6788685908181520997, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+      propertyPath: targetMapPlayer
+      value: 
+      objectReference: {fileID: 1956730515}
     - target: {fileID: 8483797766939456846, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
       propertyPath: m_Name
       value: Canvas
@@ -1080,7 +1110,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5612042043934145682, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1956730515}
   m_SourcePrefab: {fileID: 100100000, guid: 959ee2c76c366024ab36c1d77b68b1ff, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
