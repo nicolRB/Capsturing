@@ -8,7 +8,7 @@
 **Status do Projeto:**
 Prototipagem
 
-**Versão de Documento:** v0.2
+**Versão de Documento:** v0.2 <br>
 **Última Atualização:** 07/05/2026
 
 # 1. Visão Geral
