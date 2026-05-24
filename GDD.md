@@ -140,3 +140,123 @@ Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um n
 - Inventário
 - Menu de Rúnicos
 - Menu de Feitiços
+
+## Flow de Menus
+<img src="images/Diagrama de Menus.png" width="300" Height="600">
+
+## Controles
+<img src="images/keyboard-layout.png" width="300" Height="600">
+
+# 9. Direção Visual
+
+## Direção de Arte
+Estilo Fantasia e Cartoon / Anime
+<img src="images/chapel3d.png" width="300" Height="600">
+<img src="images/water cat.jpg" width="300" Height="600">
+
+---
+
+## Referências Visuais
+<img src="images/maga.png" width="300" Height="600">
+<img src="images/monstro genshin.jpg" width="300" Height="600">
+
+---
+
+# 10. Áudio
+
+Tipos de áudio utilizados:
+
+- música de fundo
+- efeitos sonoros
+- sons de animais
+
+---
+
+# 11. Animação
+
+- Animação de Andar
+- Animação de Conjuração
+- Animação de Desvio
+- Animação de Dano
+- Animação de Rúnicos
+
+---
+
+# 12. Arquitetura de Software
+
+Scripts separados por responsabilidade
+
+---
+
+## Tecnologias Utilizadas
+
+| Categoria | Ferramenta |
+|-----|-----|
+| Engine | Unity |
+| Linguagem | C# |
+| Versionamento | Git + GitHub |
+| Assets | Asset Store |
+
+---
+
+# 12. Testes e Playtests
+
+## Playtests
+
+Nenhum playtest por outros foi feito ainda
+
+---
+# 13. Cronograma
+
+- Criar os rúnicos e seus comportamentos
+- Finalizar sistema de captura
+- Criar menu de rúnicos
+- Criar sistema de luta entre rúnicos
+- Criar sistema de feitiços
+- Aplicar audio ao jogo
+- Criar mapa
+- Criar rúnicos raros
+
+---
+# 14. Riscos do Projeto
+
+| Risco | Impacto | Mitigação |
+|-----|-----|-----|
+| performance baixa | experiência ruim | otimizar ou separar o mapa em áreas separadas |
+| choque entre o estilo visual dos rúnicos e o mundo ou personagem jogável | quebra de imersão | adaptar o estilo dos rúnicos para uma mesclagem de fantasia e estilo anime |
+
+---
+
+# 15. Limitações Conhecidas
+
+Por mais que seja tentador, algumas adições não poderão ser implementadas:
+- sistema de árvore de habilidades
+- dungeons com puzzles
+- quests e NPCs
+
+---
+
+# 16. Decisões Importantes
+
+Registro de mudanças relevantes durante o projeto.
+
+| Data | Decisão | Motivo |
+|-----|-----|-----|
+| março | remover sistema de crafting | escopo muito grande |
+| abril | adicionar dash | melhorar mobilidade |
+
+---
+
+# 17. Créditos
+
+Liste assets externos utilizados.
+
+| Recurso | Fonte | Licença |
+|-----|-----|-----|
+| sprites | AssetStore | EULA |
+| efeitos sonoros | pixabay | CC0 |
+
+---
+
+# 18. Reflexão Final
+O jogo não foi finalizado ainda
