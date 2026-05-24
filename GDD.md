@@ -70,6 +70,8 @@ Explorar -> Enfrentar ou capturar rúnicos selvagens -> Treinar rúnicos -> Dese
 
 ## Mecânicas Principais
 
+| Mecânica | Descrição |
+|-----|-----|
 | Movimentação | Andar, correr, pular, montarias |
 | Combate | Convocar e comandar rúnico, desviar |
 | Interação | Feitiços |
