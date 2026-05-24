@@ -151,7 +151,9 @@ Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um n
 
 ## Direção de Arte
 Estilo Fantasia e Cartoon / Anime
+
 <img src="images/chapel3d.png" width="300" Height="600">
+
 <img src="images/water cat.jpg" width="300" Height="600">
 
 ---
