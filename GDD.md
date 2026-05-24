@@ -44,8 +44,11 @@ Jogadores em busca de algo que compense habilidade dentre 16 a 35 anos.
 ## Jogos de Referência
 
 - Pokemon
+<img src="images/pokemon.jpg" width="300" Height="600">
 - Palworld
+<img src="images/palworld.jpg" width="300" Height="600">
 - Osu
+<img src="images/osu.jpg" width="300" Height="600">
 
 ## Análise das Referências
 
