@@ -122,3 +122,21 @@ Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um n
 * Movimentação & Exploração: O jogador corre, pula e escala através de um mundo 3D aberto para explorar.
 * Combate: O jogador pode ser atacado por, ou atacar, um rúnico, no qual caso sua opção principal sera comandar um rúnico próprio para lutar. O jogador pode tanto desviar para evitar ataques quanto comandar seu rúnico aliado a desviar, comandá-lo a atacar diretamente ou manter-se na defensiva, e pode comandar o rúnico aliado a usar alguma habilidade disponível.
 * Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso.
+
+# 8. Interface (UI/UX)
+## HUD
+- Barra de Vida
+- Barra de Vida de Rúnico
+- Habilidades de Rúnico
+- Seletor de Feitiço
+- Seletor de Rúnico
+- Minigame de Conjuração
+
+## Menus
+- Menu Principal
+- Pause
+- Game Over
+- Configurações
+- Inventário
+- Menu de Rúnicos
+- Menu de Feitiços
