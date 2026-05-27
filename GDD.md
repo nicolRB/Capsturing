@@ -6,10 +6,10 @@
 **Email:** nicolas.borges@catolicasc.edu.br  
 
 **Status do Projeto:**
-Pesquisa
+Prototipagem
 
-**Versão de Documento:** v0.1  
-**Última Atualização:** 09/04/2026
+**Versão de Documento:** v0.2 <br>
+**Última Atualização:** 07/05/2026
 
 # 1. Visão Geral
 
@@ -44,8 +44,11 @@ Jogadores em busca de algo que compense habilidade dentre 16 a 35 anos.
 ## Jogos de Referência
 
 - Pokemon
+<img src="images/pokemon.jpg" width="300" Height="600">
 - Palworld
+<img src="images/palworld.jpg" width="300" Height="600">
 - Osu
+<img src="images/osu.jpg" width="300" Height="600">
 
 ## Análise das Referências
 
@@ -67,6 +70,8 @@ Explorar -> Enfrentar ou capturar rúnicos selvagens -> Treinar rúnicos -> Dese
 
 ## Mecânicas Principais
 
+| Mecânica | Descrição |
+|-----|-----|
 | Movimentação | Andar, correr, pular, montarias |
 | Combate | Convocar e comandar rúnico, desviar |
 | Interação | Feitiços |
@@ -89,8 +94,8 @@ Capturar novos rúnicos, treinar rúnicos capturados, desbloquear novas melhoria
 
 ## Inclui
 
-- Ao menos 2 regiões para explorar
-- Ao menos 9 tipos de rúnicos diferentes
+- Ao menos 3 regiões para explorar
+- Ao menos 12 tipos de rúnicos diferentes
 - 3 rúnicos únicos de alta raridade
 - Sistema de Captura de rúnicos
 - Armazenamento de rúnicos
@@ -106,7 +111,7 @@ Capturar novos rúnicos, treinar rúnicos capturados, desbloquear novas melhoria
 
 | Protótipo | Objetivo | Resultado |
 | Movimento Básico | Validar Controle | Sob ajustes |
-| Minigame de ritmo | Testar funcionalidade | Sob desenvolvimento |
+| Minigame de ritmo | Testar timing | Sob ajustes |
 
 ## Enredo Base
 O personagem jogável, um frágil praticante de magia que visa se tornar um verdadeiro mago, se especializa na arte arriscada e pouco desenvolvida de monsturgia, uma arte de domar e trabalhar com monstros mágicos, chamados rúnicos em seu mundo, que existem fora da lei natural dos animais com habilidades e características sobrenaturais. 
@@ -117,3 +122,143 @@ Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um n
 * Movimentação & Exploração: O jogador corre, pula e escala através de um mundo 3D aberto para explorar.
 * Combate: O jogador pode ser atacado por, ou atacar, um rúnico, no qual caso sua opção principal sera comandar um rúnico próprio para lutar. O jogador pode tanto desviar para evitar ataques quanto comandar seu rúnico aliado a desviar, comandá-lo a atacar diretamente ou manter-se na defensiva, e pode comandar o rúnico aliado a usar alguma habilidade disponível.
 * Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso.
+
+# 8. Interface (UI/UX)
+## HUD
+- Barra de Vida
+- Barra de Vida de Rúnico
+- Habilidades de Rúnico
+- Seletor de Feitiço
+- Seletor de Rúnico
+- Minigame de Conjuração
+
+## Menus
+- Menu Principal
+- Pause
+- Game Over
+- Configurações
+- Inventário
+- Menu de Rúnicos
+- Menu de Feitiços
+
+## Flow de Menus
+<img src="images/Diagrama de Menus.png" width="300" Height="600">
+
+## Controles
+<img src="images/keyboard-layout.png" width="300" Height="600">
+
+# 9. Direção Visual
+
+## Direção de Arte
+Estilo Fantasia e Cartoon / Anime
+
+<img src="images/chapel3d.png" width="300" Height="600">
+
+<img src="images/water cat.jpg" width="300" Height="600">
+
+---
+
+## Referências Visuais
+<img src="images/maga.png" width="300" Height="600">
+<img src="images/monstro genshin.jpg" width="300" Height="600">
+
+---
+
+# 10. Áudio
+
+Tipos de áudio utilizados:
+
+- música de fundo
+- efeitos sonoros
+- sons de animais
+
+---
+
+# 11. Animação
+
+- Animação de Andar
+- Animação de Conjuração
+- Animação de Desvio
+- Animação de Dano
+- Animação de Rúnicos
+
+---
+
+# 12. Arquitetura de Software
+
+Scripts separados por responsabilidade
+
+---
+
+## Tecnologias Utilizadas
+
+| Categoria | Ferramenta |
+|-----|-----|
+| Engine | Unity |
+| Linguagem | C# |
+| Versionamento | Git + GitHub |
+| Assets | Asset Store |
+
+---
+
+# 12. Testes e Playtests
+
+## Playtests
+
+Nenhum playtest por outros foi feito ainda
+
+---
+# 13. Cronograma
+
+- Criar os rúnicos e seus comportamentos
+- Finalizar sistema de captura
+- Criar menu de rúnicos
+- Criar sistema de luta entre rúnicos
+- Criar sistema de feitiços
+- Aplicar audio ao jogo
+- Criar mapa
+- Criar rúnicos raros
+
+---
+# 14. Riscos do Projeto
+
+| Risco | Impacto | Mitigação |
+|-----|-----|-----|
+| performance baixa | experiência ruim | otimizar ou separar o mapa em áreas separadas |
+| choque entre o estilo visual dos rúnicos e o mundo ou personagem jogável | quebra de imersão | adaptar o estilo dos rúnicos para uma mesclagem de fantasia e estilo anime |
+
+---
+
+# 15. Limitações Conhecidas
+
+Por mais que seja tentador, algumas adições não poderão ser implementadas:
+- sistema de árvore de habilidades
+- dungeons com puzzles
+- quests e NPCs
+
+---
+
+# 16. Decisões Importantes
+
+Registro de mudanças relevantes durante o projeto.
+
+| Data | Decisão | Motivo |
+|-----|-----|-----|
+| março | remover sistema de crafting | escopo muito grande |
+| abril | adicionar dash | melhorar mobilidade |
+
+---
+
+# 17. Créditos
+
+Liste assets externos utilizados.
+
+| Recurso | Fonte | Licença |
+|-----|-----|-----|
+| sprites | AssetStore | EULA |
+| efeitos sonoros | pixabay | CC0 |
+
+---
+
+# 18. Reflexão Final
+O jogo não foi finalizado ainda
