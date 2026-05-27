@@ -216,7 +216,7 @@ public class PlayerController : MonoBehaviour
     {
         if (casting || isDashing) return;
 
-        if (moving)
+        if (moving || Mouse.current.rightButton.isPressed)
         {
             // player gira para o yaw da câmera
             Quaternion targetRotation = Quaternion.Euler(0f, cameraController.yRotation, 0f);

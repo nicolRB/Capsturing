@@ -11,6 +11,8 @@ public class CameraController : MonoBehaviour
 
     private float xRotation = 0f;
     public float yRotation = 0f;
+    public float FOV = 60f;
+    public float FOVSetting = 60f;
 
     void Start()
     {
@@ -62,7 +64,13 @@ public class CameraController : MonoBehaviour
         // Zoom (botão direito do mouse)
         if (Mouse.current.rightButton.isPressed)
         {
-            
+            FOV = Mathf.Lerp(FOV, FOVSetting/2.5f, Time.deltaTime * 5f);
         }
+        else
+        {
+            FOV = Mathf.Lerp(FOV, FOVSetting, Time.deltaTime * 5f);
+        }
+
+        GetComponent<Camera>().fieldOfView = FOV;
     }
 }
