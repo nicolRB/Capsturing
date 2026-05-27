@@ -3,42 +3,66 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
+    public bool lockCursor;
+    public PauseManager pauseManager;
+
     private PlayerController playerController;
+    private Transform pivot;
 
     private float xRotation = 0f;
+    public float yRotation = 0f;
 
     void Start()
     {
         playerController = GetComponentInParent<PlayerController>();
+
+        // guarda referência ao pivot e desparenteia
+        pivot = transform.parent;
+        if (pivot.parent == playerController.transform)
+        {
+            pivot.SetParent(playerController.transform.parent);
+        }
     }
 
     void Update()
     {
-        if (!playerController.casting)
+        if (!playerController.casting && !pauseManager.isPaused)
         {
             float mouseY = Mouse.current.delta.y.ReadValue()
                            * playerController.mouseSensitivity
                            * Time.deltaTime;
 
-            // acumula rotação vertical
-            xRotation -= mouseY;
+            float mouseX = Mouse.current.delta.x.ReadValue()
+                           * playerController.mouseSensitivity
+                           * Time.deltaTime;
 
-            // limita ângulo (evita virar de cabeça pra baixo)
+            xRotation -= mouseY;
+            yRotation += mouseX;
             xRotation = Mathf.Clamp(xRotation, -85f, 85f);
 
-            // aplica no PAI (pivot), não na câmera
-            transform.parent.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            // rotação total da câmera: pitch + yaw independentes
+            pivot.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
         }
 
-        if (playerController.casting == false)
+        // pivot segue a posição do player sem herdar rotação
+        pivot.position = playerController.transform.position;
+
+        // cursor
+        if (playerController.casting || pauseManager.isPaused)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
-        else
+
+        // Zoom (botão direito do mouse)
+        if (Mouse.current.rightButton.isPressed)
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            
         }
     }
 }

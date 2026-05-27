@@ -13,21 +13,15 @@ public class CastingGameScript : MonoBehaviour
     public PlayerController player;
     public ComboCounter comboCounter;
     public TargetMapPlayer targetMapPlayer;
+    public TargetSpawner targetSpawner;
     // Json target map file 
-    private string targetMap = "Maps/MapaTeste"; 
+    private string targetMap = "Maps/MapaTeste";
 
     public int castingMode = 1; // 1 = TargetSpawner(random), 2 = TargetMap(predefined)
 
     // Update is called once per frame
     void Update()
     {
-        if (Keyboard.current.eKey.wasPressedThisFrame || 
-        Keyboard.current.digit2Key.wasPressedThisFrame || 
-        Keyboard.current.digit1Key.wasPressedThisFrame)
-        {
-            ResetCast();
-        }
-    
         // Pressing 1 activates TargetSpawner for testing (temporary)
         if (Keyboard.current.digit1Key.wasPressedThisFrame)
         {
@@ -42,7 +36,10 @@ public class CastingGameScript : MonoBehaviour
             castingMode = 2;
             ResetCast();
             Debug.Log("Casting mode set to TargetMap (predefined)");
-            targetMapPlayer.LoadMap(targetMap); // Reload the map to reset spawn times
+            if (targetMapPlayer != null)
+            {
+                targetMapPlayer.LoadMap(targetMap); // Reload the map to reset spawn times
+            }
         }
 
         if (player.casting == false)
@@ -89,6 +86,15 @@ public class CastingGameScript : MonoBehaviour
             {
                 Destroy(child.gameObject);
             }
+        }
+
+        if (targetSpawner != null)
+        {
+            targetSpawner.ResetSpawner();
+        }
+        else
+        {
+            Debug.LogWarning("CastingGameScript.ResetCast(): targetSpawner está nulo. Atribua a referência no inspetor ou deixe o Awake encontrá-lo automaticamente.");
         }
     }
 }

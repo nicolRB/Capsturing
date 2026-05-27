@@ -41,8 +41,13 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
 
     public bool casting = true;
+    public bool moving = false;
 
+    [Header("References")]
     public GameObject castingUI;
+    public CastingGameScript castingGameScript;
+    public CameraController cameraController;
+    public PauseManager pauseManager;
 
     private void Awake()
     {
@@ -91,6 +96,7 @@ public class PlayerController : MonoBehaviour
                     }
                 }
                 castingUI.SetActive(casting);
+                castingGameScript.ResetCast();
             }
         }
     }
@@ -112,6 +118,11 @@ public class PlayerController : MonoBehaviour
 
         moveInput = moveInput.normalized;
         Vector3 movement = transform.forward * moveInput.y + transform.right * moveInput.x;
+
+        if (moveInput.magnitude > 0.1f)
+            moving = true;
+        else
+            moving = false;
 
         if (!isDashing)
         {
@@ -203,9 +214,21 @@ public class PlayerController : MonoBehaviour
     // ---------------- ROTATION ----------------
     private void HandleRotation()
     {
-        if (!casting && !isDashing)
+        if (casting || isDashing) return;
+
+        if (moving)
         {
-            float mouseX = Mouse.current.delta.x.ReadValue() * mouseSensitivity * Time.deltaTime;
+            // player gira para o yaw da câmera
+            Quaternion targetRotation = Quaternion.Euler(0f, cameraController.yRotation, 0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 15f);
+        }
+        else
+        {
+            // parado: mouse rotaciona player e câmera juntos
+            float mouseX = Mouse.current.delta.x.ReadValue()
+                        * mouseSensitivity * Time.deltaTime;
+
+            cameraController.yRotation += mouseX;
             transform.Rotate(0f, mouseX, 0f);
         }
     }

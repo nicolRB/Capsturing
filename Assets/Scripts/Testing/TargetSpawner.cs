@@ -47,13 +47,6 @@ public class TargetSpawner : MonoBehaviour
             nextSpawnTime = Time.time + spawnInterval + 
             Random.Range(-spawnIntervalVariance, spawnIntervalVariance);
         }
-
-        if(Keyboard.current.eKey.wasPressedThisFrame ||
-        Keyboard.current.digit2Key.wasPressedThisFrame ||
-        Keyboard.current.digit1Key.wasPressedThisFrame)
-        {
-            nextTargetIndex = 0;
-        }
     }
 
     public void SpawnObject()
@@ -90,5 +83,12 @@ public class TargetSpawner : MonoBehaviour
             // Scale AFTER size is set (important)
             rect.localScale = Vector3.one * (targetScript != null ? targetScript.size : targetSize);
         }
+    }
+
+    public void ResetSpawner()
+    {
+        nextTargetIndex = 0;
+        nextSpawnTime = Time.time + spawnInterval + 
+            Random.Range(-spawnIntervalVariance, spawnIntervalVariance);
     }
 }
