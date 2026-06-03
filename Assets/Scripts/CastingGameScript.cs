@@ -77,6 +77,7 @@ public class CastingGameScript : MonoBehaviour
         misses = 0;
         currentTargetIndex = 0;
         comboCounter.ResetCombo();
+        targetMapPlayer.ResetMap();
 
         Debug.Log("New cast started");
 

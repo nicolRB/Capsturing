@@ -229,7 +229,6 @@ public class PlayerController : MonoBehaviour
                         * mouseSensitivity * Time.deltaTime;
 
             cameraController.yRotation += mouseX;
-            transform.Rotate(0f, mouseX, 0f);
         }
     }
 

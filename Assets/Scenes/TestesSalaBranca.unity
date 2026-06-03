@@ -228,6 +228,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28af461c65bbe164aa0ce120312af14e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
+--- !u!4 &196287501 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8219175196628837695, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+  m_PrefabInstance: {fileID: 482756594748823766}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &379182844
 GameObject:
   m_ObjectHideFlags: 0
@@ -242,8 +247,8 @@ GameObject:
   - component: {fileID: 379182846}
   - component: {fileID: 379182845}
   - component: {fileID: 379182851}
-  m_Layer: 0
-  m_Name: Cylinder
+  m_Layer: 7
+  m_Name: CylinderFollower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -262,7 +267,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BasicFollowerBehavior
   player: {fileID: 0}
-  followDistance: 2
+  playerPosition: {fileID: 196287501}
+  followerOffset: 2
+  followSide: 1
+  following: 1
+  moveToTarget: 0
+  followRange: 2
+  minFollowDistance: 0.25
+  moveSpeed: 5
+  updateFrequency: 10
 --- !u!54 &379182846
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -953,6 +966,10 @@ PrefabInstance:
       propertyPath: cameraController
       value: 
       objectReference: {fileID: 152671633}
+    - target: {fileID: 2357199181120518370, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 2591813118932854380, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_Name
       value: User
@@ -996,6 +1013,14 @@ PrefabInstance:
     - target: {fileID: 2943488982439350215, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3925378283378717101, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7617602938763653898, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

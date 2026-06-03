@@ -242,7 +242,7 @@ public class TargetMapPlayer : MonoBehaviour
         }
     }
 
-    void ResetMap()
+    public void ResetMap()
     {
         startTime = Time.time;
         currentIndex = 0;
