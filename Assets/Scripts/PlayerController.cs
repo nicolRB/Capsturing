@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
     private CapsuleCollider capsule;
     private Animator animator;
 
-    public bool casting = true;
+    public bool casting = false;
     public bool moving = false;
 
     [Header("References")]

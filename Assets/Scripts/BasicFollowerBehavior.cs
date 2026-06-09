@@ -13,6 +13,10 @@ public class BasicFollowerBehavior : MonoBehaviour
     public float followRange = 2f; // distância de seguimento
     public float minFollowDistance = 0.25f; // distância mínima em que para de seguir o jogador
     public float moveSpeed = 15f; // velocidade de movimento do seguidor
+    public float timeToTeleport = 5f; // tempo em segundos para teleporte caso o seguidor fique muito longe do jogador
+    private float teleportTimer = 0f; // timer para controlar o tempo de teleporte
+    public float teleportDistance = 10f; // distância a partir da qual o seguidor irá se teletransportar para o jogador
+    private bool teleportTimerStarted = false; // se o timer de teleporte foi iniciado
     public int updateFrequency = 15; // frequência de atualização da posição do seguidor (em frames)
     private int frameCounter = 0; // contador de frames para controlar a frequência de atualização
     private Quaternion lastMovingRotation;
@@ -69,6 +73,7 @@ public class BasicFollowerBehavior : MonoBehaviour
             frameCounter = 0; // resetar o contador de frames
 
             float targetDistance = CalculateTargetDistance(targetPosition);
+            float playerDistance = CalculateTargetDistance(playerPosition.position);
 
             if (following && targetDistance > followRange)
             {
@@ -81,6 +86,26 @@ public class BasicFollowerBehavior : MonoBehaviour
             } else if (followMode == 2 && targetDistance <= minFollowDistance * 7.5f)
             {
                 moveToTarget = false;
+            }
+
+            if (playerDistance > teleportDistance)
+            {
+                if (!teleportTimerStarted)
+                {
+                    teleportTimerStarted = true;
+                    teleportTimer = Time.time;
+                }
+
+                float elapsed = Time.time - teleportTimer;
+
+                if (elapsed >= timeToTeleport && playerDistance > teleportDistance)
+                {
+                    TeleportToTarget(playerPosition.position - forward * 5f);
+                }
+            } 
+            else
+            {
+                teleportTimerStarted = false;
             }
             
 
@@ -105,5 +130,15 @@ public class BasicFollowerBehavior : MonoBehaviour
         float targetDistance = Vector3.Distance(transform.position, targetPosition);
 
         return targetDistance;
+    }
+
+    private void TeleportToTarget(Vector3 targetPosition)
+    {
+        transform.position = targetPosition;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+        }
     }
 }
