@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
     private float jumpBufferTimer = 0f;
 
     [Header("Dash")]
-    public float dashForce = 12f;
+    public float dashForce = 6f;
     public float dashDuration = 0.2f;
     public float dashCooldown = 1f;
 
@@ -161,7 +161,12 @@ public class PlayerController : MonoBehaviour
 
         if (!casting && isHoldingShift && Keyboard.current.leftShiftKey.wasReleasedThisFrame)
         {
-            if (shiftPressedTime <= tapThreshold && cooldownTimer <= 0f && !isDashing)
+            if (shiftPressedTime <= tapThreshold && cooldownTimer <= 0f && !isDashing &&
+                (Keyboard.current.wKey.isPressed || Keyboard.current.sKey.isPressed || 
+                Keyboard.current.aKey.isPressed || Keyboard.current.dKey.isPressed || 
+                Keyboard.current.upArrowKey.isPressed || Keyboard.current.downArrowKey.isPressed || 
+                Keyboard.current.leftArrowKey.isPressed || Keyboard.current.rightArrowKey.isPressed) 
+            )
             {
                 dashDirection = movement.sqrMagnitude > 0 ? movement.normalized : transform.forward;
                 isDashing = true;
@@ -216,7 +221,7 @@ public class PlayerController : MonoBehaviour
     {
         if (casting || isDashing) return;
 
-        if (moving || Mouse.current.rightButton.isPressed)
+        if (moving || Mouse.current.rightButton.isPressed || Mouse.current.leftButton.isPressed || Keyboard.current.leftShiftKey.isPressed)
         {
             // player gira para o yaw da câmera
             Quaternion targetRotation = Quaternion.Euler(0f, cameraController.yRotation, 0f);

@@ -2,12 +2,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.AI;
 
-public class BasicFollowerBehavior : MonoBehaviour
+public class TargetFollowerBehavior : MonoBehaviour
 {
     [Header("References")]
     public PlayerController player;
     public Transform playerPosition;
+    public PointTargetScript pointer;
     private NavMeshAgent agent;
+    private GameObject point;
 
     [Header("Follow Behavior")]
     public float followerOffset = 2f;
@@ -40,6 +42,11 @@ public class BasicFollowerBehavior : MonoBehaviour
             playerPosition = player.transform;
         }
 
+        if (pointer == null)
+        {
+            pointer = FindFirstObjectByType<PointTargetScript>();
+        }
+
         agent = GetComponent<NavMeshAgent>();
     }
 
@@ -51,20 +58,27 @@ public class BasicFollowerBehavior : MonoBehaviour
         Vector3 right = lastMovingRotation * Vector3.right;
         Vector3 forward = lastMovingRotation * Vector3.forward;
 
-        switch (followMode)
+        if (!pointer.followPoint)
         {
-            case 0: // Atrás
-                targetPosition = playerPosition.position - forward * followerOffset;
-                break;
-            case 1: // Lado
-                targetPosition = playerPosition.position + right * followSide * followerOffset;
-                break;
-            case 2: // Qualquer posição próxima
-                targetPosition = playerPosition.position;
-                break;
-            default:
-                targetPosition = playerPosition.position;
-                break;
+            switch (followMode)
+            {
+                case 0: // Atrás
+                    targetPosition = playerPosition.position - forward * followerOffset;
+                    break;
+                case 1: // Lado
+                    targetPosition = playerPosition.position + right * followSide * followerOffset;
+                    break;
+                case 2: // Qualquer posição próxima
+                    targetPosition = playerPosition.position;
+                    break;
+                default:
+                    targetPosition = playerPosition.position;
+                    break;
+            }            
+        }
+        else
+        {
+            targetPosition = pointer.indicatedPosition;
         }
 
         if (Keyboard.current.qKey.wasPressedThisFrame)
@@ -72,7 +86,7 @@ public class BasicFollowerBehavior : MonoBehaviour
             followSide = -followSide;
         }
 
-        if (Keyboard.current.fKey.wasPressedThisFrame)
+        if (Keyboard.current.fKey.wasPressedThisFrame && !pointer.followPoint)
         {
             followMode = (followMode + 1) % 3; // alterna entre os modos de seguimento
         }
