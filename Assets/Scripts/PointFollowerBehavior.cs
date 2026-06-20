@@ -86,7 +86,7 @@ public class TargetFollowerBehavior : MonoBehaviour
             followSide = -followSide;
         }
 
-        if (Keyboard.current.fKey.wasPressedThisFrame && !pointer.followPoint)
+        if (Keyboard.current.fKey.wasPressedThisFrame && !pointer.followPoint && !player.casting)
         {
             followMode = (followMode + 1) % 3; // alterna entre os modos de seguimento
         }

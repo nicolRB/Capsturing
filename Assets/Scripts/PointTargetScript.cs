@@ -54,7 +54,7 @@ public class PointTargetScript : MonoBehaviour
     {
         Point();
 
-        selecting = Mouse.current.leftButton.isPressed;
+        selecting = Mouse.current.leftButton.isPressed && !player.casting;
 
         // Indicador de fade para desaparecer o círculo no chão após um tempo
         if (selected && !selecting)
@@ -78,7 +78,7 @@ public class PointTargetScript : MonoBehaviour
             SetIndicatorIntensity(fadeStartValue);
         }
 
-        if (Keyboard.current.fKey.wasPressedThisFrame)
+        if (Keyboard.current.fKey.wasPressedThisFrame && !player.casting)
         {
             groundIndicator.tag = "Untagged";
             followPoint = false;
@@ -108,7 +108,7 @@ public class PointTargetScript : MonoBehaviour
         Debug.DrawRay(ray.origin, ray.direction * maxDistance, Color.red);
 
         if (Physics.Raycast(ray, out RaycastHit hit, maxDistance) && Mouse.current.leftButton.isPressed 
-        && player.pauseManager.isPaused == false && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0)
+        && player.pauseManager.isPaused == false && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0 && !player.casting)
         {
             // Círculo no chão
             if (groundIndicator != null)
@@ -121,7 +121,7 @@ public class PointTargetScript : MonoBehaviour
         }
 
         if (Physics.Raycast(ray, out RaycastHit hit2, maxDistance) && Mouse.current.leftButton.wasReleasedThisFrame 
-        && player.pauseManager.isPaused == false && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0)
+        && player.pauseManager.isPaused == false && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0 && !player.casting)
         {
             followPoint = true;
             indicatedPosition = groundIndicator.transform.position;

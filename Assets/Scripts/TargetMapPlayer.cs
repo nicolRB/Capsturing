@@ -41,7 +41,6 @@ public class TargetData
 public class MapEvent
 {
     public EventType type;
-
     public float spawnTime;
 
     // target
@@ -52,8 +51,8 @@ public class MapEvent
     public float fadeInDuration;
 
     // line
-    public LineSettings line;
-    public TargetSettings target;
+    public LineSettings line = new LineSettings();
+    public TargetSettings target = new TargetSettings();
 }
 
 [System.Serializable]
@@ -75,17 +74,9 @@ public class TargetSettings
     public float fadeInDuration;
 }
 
-[System.Serializable]
-public class MapWrapper
-{
-    public MapEvent[] events;
-    public MapSettings[] MapSettings;
-}
-
 public class TargetMapPlayer : MonoBehaviour
 {
     public GameObject targetPrefab;
-    // public RectTransform canvas; // Removed, using transform
 
     public List<TargetData> map;
     
@@ -108,7 +99,7 @@ public class TargetMapPlayer : MonoBehaviour
 
     void Update()
     {
-        if (castingGameScript.castingMode != 2 || map == null) // Only run if TargetMap mode is active and map is loaded
+        if (castingGameScript.castingMode != 2 || map == null)
             return;
         else if (castingGameScript.castingMode == 2 && 
         castingGameScript.player.casting == true)
@@ -156,90 +147,37 @@ public class TargetMapPlayer : MonoBehaviour
         }
     }
 
-    // Loads a target map from a JSON file and populates the map list
-    public void LoadMap(string mapPath)
+    // Carrega o mapa a partir de um TargetMapAsset (ScriptableObject)
+    public void LoadMap(TargetMapAsset mapAsset)
     {
-        TextAsset jsonAsset = Resources.Load<TextAsset>(mapPath);
-
-        if (jsonAsset == null)
+        if (mapAsset == null)
         {
-            Debug.LogError($"Map file not found: {mapPath}");
+            Debug.LogError("TargetMapPlayer.LoadMap: nenhum asset atribuído.");
             return;
         }
 
-        MapWrapper wrapper = JsonUtility.FromJson<MapWrapper>(jsonAsset.text);
-
-        map = new List<TargetData>();
-
-        foreach (var e in wrapper.events)
+        if (mapAsset.GeneratedMap == null || mapAsset.GeneratedMap.Count == 0)
         {
-            if (e.type == EventType.Target)
-            {
-                map.Add(new TargetData(
-                    e.spawnTime,
-                    e.position,
-                    e.size,
-                    e.lifetime,
-                    e.activationTime,
-                    e.fadeInDuration
-                ));
-            }
-            else if (e.type == EventType.Line)
-            {
-                GenerateLineTargets(e);
-            }
+            Debug.LogWarning($"TargetMapPlayer.LoadMap: o asset '{mapAsset.name}' não tem mapa gerado. Clique em 'Gerar Mapa' no Inspector do asset.");
+            return;
         }
 
-        if (wrapper.MapSettings != null && wrapper.MapSettings.Length > 0)
+        // Copia a lista para não modificar os dados congelados dentro do asset
+        map = new List<TargetData>(mapAsset.GeneratedMap);
+
+        if (mapAsset.mapSettings != null)
         {
-            mapHitWindow = wrapper.MapSettings[0].hitWindow;
-            mapPerfectWindow = wrapper.MapSettings[0].perfectWindow;
+            mapHitWindow    = mapAsset.mapSettings.hitWindow;
+            mapPerfectWindow = mapAsset.mapSettings.perfectWindow;
         }
         else
         {
-            Debug.LogWarning("MapSettings not found, using default values.");
-            mapHitWindow = 0.2f;
+            Debug.LogWarning($"TargetMapPlayer.LoadMap: asset '{mapAsset.name}' sem MapSettings, usando valores padrão.");
+            mapHitWindow    = 0.2f;
             mapPerfectWindow = 0.08f;
-        }        
-
-        map.Sort((a, b) => a.spawnTime.CompareTo(b.spawnTime));
-
-        Debug.Log($"Loaded map with {map.Count} targets (after expansion).");
-    }
-
-    void GenerateLineTargets(MapEvent e)
-    {
-        var line = e.line;
-        var tgt = e.target;
-
-        int count = line.amount;
-        if (count <= 0) return;
-
-        Vector2 dir = line.endPos - line.startPos;
-        Vector2 perp = new Vector2(-dir.y, dir.x).normalized;
-
-        for (int i = 0; i < count; i++)
-        {
-            float t = count > 1 ? (float)i / (count - 1) : 0.5f;
-
-            Vector2 pos = Vector2.Lerp(line.startPos, line.endPos, t);
-
-            float arcOffset = Mathf.Sin(t * Mathf.PI) * line.arc;
-            pos += perp * arcOffset;
-
-            float spawnTime = count > 1
-                ? e.spawnTime + t * line.duration
-                : e.spawnTime;
-
-            map.Add(new TargetData(
-                spawnTime,
-                pos,
-                tgt.size,
-                tgt.lifetime,
-                tgt.activationTime,
-                tgt.fadeInDuration
-            ));
         }
+
+        Debug.Log($"Mapa '{mapAsset.name}' carregado com {map.Count} alvos.");
     }
 
     public void ResetMap()

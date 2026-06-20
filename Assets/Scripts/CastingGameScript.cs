@@ -14,8 +14,8 @@ public class CastingGameScript : MonoBehaviour
     public ComboCounter comboCounter;
     public TargetMapPlayer targetMapPlayer;
     public TargetSpawner targetSpawner;
-    // Json target map file 
-    private string targetMap = "Maps/MapaTeste";
+    
+    public TargetMapAsset targetMap;
 
     public int castingMode = 1; // 1 = TargetSpawner(random), 2 = TargetMap(predefined)
 
@@ -31,6 +31,18 @@ public class CastingGameScript : MonoBehaviour
         }
 
         // Pressing 2 activates TargetMap for testing (temporary)
+        if (Keyboard.current.digit2Key.wasPressedThisFrame)
+        {
+            castingMode = 2;
+            ResetCast();
+            Debug.Log("Casting mode set to TargetMap (predefined)");
+            if (targetMapPlayer != null)
+            {
+                targetMapPlayer.LoadMap(targetMap); // Reload the map to reset spawn times
+            }
+        }
+
+        // Pressing 3 activates capture spell
         if (Keyboard.current.digit2Key.wasPressedThisFrame)
         {
             castingMode = 2;
