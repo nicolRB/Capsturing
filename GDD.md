@@ -8,7 +8,7 @@
 **Status do Projeto:**
 Prototipagem
 
-**Versão de Documento:** v0.2 <br>
+**Versão de Documento:** v0.3 <br>
 **Última Atualização:** 07/05/2026
 
 # 1. Visão Geral
@@ -112,6 +112,7 @@ Capturar novos rúnicos, treinar rúnicos capturados, desbloquear novas melhoria
 | Protótipo | Objetivo | Resultado |
 | Movimento Básico | Validar Controle | Sob ajustes |
 | Minigame de ritmo | Testar timing | Sob ajustes |
+| Entidade Seguidora do Player | Testar pathfinding | Satisfatório |
 
 ## Enredo Base
 O personagem jogável, um frágil praticante de magia que visa se tornar um verdadeiro mago, se especializa na arte arriscada e pouco desenvolvida de monsturgia, uma arte de domar e trabalhar com monstros mágicos, chamados rúnicos em seu mundo, que existem fora da lei natural dos animais com habilidades e características sobrenaturais. 
@@ -125,7 +126,7 @@ Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um n
 
 # 8. Interface (UI/UX)
 ## HUD
-- Barra de Vida
+- Barra de Vida de Player
 - Barra de Vida de Rúnico
 - Habilidades de Rúnico
 - Seletor de Feitiço
@@ -177,6 +178,8 @@ Tipos de áudio utilizados:
 # 11. Animação
 
 - Animação de Andar
+- Animação de Correr
+- Animação de Pulo
 - Animação de Conjuração
 - Animação de Desvio
 - Animação de Dano
@@ -257,6 +260,7 @@ Liste assets externos utilizados.
 |-----|-----|-----|
 | sprites | AssetStore | EULA |
 | efeitos sonoros | pixabay | CC0 |
+| fontes | Eleanora Font (3IP) | EULA de uso pessoal |
 
 ---
 
