@@ -1171,9 +1171,8 @@ GameObject:
   - component: {fileID: 1252003991}
   - component: {fileID: 1252003993}
   - component: {fileID: 1252003992}
-  - component: {fileID: 1252003994}
   m_Layer: 5
-  m_Name: Percentage
+  m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1195,7 +1194,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 295, y: 462}
+  m_AnchoredPosition: {x: 731, y: 75}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1252003992
@@ -1298,32 +1297,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1252003990}
   m_CullTransparentMesh: 1
---- !u!114 &1252003994
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1252003990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12564d667a6bf594884cea5beccde8ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CastingPercentageCounterScript
-  castingGame: {fileID: 0}
-  percentageText: {fileID: 0}
-  percentage: 0
-  colorShifts:
-  - {r: 0.2603773, g: 0.2603773, b: 0.2603773, a: 1}
-  - {r: 0.6301887, g: 0, b: 0, a: 1}
-  - {r: 0.9622642, g: 0.82278645, b: 0, a: 1}
-  - {r: 0, g: 0.7509433, b: 0.0020861605, a: 1}
-  - {r: 0.19215687, g: 0.44705883, b: 1, a: 1}
-  thresholds:
-  - 0.125
-  - 0.25
-  - 0.5
-  - 0.75
 --- !u!1 &1274228636
 GameObject:
   m_ObjectHideFlags: 0
@@ -2991,10 +2964,6 @@ PrefabInstance:
     - target: {fileID: 7904044071833459796, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_Layer
       value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 8018430178619792601, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
-      propertyPath: targetLifetimeVariance
-      value: 0.03
       objectReference: {fileID: 0}
     - target: {fileID: 8084226847695949998, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_Layer

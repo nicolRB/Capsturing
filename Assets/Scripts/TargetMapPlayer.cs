@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 
 public enum EventType
 {
@@ -81,6 +82,8 @@ public class TargetMapPlayer : MonoBehaviour
     public List<TargetData> map;
     
     private CastingGameScript castingGameScript;
+
+    public int totalTargets;
 
     private float startTime;
     private int currentIndex = 0;
