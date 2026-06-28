@@ -9,7 +9,7 @@
 Prototipagem
 
 **Versão de Documento:** v0.3 <br>
-**Última Atualização:** 07/05/2026
+**Última Atualização:** 22/06/2026
 
 # 1. Visão Geral
 
