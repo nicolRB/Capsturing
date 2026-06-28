@@ -189,7 +189,7 @@ Tipos de áudio utilizados:
 
 # 12. Arquitetura de Software
 
-Scripts separados por responsabilidade
+A arquitetura segue o princípio de responsabilidade única (SRP), com scripts organizados em camadas: Input/Controle (PlayerController, CameraController), Coordenação de sistemas (CastingGameScript como coordinator central do minigame), Dados (ScriptableObjects como TargetMapAsset para dados pré-gerados e imutáveis em runtime), e UI/Feedback (FeedBackUI, ComboCounter, CastingPercentageCounterScript). O sistema de spawn do minigame usa o padrão Strategy, com duas implementações intercambiáveis (TargetSpawner aleatório e TargetMapPlayer baseado em mapa). A comunicação entre componentes ocorre via chamadas diretas ao coordinator, mantendo os subsistemas desacoplados entre si.
 
 ---
 
@@ -204,14 +204,14 @@ Scripts separados por responsabilidade
 
 ---
 
-# 12. Testes e Playtests
+# 13. Testes e Playtests
 
 ## Playtests
 
 Nenhum playtest por outros foi feito ainda
 
 ---
-# 13. Cronograma
+# 14. Cronograma
 
 - Criar os rúnicos e seus comportamentos
 - Finalizar sistema de captura
@@ -223,7 +223,7 @@ Nenhum playtest por outros foi feito ainda
 - Criar rúnicos raros
 
 ---
-# 14. Riscos do Projeto
+# 15. Riscos do Projeto
 
 | Risco | Impacto | Mitigação |
 |-----|-----|-----|
@@ -232,7 +232,7 @@ Nenhum playtest por outros foi feito ainda
 
 ---
 
-# 15. Limitações Conhecidas
+# 16. Limitações Conhecidas
 
 Por mais que seja tentador, algumas adições não poderão ser implementadas:
 - sistema de árvore de habilidades
@@ -241,7 +241,7 @@ Por mais que seja tentador, algumas adições não poderão ser implementadas:
 
 ---
 
-# 16. Decisões Importantes
+# 17. Decisões Importantes
 
 Registro de mudanças relevantes durante o projeto.
 
@@ -252,7 +252,7 @@ Registro de mudanças relevantes durante o projeto.
 
 ---
 
-# 17. Créditos
+# 18. Créditos
 
 Liste assets externos utilizados.
 
@@ -264,5 +264,5 @@ Liste assets externos utilizados.
 
 ---
 
-# 18. Reflexão Final
+# 19. Reflexão Final
 O jogo não foi finalizado ainda
