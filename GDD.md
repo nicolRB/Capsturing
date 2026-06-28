@@ -123,7 +123,7 @@ Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um n
 ## Mecânicas do Jogo (RF)
 * Movimentação & Exploração: O jogador corre, pula e escala através de um mundo 3D aberto para explorar.
 * Combate: O jogador pode ser atacado por, ou atacar, um rúnico, no qual caso sua opção principal sera comandar um rúnico próprio para lutar. O jogador pode tanto desviar para evitar ataques quanto comandar seu rúnico aliado a desviar, comandá-lo a atacar diretamente ou manter-se na defensiva, e pode comandar o rúnico aliado a usar alguma habilidade disponível.
-* Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso. Por padrão, durante o combate isto deixa o jogador vulnerável a ataques de outros rúnicos que estejam em combate com o player. Nas configurações pode-se ativar uma pausa do combate durante (A) apenas o feitiço de captura, ou (B) qualquer feitiço sendo lançado.
+* Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso. Por padrão, durante o combate isto deixa o jogador seguro a ataques de outros rúnicos que estejam em combate com o player ao pausar o combate. Nas configurações pode-se escolher entre (A) o combate continuar sem pausa, (B) o combate pausar durante a conjuração do feitiço de captura ou (C) o combate pausar durante a conjuração de qualquer feitiço.
 
 # 8. Interface (UI/UX)
 ## HUD
@@ -278,7 +278,7 @@ Registro de mudanças relevantes durante o projeto.
 | abril | adicionar dash | melhorar mobilidade |
 | maio | adicionar sistema de zoom | melhora precisão para conjuração e dar comandos a rúnicos aliados |
 | junho | trocar mapas dos minigames de arquivos json para ScriptableObject do Unity | facilita e deixa mais flexível a adição e edição de mapas |
-| junho | por padrão, o player se torna vulnerável a ataques de rúnicos durante a conjuração do feitiço de captura, mas haverá uma configuração para deixa-lo segurado durante conjuração | mantém um nível de dificuldade e necessidade de uso estratégico do feitiço de captura durante combate com múltiplos inimigos, mas ainda mantém a opção de uma experiência mais casual e acessível |
+| junho | por padrão, o player se torna seguro a ataques de rúnicos durante a conjuração do feitiço de captura, com o combate sendo pausando durante a conjuração, mas haverá a opção de que o combate não seja pausado ou seja pausado durante a conjuração de qualquer feitiço | mantém um nível de dificuldade e necessidade de uso estratégico do feitiço de captura durante combate com múltiplos inimigos, mas ainda mantém a opção de uma experiência mais casual e acessível |
 | junho | definida FSM como padrão para comportamento de rúnicos | permite escalar os 12+ tipos de rúnicos com parâmetros variáveis sem duplicar lógica de decisão |
 
 ---
