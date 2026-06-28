@@ -57,6 +57,7 @@ Ambos Pokemon e Palworld compartilham do mesmo gênero base de jogo de captura d
 # 4. Hipótese de Design
 
 | Hipótese | Método de Teste |
+|-----|-----|
 | Jogadores preferem mecânicas que testem sua habilidade a chance aleatória | Playtest comparando captura baseada em ritmo vs captura puramente probabilísticaPlaytest com mecânica de captura que requer um nivel de habilidade |
 | Jogadores conseguem aprender o sistema de captura baseado em ritmo sem tutorial longo | Playtest inicial observando taxa de erro e tempo de aprendizado |
 | Usar rúnicos para exploração (montarias ou habilidades) incentiva mais exploração do mapa | Telemetria ou observação do tempo gasto explorando |
