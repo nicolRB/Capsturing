@@ -123,7 +123,7 @@ Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um n
 ## Mecânicas do Jogo (RF)
 * Movimentação & Exploração: O jogador corre, pula e escala através de um mundo 3D aberto para explorar.
 * Combate: O jogador pode ser atacado por, ou atacar, um rúnico, no qual caso sua opção principal sera comandar um rúnico próprio para lutar. O jogador pode tanto desviar para evitar ataques quanto comandar seu rúnico aliado a desviar, comandá-lo a atacar diretamente ou manter-se na defensiva, e pode comandar o rúnico aliado a usar alguma habilidade disponível.
-* Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso.
+* Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso. Por padrão, durante o combate isto deixa o jogador vulnerável a ataques de outros rúnicos que estejam em combate com o player. Nas configurações pode-se ativar uma pausa do combate durante (A) apenas o feitiço de captura, ou (B) qualquer feitiço sendo lançado.
 
 # 8. Interface (UI/UX)
 ## HUD
@@ -190,7 +190,23 @@ Tipos de áudio utilizados:
 
 # 12. Arquitetura de Software
 
-A arquitetura segue o princípio de responsabilidade única (SRP), com scripts organizados em camadas: Input/Controle (PlayerController, CameraController), Coordenação de sistemas (CastingGameScript como coordinator central do minigame), Dados (ScriptableObjects como TargetMapAsset para dados pré-gerados e imutáveis em runtime), e UI/Feedback (FeedBackUI, ComboCounter, CastingPercentageCounterScript). O sistema de spawn do minigame usa o padrão Strategy, com duas implementações intercambiáveis (TargetSpawner aleatório e TargetMapPlayer baseado em mapa). A comunicação entre componentes ocorre via chamadas diretas ao coordinator, mantendo os subsistemas desacoplados entre si.
+A arquitetura segue o princípio de responsabilidade única (SRP), com scripts 
+organizados em camadas: Input/Controle (PlayerController, CameraController), 
+Coordenação de sistemas (CastingGameScript como coordinator central do minigame), 
+Dados (ScriptableObjects como TargetMapAsset para dados pré-gerados e imutáveis 
+em runtime), e UI/Feedback (FeedBackUI, ComboCounter, CastingPercentageCounterScript). 
+O sistema de spawn do minigame usa o padrão Strategy, com duas implementações 
+intercambiáveis (TargetSpawner aleatório e TargetMapPlayer baseado em mapa). 
+A comunicação entre componentes ocorre via chamadas diretas ao coordinator, 
+mantendo os subsistemas desacoplados entre si.
+
+Para o comportamento dos rúnicos, está planejada a implementação de Máquinas de 
+Estado Finito (FSM), com estados como Patrulha, Perseguição, Ataque e Fuga. 
+Cada rúnico compartilhará a mesma estrutura de FSM, variando parâmetros individuais 
+(raio de visão, agressividade, velocidade, limiar de HP para fuga) e podendo ter 
+comportamentos de ataque específicos dentro do estado Ataque, permitindo escalar os 
+12 tipos de rúnicos sem reescrever a lógica de decisão para cada um. Caso o escopo 
+de comportamentos cresça, a FSM pode ser evoluída para Behavior Trees.
 
 ---
 
@@ -209,7 +225,17 @@ A arquitetura segue o princípio de responsabilidade única (SRP), com scripts o
 
 ## Playtests
 
-Nenhum playtest por outros foi feito ainda
+Playtests com usuários serão iniciados a partir de Julho/Agosto, após a implementação
+dos sistemas de captura e combate. Um protótipo será compartilhado com os 4 colegas, com foco em validar:
+
+- Se o minigame de captura baseado em ritmo é intuitivo sem tutorial longo
+  (hipótese: taxa de erro deve cair visivelmente após 2-3 tentativas de captura)
+- Se a captura por habilidade é percebida como mais satisfatória do que captura
+  por chance aleatória (hipótese principal do design)
+
+O feedback será coletado por observação direta e questionário curto pós-sessão.
+Caso a premissa rítmica não seja validada, o sistema será ajustado para reduzir
+a complexidade do timing ou introduzir assists progressivos.
 
 ---
 # 14. Cronograma
@@ -250,6 +276,10 @@ Registro de mudanças relevantes durante o projeto.
 |-----|-----|-----|
 | março | remover sistema de crafting | escopo muito grande |
 | abril | adicionar dash | melhorar mobilidade |
+| maio | adicionar sistema de zoom | melhora precisão para conjuração e dar comandos a rúnicos aliados |
+| junho | trocar mapas dos minigames de arquivos json para ScriptableObject do Unity | facilita e deixa mais flexível a adição e edição de mapas |
+| junho | por padrão, o player se torna vulnerável a ataques de rúnicos durante a conjuração do feitiço de captura, mas haverá uma configuração para deixa-lo segurado durante conjuração | mantém um nível de dificuldade e necessidade de uso estratégico do feitiço de captura durante combate com múltiplos inimigos, mas ainda mantém a opção de uma experiência mais casual e acessível |
+| junho | definida FSM como padrão para comportamento de rúnicos | permite escalar os 12+ tipos de rúnicos com parâmetros variáveis sem duplicar lógica de decisão |
 
 ---
 
