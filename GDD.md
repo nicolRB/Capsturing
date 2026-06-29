@@ -8,8 +8,8 @@
 **Status do Projeto:**
 Prototipagem
 
-**Versão de Documento:** v0.2 <br>
-**Última Atualização:** 07/05/2026
+**Versão de Documento:** v0.3 <br>
+**Última Atualização:** 22/06/2026
 
 # 1. Visão Geral
 
@@ -57,6 +57,7 @@ Ambos Pokemon e Palworld compartilham do mesmo gênero base de jogo de captura d
 # 4. Hipótese de Design
 
 | Hipótese | Método de Teste |
+|-----|-----|
 | Jogadores preferem mecânicas que testem sua habilidade a chance aleatória | Playtest comparando captura baseada em ritmo vs captura puramente probabilísticaPlaytest com mecânica de captura que requer um nivel de habilidade |
 | Jogadores conseguem aprender o sistema de captura baseado em ritmo sem tutorial longo | Playtest inicial observando taxa de erro e tempo de aprendizado |
 | Usar rúnicos para exploração (montarias ou habilidades) incentiva mais exploração do mapa | Telemetria ou observação do tempo gasto explorando |
@@ -112,6 +113,7 @@ Capturar novos rúnicos, treinar rúnicos capturados, desbloquear novas melhoria
 | Protótipo | Objetivo | Resultado |
 | Movimento Básico | Validar Controle | Sob ajustes |
 | Minigame de ritmo | Testar timing | Sob ajustes |
+| Entidade Seguidora do Player | Testar pathfinding | Satisfatório |
 
 ## Enredo Base
 O personagem jogável, um frágil praticante de magia que visa se tornar um verdadeiro mago, se especializa na arte arriscada e pouco desenvolvida de monsturgia, uma arte de domar e trabalhar com monstros mágicos, chamados rúnicos em seu mundo, que existem fora da lei natural dos animais com habilidades e características sobrenaturais. 
@@ -121,11 +123,11 @@ Para que o protagonista se torne um verdadeiro mago, ele precisa demonstrar um n
 ## Mecânicas do Jogo (RF)
 * Movimentação & Exploração: O jogador corre, pula e escala através de um mundo 3D aberto para explorar.
 * Combate: O jogador pode ser atacado por, ou atacar, um rúnico, no qual caso sua opção principal sera comandar um rúnico próprio para lutar. O jogador pode tanto desviar para evitar ataques quanto comandar seu rúnico aliado a desviar, comandá-lo a atacar diretamente ou manter-se na defensiva, e pode comandar o rúnico aliado a usar alguma habilidade disponível.
-* Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso.
+* Captura: O jogador pode capturar um rúnico ao utilizar um feitiço de captura, oque inicia um mini-jogo de ritmo com em que se deve seguir comandos demonstrados de cliques com mouse e tecla sensiveis a timing e, para o mouse, posicionamento, com a precisão no mini-jogo adicionando à probabilidade de o feitiço de captura ter sucesso. Por padrão, durante o combate isto deixa o jogador seguro a ataques de outros rúnicos que estejam em combate com o player ao pausar o combate. Nas configurações pode-se escolher entre (A) o combate continuar sem pausa, (B) o combate pausar durante a conjuração do feitiço de captura ou (C) o combate pausar durante a conjuração de qualquer feitiço.
 
 # 8. Interface (UI/UX)
 ## HUD
-- Barra de Vida
+- Barra de Vida de Player
 - Barra de Vida de Rúnico
 - Habilidades de Rúnico
 - Seletor de Feitiço
@@ -177,6 +179,8 @@ Tipos de áudio utilizados:
 # 11. Animação
 
 - Animação de Andar
+- Animação de Correr
+- Animação de Pulo
 - Animação de Conjuração
 - Animação de Desvio
 - Animação de Dano
@@ -186,7 +190,23 @@ Tipos de áudio utilizados:
 
 # 12. Arquitetura de Software
 
-Scripts separados por responsabilidade
+A arquitetura segue o princípio de responsabilidade única (SRP), com scripts 
+organizados em camadas: Input/Controle (PlayerController, CameraController), 
+Coordenação de sistemas (CastingGameScript como coordinator central do minigame), 
+Dados (ScriptableObjects como TargetMapAsset para dados pré-gerados e imutáveis 
+em runtime), e UI/Feedback (FeedBackUI, ComboCounter, CastingPercentageCounterScript). 
+O sistema de spawn do minigame usa o padrão Strategy, com duas implementações 
+intercambiáveis (TargetSpawner aleatório e TargetMapPlayer baseado em mapa). 
+A comunicação entre componentes ocorre via chamadas diretas ao coordinator, 
+mantendo os subsistemas desacoplados entre si.
+
+Para o comportamento dos rúnicos, está planejada a implementação de Máquinas de 
+Estado Finito (FSM), com estados como Patrulha, Perseguição, Ataque e Fuga. 
+Cada rúnico compartilhará a mesma estrutura de FSM, variando parâmetros individuais 
+(raio de visão, agressividade, velocidade, limiar de HP para fuga) e podendo ter 
+comportamentos de ataque específicos dentro do estado Ataque, permitindo escalar os 
+12 tipos de rúnicos sem reescrever a lógica de decisão para cada um. Caso o escopo 
+de comportamentos cresça, a FSM pode ser evoluída para Behavior Trees.
 
 ---
 
@@ -201,14 +221,24 @@ Scripts separados por responsabilidade
 
 ---
 
-# 12. Testes e Playtests
+# 13. Testes e Playtests
 
 ## Playtests
 
-Nenhum playtest por outros foi feito ainda
+Playtests com usuários serão iniciados a partir de Julho/Agosto, após a implementação
+dos sistemas de captura e combate. Um protótipo será compartilhado com os 4 colegas, com foco em validar:
+
+- Se o minigame de captura baseado em ritmo é intuitivo sem tutorial longo
+  (hipótese: taxa de erro deve cair visivelmente após 2-3 tentativas de captura)
+- Se a captura por habilidade é percebida como mais satisfatória do que captura
+  por chance aleatória (hipótese principal do design)
+
+O feedback será coletado por observação direta e questionário curto pós-sessão.
+Caso a premissa rítmica não seja validada, o sistema será ajustado para reduzir
+a complexidade do timing ou introduzir assists progressivos.
 
 ---
-# 13. Cronograma
+# 14. Cronograma
 
 - Criar os rúnicos e seus comportamentos
 - Finalizar sistema de captura
@@ -220,7 +250,7 @@ Nenhum playtest por outros foi feito ainda
 - Criar rúnicos raros
 
 ---
-# 14. Riscos do Projeto
+# 15. Riscos do Projeto
 
 | Risco | Impacto | Mitigação |
 |-----|-----|-----|
@@ -229,7 +259,7 @@ Nenhum playtest por outros foi feito ainda
 
 ---
 
-# 15. Limitações Conhecidas
+# 16. Limitações Conhecidas
 
 Por mais que seja tentador, algumas adições não poderão ser implementadas:
 - sistema de árvore de habilidades
@@ -238,7 +268,7 @@ Por mais que seja tentador, algumas adições não poderão ser implementadas:
 
 ---
 
-# 16. Decisões Importantes
+# 17. Decisões Importantes
 
 Registro de mudanças relevantes durante o projeto.
 
@@ -246,10 +276,14 @@ Registro de mudanças relevantes durante o projeto.
 |-----|-----|-----|
 | março | remover sistema de crafting | escopo muito grande |
 | abril | adicionar dash | melhorar mobilidade |
+| maio | adicionar sistema de zoom | melhora precisão para conjuração e dar comandos a rúnicos aliados |
+| junho | trocar mapas dos minigames de arquivos json para ScriptableObject do Unity | facilita e deixa mais flexível a adição e edição de mapas |
+| junho | por padrão, o player se torna seguro a ataques de rúnicos durante a conjuração do feitiço de captura, com o combate sendo pausando durante a conjuração, mas haverá a opção de que o combate não seja pausado ou seja pausado durante a conjuração de qualquer feitiço | mantém um nível de dificuldade e necessidade de uso estratégico do feitiço de captura durante combate com múltiplos inimigos, mas ainda mantém a opção de uma experiência mais casual e acessível |
+| junho | definida FSM como padrão para comportamento de rúnicos | permite escalar os 12+ tipos de rúnicos com parâmetros variáveis sem duplicar lógica de decisão |
 
 ---
 
-# 17. Créditos
+# 18. Créditos
 
 Liste assets externos utilizados.
 
@@ -257,8 +291,9 @@ Liste assets externos utilizados.
 |-----|-----|-----|
 | sprites | AssetStore | EULA |
 | efeitos sonoros | pixabay | CC0 |
+| fontes | Eleanora Font (3IP) | EULA de uso pessoal |
 
 ---
 
-# 18. Reflexão Final
+# 19. Reflexão Final
 O jogo não foi finalizado ainda

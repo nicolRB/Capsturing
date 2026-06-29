@@ -8,8 +8,9 @@ using UnityEditor;
 public class PauseManager : MonoBehaviour
 {
     public GameObject pauseMenu;
+    public PlayerController playerController;
 
-    private bool isPaused = false;
+    public bool isPaused = false;
 
     void Start()
     {
@@ -20,10 +21,8 @@ public class PauseManager : MonoBehaviour
     {
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            if (isPaused)
-                Resume();
-            else
-                Pause();
+            if (isPaused) Resume();
+            else Pause();
         }
     }
 
@@ -34,9 +33,6 @@ public class PauseManager : MonoBehaviour
         pauseMenu.SetActive(true);
 
         Time.timeScale = 0f;
-
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     public void Resume()
@@ -46,9 +42,6 @@ public class PauseManager : MonoBehaviour
         pauseMenu.SetActive(false);
 
         Time.timeScale = 1f;
-
-        //Cursor.lockState = CursorLockMode.Locked;
-        //Cursor.visible = false;
     }
 
     public void QuitGame()

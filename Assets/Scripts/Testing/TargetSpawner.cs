@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TargetSpawner : MonoBehaviour
 {
@@ -6,11 +7,13 @@ public class TargetSpawner : MonoBehaviour
     public GameObject target;
     public int nextTargetIndex = 0;
 
+    private CastingGameScript castingGameScript;
+
     [Header("Target Properties")]
     public float targetSize = 1f;
     public float targetLifetime = 2f;
-    public float targetPerfectWindow = 0.08f;
-    public float targetHitWindow = 0.2f;
+    public float targetPerfectWindow = 0.04f;
+    public float targetHitWindow = 0.08f;
     public float targetActivationTime = 0.5f;
     public float targetFadeInDuration = 0.5f;
     public float targetMissDuration = 0.2f;
@@ -31,10 +34,18 @@ public class TargetSpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (castingGameScript == null)
+        {
+            castingGameScript = Object.FindFirstObjectByType<CastingGameScript>();
+        }
+
+        if (castingGameScript.castingMode != 1) return;
+
         if (Time.time >= nextSpawnTime)
         {
             SpawnObject();
-            nextSpawnTime = Time.time + spawnInterval + Random.Range(-spawnIntervalVariance, spawnIntervalVariance);
+            nextSpawnTime = Time.time + spawnInterval + 
+            Random.Range(-spawnIntervalVariance, spawnIntervalVariance);
         }
     }
 
@@ -50,27 +61,34 @@ public class TargetSpawner : MonoBehaviour
                 spawnPoint.y + Random.Range(-spawnRange.y / 2, spawnRange.y / 2)
             );
 
-            // 👇 Get the ClickableCircle script
-            ClickableCircle circle = obj.GetComponent<ClickableCircle>();
+            // Get the TargetScript script
+            TargetScript targetScript = obj.GetComponent<TargetScript>();
 
-            if (circle != null)
+            if (targetScript != null)
             {
                 // Apply base properties
-                circle.size = targetSize + Random.Range(-targetSizeVariance, targetSizeVariance);
-                circle.lifetime = targetLifetime + Random.Range(-targetLifetimeVariance, targetLifetimeVariance);
-                circle.perfectWindow = targetPerfectWindow;
-                circle.hitWindow = targetHitWindow;
-                circle.activationTime = targetActivationTime;
-                circle.fadeInDuration = targetFadeInDuration;
-                circle.missDuration = targetMissDuration;
+                targetScript.size = targetSize + Random.Range(-targetSizeVariance, targetSizeVariance);
+                targetScript.lifetime = targetLifetime + Random.Range(-targetLifetimeVariance, targetLifetimeVariance);
+                targetScript.perfectWindow = targetPerfectWindow;
+                targetScript.hitWindow = targetHitWindow;
+                targetScript.activationTime = targetActivationTime;
+                targetScript.fadeInDuration = targetFadeInDuration;
+                targetScript.missDuration = targetMissDuration;
 
                 // Optional: assign index for sequencing
-                circle.targetIndex = nextTargetIndex;
+                targetScript.targetIndex = nextTargetIndex;
                 nextTargetIndex++;
             }
 
             // Scale AFTER size is set (important)
-            rect.localScale = Vector3.one * (circle != null ? circle.size : targetSize);
+            rect.localScale = Vector3.one * (targetScript != null ? targetScript.size : targetSize);
         }
+    }
+
+    public void ResetSpawner()
+    {
+        nextTargetIndex = 0;
+        nextSpawnTime = Time.time + spawnInterval + 
+            Random.Range(-spawnIntervalVariance, spawnIntervalVariance);
     }
 }

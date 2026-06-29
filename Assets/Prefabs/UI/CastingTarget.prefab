@@ -27,8 +27,8 @@ RectTransform:
   m_GameObject: {fileID: 1353679101410905553}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.035, y: 1.035, z: 1.035}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4082407720409270957}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 6962330579947299420}
   m_Layer: 5
   m_Name: CastingTarget
-  m_TagString: Untagged
+  m_TagString: Target
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -167,8 +167,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ClickableCircle
   size: 1
   lifetime: 1
-  perfectWindow: 0.06
-  hitWindow: 0.145
+  perfectWindow: 0
+  hitWindow: 0
   activationTime: 0.5
   fadeInDuration: 0.5
   missDuration: 0.2

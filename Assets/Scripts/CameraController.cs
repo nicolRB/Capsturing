@@ -3,31 +3,74 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
+    public bool lockCursor;
+    public PauseManager pauseManager;
+
     private PlayerController playerController;
+    private Transform pivot;
 
     private float xRotation = 0f;
+    public float yRotation = 0f;
+    public float FOV = 60f;
+    public float FOVSetting = 60f;
 
     void Start()
     {
         playerController = GetComponentInParent<PlayerController>();
 
-        // Cursor.lockState = CursorLockMode.Locked;
-        // Cursor.visible = false;
+        // guarda referência ao pivot e desparenteia
+        pivot = transform.parent;
+        if (pivot.parent == playerController.transform)
+        {
+            pivot.SetParent(playerController.transform.parent);
+        }
     }
 
     void Update()
     {
-        float mouseY = Mouse.current.delta.y.ReadValue()
-                       * playerController.mouseSensitivity
-                       * Time.deltaTime;
+        if (!playerController.casting && !pauseManager.isPaused)
+        {
+            float mouseY = Mouse.current.delta.y.ReadValue()
+                           * playerController.mouseSensitivity
+                           * Time.deltaTime;
 
-        // acumula rotação vertical
-        xRotation -= mouseY;
+            float mouseX = Mouse.current.delta.x.ReadValue()
+                           * playerController.mouseSensitivity
+                           * Time.deltaTime;
 
-        // limita ângulo (evita virar de cabeça pra baixo)
-        xRotation = Mathf.Clamp(xRotation, -85f, 85f);
+            xRotation -= mouseY;
+            yRotation += mouseX;
+            xRotation = Mathf.Clamp(xRotation, -85f, 85f);
 
-        // aplica no PAI (pivot), não na câmera
-        transform.parent.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            // rotação total da câmera: pitch + yaw independentes
+            pivot.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
+        }
+
+        // pivot segue a posição do player sem herdar rotação
+        pivot.position = playerController.transform.position;
+
+        // cursor
+        if (playerController.casting || pauseManager.isPaused)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        // Zoom (botão direito do mouse)
+        if (Mouse.current.rightButton.isPressed)
+        {
+            FOV = Mathf.Lerp(FOV, FOVSetting/2.5f, Time.deltaTime * 5f);
+        }
+        else
+        {
+            FOV = Mathf.Lerp(FOV, FOVSetting, Time.deltaTime * 5f);
+        }
+
+        GetComponent<Camera>().fieldOfView = FOV;
     }
 }
