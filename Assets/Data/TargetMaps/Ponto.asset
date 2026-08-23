@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d7bcdae25738f047b23ecd4c6dd4260, type: 3}
+  m_Name: Ponto
+  m_EditorClassIdentifier: Assembly-CSharp::TargetMapAsset
+  mapSettings:
+    hitWindow: 0.2
+    perfectWindow: 0.08
+    name: Ponto
+  events:
+  - type: 0
+    spawnTime: 0
+    position: {x: 0, y: 0}
+    size: 1
+    lifetime: 0.65
+    activationTime: 0.25
+    fadeInDuration: 0.5
+    line:
+      startPos: {x: 0, y: 0}
+      endPos: {x: 0, y: 0}
+      amount: 1
+      arc: 0
+      duration: 1
+    target:
+      size: 1
+      lifetime: 1
+      activationTime: 0.5
+      fadeInDuration: 0.5
+  generatedMap:
+  - spawnTime: 0
+    position: {x: 0, y: 0}
+    size: 1
+    lifetime: 1
+    activationTime: 0.5
+    fadeInDuration: 0.5

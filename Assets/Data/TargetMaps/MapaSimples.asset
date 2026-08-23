@@ -13,9 +13,12 @@ MonoBehaviour:
   m_Name: MapaSimples
   m_EditorClassIdentifier: Assembly-CSharp::TargetMapAsset
   mapSettings:
-    hitWindow: 0.06
-    perfectWindow: 0.03
+    hitWindow: 0.2
+    perfectWindow: 0.08
     name: MapaSimples
+    perfectWeight: 1
+    goodWeight: 0.5
+    missWeight: 0
   events:
   - type: 0
     spawnTime: 0.3

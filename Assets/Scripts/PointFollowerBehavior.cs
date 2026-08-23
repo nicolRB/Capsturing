@@ -10,6 +10,7 @@ public class TargetFollowerBehavior : MonoBehaviour
     public PointTargetScript pointer;
     private NavMeshAgent agent;
     private GameObject point;
+    public PlayerInteractionScript playerInteraction;
 
     [Header("Follow Behavior")]
     public float followerOffset = 2f;
@@ -32,20 +33,11 @@ public class TargetFollowerBehavior : MonoBehaviour
 
     void Start()
     {
-        if (player == null)
-        {
-            player = FindFirstObjectByType<PlayerController>();
-        }
+        if (player == null) player = FindFirstObjectByType<PlayerController>();
 
-        if (playerPosition == null && player != null)
-        {
-            playerPosition = player.transform;
-        }
+        if (playerPosition == null && player != null) playerPosition = player.transform;
 
-        if (pointer == null)
-        {
-            pointer = FindFirstObjectByType<PointTargetScript>();
-        }
+        if (pointer == null) pointer = FindFirstObjectByType<PointTargetScript>();
 
         agent = GetComponent<NavMeshAgent>();
     }
@@ -85,10 +77,14 @@ public class TargetFollowerBehavior : MonoBehaviour
         {
             followSide = -followSide;
         }
+        
+        bool interactableActive = playerInteraction != null && playerInteraction.interactableTarget != null;
 
-        if (Keyboard.current.fKey.wasPressedThisFrame && !pointer.followPoint && !player.casting)
+        if (!interactableActive && Keyboard.current.fKey.wasPressedThisFrame 
+            && (!pointer.followPoint && player.castState != PlayerController.CastState.Channeling 
+            || player.castState != PlayerController.CastState.Casting))
         {
-            followMode = (followMode + 1) % 3; // alterna entre os modos de seguimento
+            followMode = (followMode + 1) % 3;
         }
 
         if (frameCounter >= updateFrequency)

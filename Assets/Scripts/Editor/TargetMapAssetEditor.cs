@@ -83,6 +83,8 @@ public class TargetMapAssetEditor : Editor
         if (GUILayout.Button("+ Adicionar Evento"))
         {
             events.arraySize++;
+            SerializedProperty newEvent = events.GetArrayElementAtIndex(events.arraySize - 1);
+            ApplyDefaultEventValues(newEvent);
         }
 
         GUILayout.Space(10);
@@ -112,5 +114,33 @@ public class TargetMapAssetEditor : Editor
 
         // Aplica mudanças feitas via SerializedProperty de volta ao objeto
         serializedObject.ApplyModifiedProperties();
+    }
+
+    private void ApplyDefaultEventValues(SerializedProperty evt)
+    {
+        evt.FindPropertyRelative("type").enumValueIndex = (int)EventType.Target;
+        evt.FindPropertyRelative("spawnTime").floatValue = 0f;
+
+        // Target fields
+        evt.FindPropertyRelative("position").vector2Value = Vector2.zero;
+        evt.FindPropertyRelative("size").floatValue = 1f;
+        evt.FindPropertyRelative("lifetime").floatValue = 1f;
+        evt.FindPropertyRelative("activationTime").floatValue = 0.5f;
+        evt.FindPropertyRelative("fadeInDuration").floatValue = 0.5f;
+
+        // Line sub-settings
+        SerializedProperty line = evt.FindPropertyRelative("line");
+        line.FindPropertyRelative("startPos").vector2Value = Vector2.zero;
+        line.FindPropertyRelative("endPos").vector2Value = Vector2.zero;
+        line.FindPropertyRelative("amount").intValue = 1;
+        line.FindPropertyRelative("arc").floatValue = 0f;
+        line.FindPropertyRelative("duration").floatValue = 1f;
+
+        // Target sub-settings (used by Line events)
+        SerializedProperty target = evt.FindPropertyRelative("target");
+        target.FindPropertyRelative("size").floatValue = 1f;
+        target.FindPropertyRelative("lifetime").floatValue = 1f;
+        target.FindPropertyRelative("activationTime").floatValue = 0.5f;
+        target.FindPropertyRelative("fadeInDuration").floatValue = 0.5f;
     }
 }
