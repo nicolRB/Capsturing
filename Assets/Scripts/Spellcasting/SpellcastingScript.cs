@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System;
 
 public class SpellcastingScript : MonoBehaviour
 {
@@ -85,8 +86,15 @@ public class SpellcastingScript : MonoBehaviour
         {
             if (player.castState == PlayerController.CastState.Idle)
             {
-                BeginChannel();
-                player.playerHUD.SetActive(false);
+                if (spellCooldowns[spellIndex] <= 0)
+                {
+                    BeginChannel();
+                    player.playerHUD.SetActive(false);
+                }            
+                else
+                {
+                    Debug.Log("Spell currently in cooldown. Time left: " + spellCooldowns[spellIndex]);
+                }
             }
             else if (player.castState == PlayerController.CastState.Channeling
                    || player.castState == PlayerController.CastState.Aiming)
@@ -220,6 +228,14 @@ public class SpellcastingScript : MonoBehaviour
                     spellCooldowns[i] = 0f;
                 }
             }
+        }
+    }
+
+    public void ResetCooldowns()
+    {
+        for (int i = 0; i < spellCooldowns.Count; i++)
+        {
+            spellCooldowns[i] = 0;
         }
     }
 
