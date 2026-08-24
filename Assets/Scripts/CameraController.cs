@@ -28,7 +28,7 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        if (!playerController.casting && !pauseManager.isPaused)
+        if (playerController.castState != PlayerController.CastState.Channeling && !pauseManager.isPaused)
         {
             float mouseY = Mouse.current.delta.y.ReadValue()
                            * playerController.mouseSensitivity
@@ -50,7 +50,7 @@ public class CameraController : MonoBehaviour
         pivot.position = playerController.transform.position;
 
         // cursor
-        if (playerController.casting || pauseManager.isPaused)
+        if (playerController.castState == PlayerController.CastState.Channeling || pauseManager.isPaused)
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -62,7 +62,7 @@ public class CameraController : MonoBehaviour
         }
 
         // Zoom (botão direito do mouse)
-        if (Mouse.current.rightButton.isPressed)
+        if (Mouse.current.rightButton.isPressed || playerController.castState == PlayerController.CastState.Aiming)
         {
             FOV = Mathf.Lerp(FOV, FOVSetting/2.5f, Time.deltaTime * 5f);
         }

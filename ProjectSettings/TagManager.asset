@@ -7,18 +7,19 @@ TagManager:
   - Target
   - FollowerTarget
   - Wild
+  - Button
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - AimHighlight
   - Water
   - UI
   - Player
   - Follower
-  - 
-  - 
-  - 
+  - Runic
+  - Interactable
+  - InteractHighlight
   - 
   - 
   - 

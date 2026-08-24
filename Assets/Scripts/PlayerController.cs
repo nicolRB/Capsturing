@@ -40,14 +40,15 @@ public class PlayerController : MonoBehaviour
     private CapsuleCollider capsule;
     private Animator animator;
 
-    public bool casting = false;
+    [Header("State Flags")]
     public bool moving = false;
+    public enum CastState { Idle, Channeling, Aiming, Casting } // Idle - não está fazendo nada, Channeling - carregando feitiço (minigame), Aiming - mirando feitiço (feitiço carregado e pronto para lançar), Casting - lançando feitiço
+    public CastState castState = CastState.Idle;
 
     [Header("References")]
-    public GameObject castingUI;
-    public CastingGameScript castingGameScript;
     public CameraController cameraController;
     public PauseManager pauseManager;
+    public GameObject playerHUD;
 
     private void Awake()
     {
@@ -66,10 +67,11 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         currentSpeed = walkSpeed;
-        if (castingUI != null)
-        {
-            castingUI.SetActive(casting);
-        }
+        if (cameraController == null) cameraController = FindFirstObjectByType<CameraController>();
+
+        if (pauseManager == null) pauseManager = FindFirstObjectByType<PauseManager>();
+
+        if (playerHUD == null) playerHUD = GameObject.Find("PlayerHUD");
     }
 
     private void Update()
@@ -80,25 +82,6 @@ public class PlayerController : MonoBehaviour
         HandleRotation();
         UpdateCooldowns();
         UpdateAnimator();
-
-        // flips casting state when E is pressed
-        if (Keyboard.current.eKey.wasPressedThisFrame)        
-        {
-            casting = !casting;
-            Debug.Log($"Casting state toggled: {casting}");
-            if (castingUI != null)
-            {
-                foreach (Transform child in castingUI.transform)
-                {
-                    if (child.CompareTag("Target"))
-                    {
-                        Destroy(child.gameObject);
-                    }
-                }
-                castingUI.SetActive(casting);
-                castingGameScript.ResetCast();
-            }
-        }
     }
 
     private void FixedUpdate()
@@ -111,10 +94,10 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = Vector2.zero;
 
-        if (!casting && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
-        if (!casting && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
-        if (!casting && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
-        if (!casting && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
 
         moveInput = moveInput.normalized;
         Vector3 movement = transform.forward * moveInput.y + transform.right * moveInput.x;
@@ -141,25 +124,25 @@ public class PlayerController : MonoBehaviour
     private void HandleDashInput()
     {
         Vector2 moveInput = Vector2.zero;
-        if (!casting && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
-        if (!casting && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
-        if (!casting && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
-        if (!casting && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
 
         Vector3 movement = transform.forward * moveInput.y + transform.right * moveInput.x;
 
-        if (!casting && Keyboard.current.leftShiftKey.wasPressedThisFrame)
+        if (castState != CastState.Channeling && Keyboard.current.leftShiftKey.wasPressedThisFrame)
         {
             shiftPressedTime = 0f;
             isHoldingShift = true;
         }
 
-        if (!casting && isHoldingShift && Keyboard.current.leftShiftKey.isPressed)
+        if (castState != CastState.Channeling && isHoldingShift && Keyboard.current.leftShiftKey.isPressed)
         {
             shiftPressedTime += Time.deltaTime;
         }
 
-        if (!casting && isHoldingShift && Keyboard.current.leftShiftKey.wasReleasedThisFrame)
+        if (castState != CastState.Channeling && isHoldingShift && Keyboard.current.leftShiftKey.wasReleasedThisFrame)
         {
             if (shiftPressedTime <= tapThreshold && cooldownTimer <= 0f && !isDashing &&
                 (Keyboard.current.wKey.isPressed || Keyboard.current.sKey.isPressed || 
@@ -190,7 +173,7 @@ public class PlayerController : MonoBehaviour
     // ---------------- JUMP ----------------
     private void HandleJumpInput()
     {
-        if (!casting && Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (castState != CastState.Channeling && Keyboard.current.spaceKey.wasPressedThisFrame)
             jumpBufferTimer = jumpBufferTime;
         else
             jumpBufferTimer -= Time.deltaTime;
@@ -219,9 +202,10 @@ public class PlayerController : MonoBehaviour
     // ---------------- ROTATION ----------------
     private void HandleRotation()
     {
-        if (casting || isDashing) return;
+        if (castState == CastState.Channeling || isDashing) return;
 
-        if (moving || Mouse.current.rightButton.isPressed || Mouse.current.leftButton.isPressed || Keyboard.current.leftShiftKey.isPressed)
+        if (moving || Mouse.current.rightButton.isPressed || Mouse.current.leftButton.isPressed 
+        || Keyboard.current.leftShiftKey.isPressed || castState == CastState.Aiming)
         {
             // player gira para o yaw da câmera
             Quaternion targetRotation = Quaternion.Euler(0f, cameraController.yRotation, 0f);
@@ -262,10 +246,10 @@ public class PlayerController : MonoBehaviour
         // -------- INPUT --------
         Vector2 moveInput = Vector2.zero;
 
-        if (!casting && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
-        if (!casting && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
-        if (!casting && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
-        if (!casting && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
 
         float inputAmount = moveInput.magnitude;
 
