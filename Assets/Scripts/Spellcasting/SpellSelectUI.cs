@@ -1,5 +1,8 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
+using Microsoft.Unity.VisualStudio.Editor;
 
 public class SpellSelectUI : MonoBehaviour
 {
@@ -10,6 +13,9 @@ public class SpellSelectUI : MonoBehaviour
     public float iconScale = 0.91f; // Scale of each spell icon
     public float selectionIndicatorOffset = 10f; // Offset for the selection indicator
     private int spellCount = 0;
+
+    [Header("Cooldown Visuals")]
+    public Color cooldownTint = new Color(0.25f, 0.25f, 0.25f, 1f);
 
     [Header("References")]
     public SpellcastingScript spellcastingScript;
@@ -29,6 +35,7 @@ public class SpellSelectUI : MonoBehaviour
         if (spellcastingScript != null)
         {
             UpdateSelectionIndicator(spellcastingScript.spellIndex);
+            UpdateCoolDownTimers();
         }   
     }
 
@@ -90,6 +97,25 @@ public class SpellSelectUI : MonoBehaviour
                 ? selectionIndicatorOffset : 0f, 0f);
                 spellIconTransform.localPosition = Vector3.Lerp(spellIconTransform.localPosition, targetPosition, 
                 Time.deltaTime * 10f);
+            }
+        }
+    }
+
+    void UpdateCoolDownTimers()
+    {
+        for (int i = 0; i < spellCount; i++)
+        {
+            TextMeshProUGUI coolDownTime = transform.GetChild(i).transform.Find("CoolDownTime").GetComponent<TextMeshProUGUI>();
+            UnityEngine.UI.Image icon = transform.GetChild(i).transform.Find("SpellIcon").GetComponent<UnityEngine.UI.Image>();
+            if (spellcastingScript.spellCooldowns[i] <= 0)
+            {
+                icon.color = Color.white;
+                coolDownTime.text = "";
+            }
+            else
+            {
+                icon.color = cooldownTint;
+                coolDownTime.text = spellcastingScript.spellCooldowns[i].ToString("F0");
             }
         }
     }
