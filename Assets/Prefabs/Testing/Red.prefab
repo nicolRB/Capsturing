@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &8641579153137820714
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4852297483110751698, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: creature
+      value: 
+      objectReference: {fileID: 5728519553340375902}
+    - target: {fileID: 7250556084618688665, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_Name
+      value: Red Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.13504
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.058
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 4.66
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8953911265105648908, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7250556084618688665, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5728519553340375902}
+  m_SourcePrefab: {fileID: 100100000, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+--- !u!1 &1401226605364059315 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7250556084618688665, guid: 5d400f9ac86a33f49875b52ca4178c77, type: 3}
+  m_PrefabInstance: {fileID: 8641579153137820714}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5728519553340375902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401226605364059315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c82d0c6373881af4ea0a51516c74d6fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Runic
+  currentState: 0
+  species: {fileID: 0}
+  nickname: Red
+  level: 1
+  experience: 0
+  currentHP: 10
+  maxHP: 10
+  attack: 0
+  defense: 0
+  speed: 0
+  magic: 0
+  magicDefense: 0
+  elements: []
+  basicSkills: []
+  skills: []
+  capturable: 1
+  captureMap: {fileID: 11400000, guid: b479b697b8c891b4daf2e85dda936882, type: 2}
+  minCaptureChance: 0
+  maxCaptureChance: 1
+  targetPerfectWeight: 2
+  targetGoodWeight: 1
+  targetMissWeight: 0
+  CCModifier: 0
+  CCMultiplier: 0
+  perfectBonus: 0
+  perfectMultiplier: 0
+  goodBonus: 0
+  goodMultiplier: 0
+  missBonus: 0
+  missMultiplier: 0
+  frozen: 0
+  behaviorState: 0
+  captureChainsPrefab: {fileID: 6365447050532344907, guid: ef2b118e8a8c2674198a5e7aed2f4899, type: 3}
+  chainYAngleMinVariance: 60
+  chainYAngleMaxVariance: 60
+  chainMinZAngle: 20
+  chainMaxZAngle: 95
+  minChainNumber: 6
+  maxChainNumber: 8
+  chainSpawnInterval: 0

@@ -3,7 +3,7 @@ using TMPro;
 
 public class HPCounterScript : MonoBehaviour
 {
-    public EnemyScript enemy;
+    public Runic creature;
     public TextMeshPro hpText;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -14,9 +14,9 @@ public class HPCounterScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (hpText != null && enemy != null)
+        if (hpText != null && creature != null)
         {
-            hpText.text = $"{enemy.currentHealth}/{enemy.maxHealth}";
+            hpText.text = $"{creature.currentHP}/{creature.maxHP}";
         }
     }
 }

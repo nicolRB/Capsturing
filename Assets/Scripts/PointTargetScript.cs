@@ -39,7 +39,6 @@ public class PointTargetScript : MonoBehaviour
     [Header("Creature Targeting")]
     public GameObject creatureTarget;
     public LayerMask creatureLayer;
-    private GameObject previousTarget;
     private Highlight highlightTarget;
 
 

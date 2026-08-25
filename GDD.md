@@ -8,8 +8,8 @@
 **Status do Projeto:**
 Prototipagem
 
-**Versão de Documento:** v0.3 <br>
-**Última Atualização:** 22/06/2026
+**Versão de Documento:** v0.4 <br>
+**Última Atualização:** 25/08/2026
 
 # 1. Visão Geral
 
@@ -31,7 +31,7 @@ Jogadores em busca de algo que compense habilidade dentre 16 a 35 anos.
 
 - PC
 
-# Acesso ao Projeto
+# 2. Acesso ao Projeto
 
 | Item | Link |
 |-----|-----|
@@ -63,11 +63,22 @@ Ambos Pokemon e Palworld compartilham do mesmo gênero base de jogo de captura d
 | Usar rúnicos para exploração (montarias ou habilidades) incentiva mais exploração do mapa | Telemetria ou observação do tempo gasto explorando |
 | Participação ativa do personagem jogável junto de um rúnico aliado é mais satisfatório comparado a combate com apenas um ou outro | Observação de reação e feedback após capturas ou combates difíceis |
 
+## Pilares do jogo
+- **Habilidade acima de sorte**: a captura e o combate recompensam precisão e timing do jogador, não apenas estatísticas ou chance pura.
+- **Combate compartilhado**: o jogador participa ativamente do combate ao lado do rúnico aliado, em vez de apenas observar ou comandar de longe.
+- **Exploração motivada por rúnicos**: encontrar e capturar novos rúnicos é o principal motor que leva o jogador a explorar o mapa.
+- **Progressão através de vínculo**: capturar não é o fim — treinar e desenvolver os rúnicos capturados é parte central da progressão do jogador.
+
 # 5. Gameplay
 
 ## Core Loop
 
 Explorar -> Enfrentar ou capturar rúnicos selvagens -> Treinar rúnicos -> Desenvolver novas melhorias -> Continuar Explorando
+
+## Loops Secundários
+- **Loop de captura**: apontar/travar em rúnico selvagem → conjurar feitiço de captura → minigame de preparo → minigame de captura → sucesso (rúnico vai para party ou boxStorage) ou falha (rúnico permanece selvagem).
+- **Loop de combate**: identificar ameaça → comandar rúnico aliado (atacar/desviar/defender) ou agir diretamente → gerenciar HP do jogador e do rúnico → resolver combate.
+- **Loop de gerenciamento de coleção**: revisar rúnicos capturados (party + boxStorage) → organizar/trocar rúnico ativo → acompanhar progressão individual.
 
 ## Mecânicas Principais
 
@@ -76,6 +87,9 @@ Explorar -> Enfrentar ou capturar rúnicos selvagens -> Treinar rúnicos -> Dese
 | Movimentação | Andar, correr, pular, montarias |
 | Combate | Convocar e comandar rúnico, desviar |
 | Interação | Feitiços |
+
+## Camera
+Câmera em terceira pessoa sobre o ombro (shoulder camera), com pivot que segue a posição do jogador sem herdar sua rotação. O jogador pode alternar o lado do ombro (tecla Q) e ajustar o campo de visão via zoom (botão direito do mouse ou durante a mira de feitiços), que aproxima suavemente a câmera. A câmera possui detecção de colisão via sphere cast contra o cenário, ajustando a distância automaticamente para evitar clipping.
 
 ## Regras do Jogo
 
@@ -99,7 +113,7 @@ Capturar novos rúnicos, treinar rúnicos capturados, desbloquear novas melhoria
 - Ao menos 12 tipos de rúnicos diferentes
 - 3 rúnicos únicos de alta raridade
 - Sistema de Captura de rúnicos
-- Armazenamento de rúnicos
+- Armazenamento de rúnicos em save local por json
 
 ## Não Inclui
 
@@ -208,6 +222,27 @@ comportamentos de ataque específicos dentro do estado Ataque, permitindo escala
 12 tipos de rúnicos sem reescrever a lógica de decisão para cada um. Caso o escopo 
 de comportamentos cresça, a FSM pode ser evoluída para Behavior Trees.
 
+Com a evolução do protótipo, os scripts que antes representavam separadamente o 
+comportamento de inimigo (EnemyScript) e o de entidade seguidora (TargetFollowerBehavior) 
+foram unificados em um único componente, Runic, controlado por uma enum de estado 
+(RunicState: Wild, Tamed, Fainted). Essa unificação reflete a natureza do próprio 
+sistema: um rúnico selvagem e um rúnico aliado são a mesma entidade em estágios 
+diferentes de uma mesma relação com o jogador, então não fazia sentido mantê-los 
+como classes separadas que duplicavam lógica de captura, corrente e dano. A 
+ramificação de comportamento (perseguir vs. seguir, capturável vs. não) agora 
+acontece dentro do próprio Update() do Runic, checando o estado atual — o que exige 
+atenção redobrada ao valor padrão da enum (ver Seção 17) para evitar comportamento 
+silenciosamente incorreto.
+
+Iniciou-se também a primeira camada de persistência do projeto, via SaveManager 
+(singleton com DontDestroyOnLoad) serializando dados de rúnicos capturados 
+(RunicSaveData, agrupados em party e boxStorage dentro de SaveDataContainer) para 
+JSON local em Application.persistentDataPath. O fluxo de Runic.Capture() converte 
+a instância ativa em cena para essa estrutura de dados, carrega o save existente, 
+adiciona à party (limite de 6) ou à boxStorage, e regrava o arquivo — fechando o 
+ciclo entre a spell de captura (CaptureSpellScript) e o armazenamento persistente 
+de rúnicos.
+
 ---
 
 ## Tecnologias Utilizadas
@@ -280,6 +315,9 @@ Registro de mudanças relevantes durante o projeto.
 | junho | trocar mapas dos minigames de arquivos json para ScriptableObject do Unity | facilita e deixa mais flexível a adição e edição de mapas |
 | junho | por padrão, o player se torna seguro a ataques de rúnicos durante a conjuração do feitiço de captura, com o combate sendo pausando durante a conjuração, mas haverá a opção de que o combate não seja pausado ou seja pausado durante a conjuração de qualquer feitiço | mantém um nível de dificuldade e necessidade de uso estratégico do feitiço de captura durante combate com múltiplos inimigos, mas ainda mantém a opção de uma experiência mais casual e acessível |
 | junho | definida FSM como padrão para comportamento de rúnicos | permite escalar os 12+ tipos de rúnicos com parâmetros variáveis sem duplicar lógica de decisão |
+| agosto | unificar scripts de comportamento de criaturas em um só script com diferentes estados de comportamento | Elimina duplicação de lógica entre comportamento selvagem/aliado; um rúnico muda de papel sem trocar de componente |
+| agosto | implementado sistema de save via SaveManager singleton + JSON local, com party e boxStorage | Primeira peça funcional de persistência; necessário pra fechar o loop de captura |
+| agosto |	enum RunicState com default Wild faz TameAI() nunca executar se o valor não for setado manualmente no Inspector | Comportamento silencioso — sem erro, sem log; corrigido adicionando log defensivo no Start() quando NavMeshAgent está ausente |
 
 ---
 

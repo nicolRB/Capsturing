@@ -5,9 +5,9 @@ using UnityEngine;
 // que nunca é destruído — só o campo currentTarget muda.
 public class EnemyTargetHolder : MonoBehaviour
 {
-    public EnemyScript currentTarget;
+    public Runic currentTarget;
 
-    public void SetTarget(EnemyScript newTarget)
+    public void SetTarget(Runic newTarget)
     {
         currentTarget = newTarget;
     }

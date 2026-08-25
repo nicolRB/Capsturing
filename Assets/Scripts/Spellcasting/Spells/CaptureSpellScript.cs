@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CaptureSpellScript : SpellBase
 {
-    public EnemyScript target;
+    public Runic target;
 
     [Header("Prep Score to Global Multiplier")]
     [Tooltip("O prepScore (0-1) da canalização de preparo é usado para interpolar entre esses dois valores, formando parte do multiplicador global aplicado na canalização de captura.")]
@@ -10,8 +10,8 @@ public class CaptureSpellScript : SpellBase
     public float prepMaxFactor = 1f;
 
     [Header("HP Factor")]
-    public float maxHealthFactor = 4f;
-    public float currentHealthFactor = 3f;
+    public float maxHPFactor = 4f;
+    public float currentHPFactor = 3f;
 
     private float prepScore;
     private float combinedGlobalMultiplier = 1f;
@@ -68,7 +68,7 @@ public class CaptureSpellScript : SpellBase
     {
         GameObject targetObj = pointTarget.creatureTarget;
 
-        target = targetObj != null ? targetObj.GetComponentInParent<EnemyScript>() : null;
+        target = targetObj != null ? targetObj.GetComponentInParent<Runic>() : null;
 
         if (target == null || !target.capturable)
         {
@@ -95,15 +95,15 @@ public class CaptureSpellScript : SpellBase
     private void BeginCaptureChannel()
     {
         // Calcula o fator de HP baseado na vida atual e máxima do inimigo.
-        float hpFactor = target.maxHealth > 0f
+        float hpFactor = target.maxHP > 0f
             ? Mathf.Clamp01(
                 (
-                    maxHealthFactor * target.maxHealth
+                    maxHPFactor * target.maxHP
                     -
-                    currentHealthFactor * target.currentHealth
+                    currentHPFactor * target.currentHP
                 )
                 /
-                (maxHealthFactor * target.maxHealth)
+                (maxHPFactor * target.maxHP)
             )
             : 0f;
 
