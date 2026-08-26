@@ -51,6 +51,13 @@ public class CaptureSpellScript : SpellBase
                 $"Misses={result.misses} " +
                 $"| prepScore={prepScore:F2}"
             );
+
+            if (result.perfects == 0 && result.goods == 0)
+            {
+                Debug.LogWarning("Capture spell cancelled: preparation score was too low.");
+                spellcastingScript.CancelCast();
+                return;
+            }
         }
         else
         {

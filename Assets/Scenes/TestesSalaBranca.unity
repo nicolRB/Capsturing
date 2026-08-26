@@ -799,7 +799,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82d0c6373881af4ea0a51516c74d6fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Runic
-  tameState: 0
+  tameState: 1
   species: {fileID: 11400000, guid: c014a50325299d54ebd86558c955ba3f, type: 2}
   nickname: Coal
   level: 1
@@ -842,6 +842,7 @@ MonoBehaviour:
   player: {fileID: 196287502}
   pointer: {fileID: 196287503}
   playerInteraction: {fileID: 196287508}
+  runicDatabase: {fileID: 0}
   followerOffset: 2
   followSide: 1
   following: 1
@@ -1474,6 +1475,11 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &640391236 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3960866908044416004, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+  m_PrefabInstance: {fileID: 482756594748823766}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &689705519
 GameObject:
   m_ObjectHideFlags: 0
@@ -4708,17 +4714,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 615536702}
   m_LocalEulerAnglesHint: {x: 0, y: 89.931, z: 0}
---- !u!114 &2065972983 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1944193668297534807, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
-  m_PrefabInstance: {fileID: 482756594748823766}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 481128473}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1018f54a72ae8644be88268b67019b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PauseManager
 --- !u!224 &2065972984 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7129750026493780862, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
@@ -4762,6 +4757,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 481128473}
   m_CullTransparentMesh: 1
+--- !u!114 &2065972995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481128473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39b9d8aec1aa20b46b29204959a393f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PauseManager
+  pauseMenu: {fileID: 640391236}
+  player: {fileID: 196287502}
+  isPaused: 0
 --- !u!1001 &280447943333769594
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4897,7 +4907,7 @@ PrefabInstance:
     - target: {fileID: 1310735995781298480, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: pauseManager
       value: 
-      objectReference: {fileID: 2065972983}
+      objectReference: {fileID: 0}
     - target: {fileID: 1310735995781298480, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: cameraController
       value: 
@@ -4918,6 +4928,10 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 196287502}
+    - target: {fileID: 1944193668297534807, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: m_EditorClassIdentifier
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 2064574413933841517, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -5058,6 +5072,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 5116721083266880232, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: pauseManager
+      value: 
+      objectReference: {fileID: 2065972995}
     - target: {fileID: 5151477244623142956, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -5086,6 +5104,14 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 6507949813743944286, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2065972995}
+    - target: {fileID: 6507949813743944286, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Resume
+      objectReference: {fileID: 0}
     - target: {fileID: 6548972709803659988, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_Constraints
       value: 112
@@ -5113,6 +5139,14 @@ PrefabInstance:
     - target: {fileID: 8018430178619792601, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: targetLifetimeVariance
       value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 8026410811700173382, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2065972995}
+    - target: {fileID: 8026410811700173382, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: QuitGame
       objectReference: {fileID: 0}
     - target: {fileID: 8084226847695949998, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_Layer
@@ -5145,6 +5179,7 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 3195999082684896831, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
     - {fileID: 8018430178619792601, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+    - {fileID: 1944193668297534807, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 7129750026493780862, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
@@ -5172,6 +5207,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 563153331625259284, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2065972989}
+    - targetCorrespondingSourceObject: {fileID: 563153331625259284, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2065972995}
     - targetCorrespondingSourceObject: {fileID: 5299798053642138187, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       insertIndex: -1
       addedObject: {fileID: 983967854}

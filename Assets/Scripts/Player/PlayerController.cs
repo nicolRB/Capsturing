@@ -42,8 +42,15 @@ public class PlayerController : MonoBehaviour
 
     [Header("State Flags")]
     public bool moving = false;
-    public enum CastState { Idle, Channeling, Aiming, Casting } // Idle - não está fazendo nada, Channeling - carregando feitiço (minigame), Aiming - mirando feitiço (feitiço carregado e pronto para lançar), Casting - lançando feitiço
+
+    // Idle - não está fazendo nada, Channeling - carregando feitiço (minigame), 
+    // Aiming - mirando feitiço (feitiço carregado e pronto para lançar), 
+    // Casting - lançando feitiço
+    public enum CastState { Idle, Channeling, Aiming, Casting } 
     public CastState castState = CastState.Idle;
+
+    [Header("Runics")]
+    public int maxPartySize = 3;
 
     [Header("References")]
     public CameraController cameraController;

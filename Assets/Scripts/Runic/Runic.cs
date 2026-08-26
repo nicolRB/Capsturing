@@ -74,6 +74,7 @@ public class Runic : MonoBehaviour
     private NavMeshAgent agent;
     private GameObject point;
     public PlayerInteractionScript playerInteraction;
+    public RunicDatabase runicDatabase;
 
     [Header("Follow Behavior")]
     public float followerOffset = 2f;
@@ -100,6 +101,8 @@ public class Runic : MonoBehaviour
 
         if (pointer == null) pointer = FindFirstObjectByType<PointTargetScript>();
 
+        if (runicDatabase == null) runicDatabase = FindFirstObjectByType<RunicDatabase>();
+
         agent = GetComponent<NavMeshAgent>();
 
         if (tameState == RunicState.Tamed || tameState == RunicState.Fainted) capturable = false;
@@ -114,10 +117,16 @@ public class Runic : MonoBehaviour
     }
 
     // Initializes creature state from a save file entry
-    public void InitializeFromData(RunicSaveData data, RunicSpecies speciesSO)
+    public void InitializeFromData(RunicSaveData data)
     {
-        species = speciesSO;
-        nickname = string.IsNullOrEmpty(data.nickname) ? speciesSO.speciesName : data.nickname;
+        species = runicDatabase != null ? runicDatabase.GetSpeciesById(data.speciesId) : null;
+        if (species == null)
+        {
+            Debug.LogError($"Could not load Runic species with ID '{data.speciesId}'.", this);
+            return;
+        }
+
+        nickname = string.IsNullOrEmpty(data.nickname) ? species.speciesName : data.nickname;
         level = data.level;
         experience = data.experience;
         currentHP = data.currentHP;
@@ -127,6 +136,8 @@ public class Runic : MonoBehaviour
         speed = data.speed;
         magic = data.magic;
         magicDefense = data.magicDefense;
+        basicSkills = runicDatabase.GetSkillsByIds(data.learnedBasicSkillIds);
+        skills = runicDatabase.GetSkillsByIds(data.learnedSkillIds);
         
         tameState = RunicState.Tamed;
     }
@@ -194,7 +205,7 @@ public class Runic : MonoBehaviour
             SaveDataContainer currentSave = saveManager.LoadGame();
             
             // Add to party if room, otherwise send to box storage
-            if (currentSave.party.Count < 6)
+            if (currentSave.party.Count < player.maxPartySize)
             {
                 currentSave.party.Add(capturedData);
             }

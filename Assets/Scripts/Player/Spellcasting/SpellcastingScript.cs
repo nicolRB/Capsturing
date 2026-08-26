@@ -88,6 +88,11 @@ public class SpellcastingScript : MonoBehaviour
             {
                 if (spellCooldowns[spellIndex] <= 0)
                 {
+                    if (CurrentSpell.spellMap == null) {
+                        CastSpell();
+                        Debug.Log("No map for this spell");
+                        return;
+                    }
                     BeginChannel();
                     player.playerHUD.SetActive(false);
                 }            
@@ -97,11 +102,7 @@ public class SpellcastingScript : MonoBehaviour
                 }
             }
             else if (player.castState == PlayerController.CastState.Channeling
-                   || player.castState == PlayerController.CastState.Aiming)
-            {
-                CancelCast();
-                spellCooldowns[spellIndex] = CurrentSpell.cooldownTime;
-            }
+                   || player.castState == PlayerController.CastState.Aiming) CancelCast();
         }
 
         if (player.castState == PlayerController.CastState.Aiming 
@@ -206,10 +207,11 @@ public class SpellcastingScript : MonoBehaviour
         if (castingUI != null) castingUI.SetActive(false);
     }
 
-    void CancelCast()
+    public void CancelCast()
     {
         channelingGame.OnChannelingResolved -= HandleChannelResolved;
         CurrentSpell?.Cancel();
+        spellCooldowns[spellIndex] = CurrentSpell.cooldownTime;
         if (castingUI != null) castingUI.SetActive(false);
         player.castState = PlayerController.CastState.Idle;
         player.playerHUD.SetActive(true);

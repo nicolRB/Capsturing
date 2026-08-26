@@ -4,9 +4,8 @@ using UnityEngine.InputSystem;
 public class CameraController : MonoBehaviour
 {
     public bool lockCursor;
-    public PauseManager pauseManager;
 
-    private PlayerController playerController;
+    private PlayerController player;
     private Transform pivot;
 
     private float xRotation = 0f;
@@ -16,26 +15,26 @@ public class CameraController : MonoBehaviour
 
     void Start()
     {
-        playerController = GetComponentInParent<PlayerController>();
+        player = GetComponentInParent<PlayerController>();
 
         // guarda referência ao pivot e desparenteia
         pivot = transform.parent;
-        if (pivot.parent == playerController.transform)
+        if (pivot.parent == player.transform)
         {
-            pivot.SetParent(playerController.transform.parent);
+            pivot.SetParent(player.transform.parent);
         }
     }
 
     void Update()
     {
-        if (playerController.castState != PlayerController.CastState.Channeling && !pauseManager.isPaused)
+        if (player.castState != PlayerController.CastState.Channeling && !player.pauseManager.isPaused)
         {
             float mouseY = Mouse.current.delta.y.ReadValue()
-                           * playerController.mouseSensitivity
+                           * player.mouseSensitivity
                            * Time.deltaTime;
 
             float mouseX = Mouse.current.delta.x.ReadValue()
-                           * playerController.mouseSensitivity
+                           * player.mouseSensitivity
                            * Time.deltaTime;
 
             xRotation -= mouseY;
@@ -47,10 +46,10 @@ public class CameraController : MonoBehaviour
         }
 
         // pivot segue a posição do player sem herdar rotação
-        pivot.position = playerController.transform.position;
+        pivot.position = player.transform.position;
 
         // cursor
-        if (playerController.castState == PlayerController.CastState.Channeling || pauseManager.isPaused)
+        if (player.castState == PlayerController.CastState.Channeling || player.pauseManager.isPaused)
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -62,7 +61,7 @@ public class CameraController : MonoBehaviour
         }
 
         // Zoom (botão direito do mouse)
-        if (Mouse.current.rightButton.isPressed || playerController.castState == PlayerController.CastState.Aiming)
+        if (Mouse.current.rightButton.isPressed || player.castState == PlayerController.CastState.Aiming)
         {
             FOV = Mathf.Lerp(FOV, FOVSetting/2.5f, Time.deltaTime * 5f);
         }
