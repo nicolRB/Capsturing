@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -6,7 +7,10 @@ public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance { get; private set; }
 
-    private string saveFilePath;
+    private const string LegacySaveFileName = "creature_save.json";
+    private const string SaveFilePrefix = "save_";
+    private string saveDirectory;
+    private string activeSaveFileName = "save_1";
 
     private void Awake()
     {
@@ -20,16 +24,18 @@ public class SaveManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         // Persistent data path initialization
-        saveFilePath = Path.Combine(Application.persistentDataPath, "creature_save.json");
+        saveDirectory = Application.persistentDataPath;
     }
 
-    public void SaveGame(SaveDataContainer dataToSave)
+    public void SaveGame(string fileName, SaveDataContainer dataToSave)
     {
         try
         {
+            fileName = NormalizeFileName(fileName);
             string json = JsonUtility.ToJson(dataToSave, true);
-            File.WriteAllText(saveFilePath, json);
-            Debug.Log($"Game Saved to: {saveFilePath}");
+            File.WriteAllText(GetSaveFilePath(fileName), json);
+            activeSaveFileName = fileName;
+            Debug.Log($"Game Saved to: {GetSaveFilePath(fileName)}");
         }
         catch (Exception e)
         {
@@ -37,8 +43,10 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    public SaveDataContainer LoadGame()
+    public SaveDataContainer LoadGame(string fileName)
     {
+        fileName = NormalizeFileName(fileName);
+        string saveFilePath = GetSaveFilePath(fileName);
         if (!File.Exists(saveFilePath))
         {
             Debug.LogWarning("No save file found. Creating fresh save data.");
@@ -49,6 +57,7 @@ public class SaveManager : MonoBehaviour
         {
             string json = File.ReadAllText(saveFilePath);
             SaveDataContainer loadedData = JsonUtility.FromJson<SaveDataContainer>(json);
+            activeSaveFileName = fileName;
             Debug.Log("Game Loaded Successfully!");
             return loadedData ?? new SaveDataContainer();
         }
@@ -59,17 +68,127 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    public void SaveGame(SaveDataContainer dataToSave)
+    {
+        SaveGame(activeSaveFileName, dataToSave);
+    }
+
+    public SaveDataContainer LoadGame()
+    {
+        return LoadGame(activeSaveFileName);
+    }
+
+    public bool SaveFileExists(string fileName)
+    {
+        return File.Exists(GetSaveFilePath(NormalizeFileName(fileName)));
+    }
+
     public bool SaveFileExists()
     {
-        return File.Exists(saveFilePath);
+        return SaveFileExists(activeSaveFileName);
+    }
+
+    public string[] GetSaveFiles()
+    {
+        List<string> saveFiles = new List<string>();
+        string[] paths = Directory.GetFiles(saveDirectory, "*.json");
+
+        foreach (string path in paths)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(path);
+            if (fileName == LegacySaveFileName.Replace(".json", "") || fileName.StartsWith(SaveFilePrefix))
+            {
+                saveFiles.Add(fileName);
+            }
+        }
+
+        saveFiles.Sort();
+        return saveFiles.ToArray();
+    }
+
+    public string CreateNextSaveFileName()
+    {
+        int slotNumber = 1;
+        while (SaveFileExists($"{SaveFilePrefix}SaveFile_{slotNumber}")) slotNumber++;
+        return $"{SaveFilePrefix}SaveFile_{slotNumber}";
+    }
+
+    public void DeleteSaveFile(string fileName)
+    {
+        string saveFilePath = GetSaveFilePath(NormalizeFileName(fileName));
+        if (File.Exists(saveFilePath))
+        {
+            File.Delete(saveFilePath);
+            if (activeSaveFileName == NormalizeFileName(fileName)) activeSaveFileName = "save_1";
+            Debug.Log("Save file deleted.");
+        }
     }
 
     public void DeleteSaveFile()
     {
-        if (File.Exists(saveFilePath))
+        DeleteSaveFile(activeSaveFileName);
+    }
+
+    private string GetSaveFilePath(string fileName)
+    {
+        return Path.Combine(saveDirectory, $"{fileName}.json");
+    }
+
+    private string NormalizeFileName(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName)) return activeSaveFileName;
+
+        string normalizedName = Path.GetFileNameWithoutExtension(fileName);
+        foreach (char invalidCharacter in Path.GetInvalidFileNameChars())
         {
-            File.Delete(saveFilePath);
-            Debug.Log("Save file deleted.");
+            normalizedName = normalizedName.Replace(invalidCharacter.ToString(), string.Empty);
+        }
+
+        return string.IsNullOrWhiteSpace(normalizedName) ? activeSaveFileName : normalizedName;
+    }
+
+    public void RenameSaveFile(string oldFileName, string newFileName)
+    {
+        oldFileName = NormalizeFileName(oldFileName);
+        newFileName = NormalizeFileName(newFileName);
+
+        if (!newFileName.StartsWith(SaveFilePrefix) && oldFileName.StartsWith(SaveFilePrefix))
+        {
+            // Se o original tinha o prefixo, garante que o novo também tenha para manter o padrão
+            // (Remova este bloco se preferir que nomes customizados não precisem começar com save_)
+            newFileName = SaveFilePrefix + newFileName;
+        }
+
+        string oldPath = GetSaveFilePath(oldFileName);
+        
+        // Evita sobrescrita: se o arquivo com o novo nome já existir, adiciona um sufixo numérico
+        if (File.Exists(GetSaveFilePath(newFileName)))
+        {
+            string baseName = newFileName;
+            int suffix = 1;
+            while (File.Exists(GetSaveFilePath($"{baseName}_{suffix}")))
+            {
+                suffix++;
+            }
+            newFileName = $"{baseName}_{suffix}";
+        }
+
+        string newPath = GetSaveFilePath(newFileName);
+
+        if (File.Exists(oldPath))
+        {
+            File.Move(oldPath, newPath);
+            
+            if (activeSaveFileName == oldFileName)
+            {
+                activeSaveFileName = newFileName;
+            }
+            
+            Debug.Log($"Save file renamed from {oldFileName} to {newFileName}");
+        }
+        else
+        {
+            Debug.LogWarning($"Could not rename. Old save file not found: {oldPath}");
         }
     }
 }

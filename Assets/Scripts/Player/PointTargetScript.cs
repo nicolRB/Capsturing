@@ -106,13 +106,13 @@ public class PointTargetScript : MonoBehaviour
 
     void Point()
     {
-        ray = new Ray(player.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x, 
-        player.transform.eulerAngles.y, 0) * Vector3.forward);
+        ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x, 
+        playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
 
         bool creaturePointed = PointCreature();
         
         bool inputActive = Mouse.current.leftButton.isPressed 
-                            && player.pauseManager.isPaused == false 
+                            && player.menuManager.currentMenu == null 
                             && stateOnMousePressed == PlayerController.CastState.Idle;
 
         bool aimingSpell = player.castState == PlayerController.CastState.Aiming 
@@ -143,7 +143,7 @@ public class PointTargetScript : MonoBehaviour
         }
 
         if (terrainHit && Mouse.current.leftButton.wasReleasedThisFrame 
-            && player.pauseManager.isPaused == false 
+            && player.menuManager.currentMenu == null
             && stateOnMousePressed == PlayerController.CastState.Idle)
         {
             followPoint = true;

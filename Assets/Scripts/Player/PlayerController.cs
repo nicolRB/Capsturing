@@ -5,6 +5,10 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CapsuleCollider))]
 public class PlayerController : MonoBehaviour
 {
+    [Header("Stats")]
+    public int maxHP = 100;
+    public int currentHP = 100;
+
     [Header("Movement")]
     public float walkSpeed = 5f;
     public float runningSpeed = 10f;
@@ -53,9 +57,11 @@ public class PlayerController : MonoBehaviour
     public int maxPartySize = 3;
 
     [Header("References")]
+    public GameObject playerCharacter;
     public CameraController cameraController;
-    public PauseManager pauseManager;
+    public MenuManager menuManager;
     public GameObject playerHUD;
+    public GameObject aimIndicator;
 
     private void Awake()
     {
@@ -76,7 +82,7 @@ public class PlayerController : MonoBehaviour
         currentSpeed = walkSpeed;
         if (cameraController == null) cameraController = FindFirstObjectByType<CameraController>();
 
-        if (pauseManager == null) pauseManager = FindFirstObjectByType<PauseManager>();
+        if (menuManager == null) menuManager = FindFirstObjectByType<MenuManager>();
 
         if (playerHUD == null) playerHUD = GameObject.Find("PlayerHUD");
     }
@@ -89,6 +95,13 @@ public class PlayerController : MonoBehaviour
         HandleRotation();
         UpdateCooldowns();
         UpdateAnimator();
+        if (currentHP <= 0) Die();
+        if (castState == CastState.Aiming) 
+        {
+            aimIndicator.SetActive(true);
+            AimIndicatorAnimation();
+        }
+        else if (aimIndicator.activeSelf) aimIndicator.SetActive(false);
     }
 
     private void FixedUpdate()
@@ -209,7 +222,7 @@ public class PlayerController : MonoBehaviour
     // ---------------- ROTATION ----------------
     private void HandleRotation()
     {
-        if (castState == CastState.Channeling || isDashing) return;
+        if (castState == CastState.Channeling || isDashing || menuManager.currentMenu != null) return;
 
         if (moving || Mouse.current.rightButton.isPressed || Mouse.current.leftButton.isPressed 
         || Keyboard.current.leftShiftKey.isPressed || castState == CastState.Aiming)
@@ -272,5 +285,49 @@ public class PlayerController : MonoBehaviour
 
         // -------- ANIMATION PLAYBACK SPEED --------
         animator.speed = Mathf.Lerp(0.8f, 1.5f, normalizedSpeed*2f); // slightly faster than actual speed for better feel
+    }
+
+    private void AimIndicatorAnimation()
+    {
+        if (aimIndicator == null) return;
+
+        float pulse = Mathf.Sin(Time.time * 5f) * 0.5f + 0.5f; // oscillates between 0 and 1
+        float scale = Mathf.Lerp(0.9f, 1.1f, pulse);
+        aimIndicator.transform.localScale = new Vector3(scale, scale, scale);
+    }
+
+    public void LoadPlayerData(SaveDataContainer data)
+    {
+        currentHP = data.playerHP;
+        Vector3 loadedPosition = new Vector3(data.playerPosition[0], data.playerPosition[1], data.playerPosition[2]);
+        float loadedRotation = data.playerRotation;
+
+        playerCharacter.transform.position = loadedPosition;
+        playerCharacter.transform.rotation = Quaternion.Euler(0f, loadedRotation, 0f); // Reset rotation
+    }
+
+    public void PopulateSaveData(SaveDataContainer data)
+    {
+        data.playerHP = currentHP;
+        data.playerPosition[0] = transform.position.x;
+        data.playerPosition[1] = transform.position.y;
+        data.playerPosition[2] = transform.position.z;
+        data.playerRotation = transform.rotation.eulerAngles.y;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (castState == CastState.Channeling) return;
+
+        currentHP -= damage;
+        if (currentHP <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Die()
+    {
+        // gameover logic
     }
 }

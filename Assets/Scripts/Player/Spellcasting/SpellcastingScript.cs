@@ -61,7 +61,7 @@ public class SpellcastingScript : MonoBehaviour
 
     void HandleSpellSelection()
     { 
-        if (player.castState != PlayerController.CastState.Idle) return;
+        if (player.castState != PlayerController.CastState.Idle || player.menuManager.isPaused) return;
 
         // método de seleção de feitiço por scroll do mouse
         float scrollValue = Mouse.current.scroll.ReadValue().y;
@@ -82,7 +82,7 @@ public class SpellcastingScript : MonoBehaviour
 
     void HandleCastInput()
     {
-        if (Keyboard.current.eKey.wasPressedThisFrame && player.pauseManager.isPaused == false)
+        if (Keyboard.current.eKey.wasPressedThisFrame && player.menuManager.isPaused == false)
         {
             if (player.castState == PlayerController.CastState.Idle)
             {

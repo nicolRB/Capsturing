@@ -318,6 +318,7 @@ Registro de mudanças relevantes durante o projeto.
 | agosto | unificar scripts de comportamento de criaturas em um só script com diferentes estados de comportamento | Elimina duplicação de lógica entre comportamento selvagem/aliado; um rúnico muda de papel sem trocar de componente |
 | agosto | implementado sistema de save via SaveManager singleton + JSON local, com party e boxStorage | Primeira peça funcional de persistência; necessário pra fechar o loop de captura |
 | agosto |	enum RunicState com default Wild faz TameAI() nunca executar se o valor não for setado manualmente no Inspector | Comportamento silencioso — sem erro, sem log; corrigido adicionando log defensivo no Start() quando NavMeshAgent está ausente |
+| setembro | criado RunicStorageManager como fonte única de verdade para o time/box em runtime, desacoplado do SaveManager | Capture() estava gravando no disco imediatamente a cada captura, ignorando o fluxo de slots de save; agora captura só atualiza memória, e persistência ocorre apenas quando o jogador salva explicitamente |
 
 ---
 

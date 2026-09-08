@@ -8,6 +8,7 @@ public class RunicSpecies : ScriptableObject
     public string speciesId;
     public string description;
     public Sprite speciesIcon;
+    public List<GameObject> speciesModels; // Lista de modelos que podem ser usados para instanciar o Runic
     public float baseHP;
     public float baseAttack;
     public float baseDefense;

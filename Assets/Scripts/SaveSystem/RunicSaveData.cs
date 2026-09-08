@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public class RunicSaveData
@@ -7,6 +8,8 @@ public class RunicSaveData
     public string runicInstanceId; // Unique identifier for this specific creature instance
     public string speciesId;       // References RunicSpecies.speciesId
     public string nickname;
+    public Sprite runicIcon; // The icon representing this creature
+    public GameObject runicModel; // The model of the creature
     public int level;
     public float experience;
     public float currentHP;
@@ -19,11 +22,4 @@ public class RunicSaveData
     public List<string> elementIds;
     public List<string> learnedBasicSkillIds = new List<string>();
     public List<string> learnedSkillIds = new List<string>();
-}
-
-[Serializable]
-public class SaveDataContainer
-{
-    public List<RunicSaveData> party = new List<RunicSaveData>();
-    public List<RunicSaveData> boxStorage = new List<RunicSaveData>();
 }

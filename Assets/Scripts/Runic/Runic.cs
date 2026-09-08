@@ -15,6 +15,10 @@ public class Runic : MonoBehaviour
     [Header("Species Template")]
     public RunicSpecies species; // Loaded from ScriptableObject asset
 
+    [Header("Visuals")]
+    public Sprite runicIcon; // The icon representing this creature, loaded from species or set in the inspector
+    public GameObject runicModel; // The model of the creature, loaded from species or set in the inspector
+
     [Header("Runtime Stats")]
     public string nickname;
     public int level = 1;
@@ -72,7 +76,6 @@ public class Runic : MonoBehaviour
     public PlayerController player;
     public PointTargetScript pointer;
     private NavMeshAgent agent;
-    private GameObject point;
     public PlayerInteractionScript playerInteraction;
     public RunicDatabase runicDatabase;
 
@@ -127,6 +130,7 @@ public class Runic : MonoBehaviour
         }
 
         nickname = string.IsNullOrEmpty(data.nickname) ? species.speciesName : data.nickname;
+        runicModel = data.runicModel;
         level = data.level;
         experience = data.experience;
         currentHP = data.currentHP;
@@ -176,6 +180,8 @@ public class Runic : MonoBehaviour
             runicInstanceId = System.Guid.NewGuid().ToString(),
             speciesId = species != null ? species.speciesId : "",
             nickname = string.IsNullOrEmpty(nickname) && species != null ? species.speciesName : nickname,
+            runicIcon = runicIcon,
+            runicModel = runicModel,
             level = level,
             experience = experience,
             currentHP = currentHP,
@@ -195,33 +201,17 @@ public class Runic : MonoBehaviour
     {
         if (tameState != RunicState.Wild) return;
 
-        // 1. Convert active creature to saveable C# data structure
         RunicSaveData capturedData = ExportToSaveData();
 
-        // 2. Load existing save, append new creature to party/storage, and save back to disk
-        SaveManager saveManager = FindFirstObjectByType<SaveManager>();
-        if (saveManager != null)
-        {
-            SaveDataContainer currentSave = saveManager.LoadGame();
-            
-            // Add to party if room, otherwise send to box storage
-            if (currentSave.party.Count < player.maxPartySize)
-            {
-                currentSave.party.Add(capturedData);
-            }
-            else
-            {
-                currentSave.boxStorage.Add(capturedData);
-            }
+        if (RunicStorageManager.Instance != null)
+            RunicStorageManager.Instance.AddCapturedRunic(capturedData);
+        else
+            Debug.LogError("Runic.Capture: RunicStorageManager não encontrado na cena.", this);
 
-            saveManager.SaveGame(currentSave);
-        }
-
-        // 3. Remove wild unit from the active scene
         Destroy(gameObject);
     }
 
-        public void Chain()
+    public void Chain()
     {
         frozen = true;
         int instances = Random.Range(minChainNumber, maxChainNumber+1);

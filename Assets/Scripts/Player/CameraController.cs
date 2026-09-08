@@ -27,7 +27,22 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        if (player.castState != PlayerController.CastState.Channeling && !player.pauseManager.isPaused)
+        // Cursor
+        bool menuOpen = player.menuManager.currentMenu != null;
+
+        if (menuOpen || player.castState == PlayerController.CastState.Channeling)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else if (!menuOpen && player.castState != PlayerController.CastState.Channeling)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        // Rotação da câmera
+        if (player.castState != PlayerController.CastState.Channeling && !player.menuManager.isPaused && !menuOpen)
         {
             float mouseY = Mouse.current.delta.y.ReadValue()
                            * player.mouseSensitivity
@@ -48,20 +63,9 @@ public class CameraController : MonoBehaviour
         // pivot segue a posição do player sem herdar rotação
         pivot.position = player.transform.position;
 
-        // cursor
-        if (player.castState == PlayerController.CastState.Channeling || player.pauseManager.isPaused)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-
         // Zoom (botão direito do mouse)
-        if (Mouse.current.rightButton.isPressed || player.castState == PlayerController.CastState.Aiming)
+        if ((Mouse.current.rightButton.isPressed || player.castState == PlayerController.CastState.Aiming)
+        && !menuOpen)
         {
             FOV = Mathf.Lerp(FOV, FOVSetting/2.5f, Time.deltaTime * 5f);
         }
