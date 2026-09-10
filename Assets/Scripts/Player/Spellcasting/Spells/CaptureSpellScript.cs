@@ -221,7 +221,7 @@ public class CaptureSpellScript : SpellBase
         Debug.Log(
             $"Capture {(success ? "SUCCESS" : "FAILED")} " +
             $"vs {target.name} | " +
-            $"chance={captureChance:F1}"
+            $"chance={captureChance:F2}"
         );
 
         target.Unchain();

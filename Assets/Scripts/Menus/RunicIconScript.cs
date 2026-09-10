@@ -170,7 +170,7 @@ public class RunicIconScript : MonoBehaviour, IPointerClickHandler, IPointerEnte
                 {
                     // Se já estiver na party, acha qual slot da party ele ocupa e remove
                     int partyIndex = runicsMenuScript.runicStorageManager.GetPartySlotIndex(
-                        runicsMenuScript.runicStorageManager.GetBoxRunic(slotNumber)?.runicInstanceId
+                        runicsMenuScript.runicStorageManager.GetBoxRunicBySlot(slotNumber)?.runicInstanceId
                     );
                     if (partyIndex != -1)
                     {

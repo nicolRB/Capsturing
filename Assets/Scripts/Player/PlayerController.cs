@@ -10,9 +10,12 @@ public class PlayerController : MonoBehaviour
     public int currentHP = 100;
 
     [Header("Movement")]
-    public float walkSpeed = 5f;
+    public float walkSpeed = 2f;
+    public float jogSpeed = 5f;
     public float runningSpeed = 10f;
     public float currentSpeed;
+    public Key runKey = Key.LeftShift;
+    public Key walkKey = Key.LeftAlt;
 
     [Header("Jump Settings")]
     public float jumpForce = 5f;
@@ -59,9 +62,11 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     public GameObject playerCharacter;
     public CameraController cameraController;
+    public CameraCollision cameraCollision;
     public MenuManager menuManager;
     public GameObject playerHUD;
     public GameObject aimIndicator;
+    public bool useAimIndicator = true;
 
     private void Awake()
     {
@@ -79,12 +84,14 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        currentSpeed = walkSpeed;
+        currentSpeed = jogSpeed;
         if (cameraController == null) cameraController = FindFirstObjectByType<CameraController>();
 
         if (menuManager == null) menuManager = FindFirstObjectByType<MenuManager>();
 
         if (playerHUD == null) playerHUD = GameObject.Find("PlayerHUD");
+
+        if (cameraCollision == null) cameraCollision = FindFirstObjectByType<CameraCollision>();
     }
 
     private void Update()
@@ -96,7 +103,7 @@ public class PlayerController : MonoBehaviour
         UpdateCooldowns();
         UpdateAnimator();
         if (currentHP <= 0) Die();
-        if (castState == CastState.Aiming) 
+        if (castState == CastState.Aiming && useAimIndicator) 
         {
             aimIndicator.SetActive(true);
             AimIndicatorAnimation();
@@ -114,10 +121,18 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = Vector2.zero;
 
-        if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed 
+        || Keyboard.current.upArrowKey.isPressed)) 
+            moveInput.y += 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed 
+        || Keyboard.current.downArrowKey.isPressed)) 
+            moveInput.y -= 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.aKey.isPressed 
+        || Keyboard.current.leftArrowKey.isPressed)) 
+            moveInput.x -= 1f;
+        if (castState != CastState.Channeling && (Keyboard.current.dKey.isPressed 
+        || Keyboard.current.rightArrowKey.isPressed)) 
+            moveInput.x += 1f;
 
         moveInput = moveInput.normalized;
         Vector3 movement = transform.forward * moveInput.y + transform.right * moveInput.x;
@@ -129,10 +144,16 @@ public class PlayerController : MonoBehaviour
 
         if (!isDashing)
         {
-            bool isTryingToRun = Keyboard.current.leftShiftKey.isPressed;
+            bool isTryingToRun = Keyboard.current[runKey].isPressed;
+            bool isTryingToWalk = Keyboard.current[walkKey].isPressed;
             bool isMovingForward = moveInput.y > 0f;
 
-            float targetSpeed = (isTryingToRun && isMovingForward) ? runningSpeed : walkSpeed;
+            float targetSpeed = jogSpeed;
+            if (isTryingToWalk)
+                targetSpeed = walkSpeed;
+            else if (isTryingToRun && isMovingForward)
+                targetSpeed = runningSpeed;
+
             currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 5f);
 
             // Use Rigidbody for movement to avoid overriding physics
@@ -143,6 +164,11 @@ public class PlayerController : MonoBehaviour
     // ---------------- DASH ----------------
     private void HandleDashInput()
     {
+        if (!IsGrounded()) 
+        {
+            isDashing = false;
+            return;
+        }
         Vector2 moveInput = Vector2.zero;
         if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
         if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
@@ -151,18 +177,18 @@ public class PlayerController : MonoBehaviour
 
         Vector3 movement = transform.forward * moveInput.y + transform.right * moveInput.x;
 
-        if (castState != CastState.Channeling && Keyboard.current.leftShiftKey.wasPressedThisFrame)
+        if (castState != CastState.Channeling && Keyboard.current[runKey].wasPressedThisFrame)
         {
             shiftPressedTime = 0f;
             isHoldingShift = true;
         }
 
-        if (castState != CastState.Channeling && isHoldingShift && Keyboard.current.leftShiftKey.isPressed)
+        if (castState != CastState.Channeling && isHoldingShift && Keyboard.current[runKey].isPressed)
         {
             shiftPressedTime += Time.deltaTime;
         }
 
-        if (castState != CastState.Channeling && isHoldingShift && Keyboard.current.leftShiftKey.wasReleasedThisFrame)
+        if (castState != CastState.Channeling && isHoldingShift && Keyboard.current[runKey].wasReleasedThisFrame)
         {
             if (shiftPressedTime <= tapThreshold && cooldownTimer <= 0f && !isDashing &&
                 (Keyboard.current.wKey.isPressed || Keyboard.current.sKey.isPressed || 
@@ -175,6 +201,11 @@ public class PlayerController : MonoBehaviour
                 isDashing = true;
                 dashTimer = dashDuration;
                 cooldownTimer = dashCooldown;
+
+                Vector3 velocity = rb.linearVelocity;
+                velocity.x = 0f;
+                velocity.z = 0f;
+                rb.linearVelocity = velocity;
             }
             isHoldingShift = false;
         }
@@ -186,7 +217,13 @@ public class PlayerController : MonoBehaviour
             dashTimer -= Time.deltaTime;
 
             if (dashTimer <= 0f)
+            {
                 isDashing = false;
+                Vector3 velocity = rb.linearVelocity;
+                velocity.x = 0f;
+                velocity.z = 0f;
+                rb.linearVelocity = velocity;
+            }
         }
     }
 
@@ -225,7 +262,7 @@ public class PlayerController : MonoBehaviour
         if (castState == CastState.Channeling || isDashing || menuManager.currentMenu != null) return;
 
         if (moving || Mouse.current.rightButton.isPressed || Mouse.current.leftButton.isPressed 
-        || Keyboard.current.leftShiftKey.isPressed || castState == CastState.Aiming)
+        || Keyboard.current[runKey].isPressed || castState == CastState.Aiming)
         {
             // player gira para o yaw da câmera
             Quaternion targetRotation = Quaternion.Euler(0f, cameraController.yRotation, 0f);

@@ -1,13 +1,26 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 public class RunicInjectorWindow : EditorWindow
 {
-    private string targetSaveFile = "save_1";
+    private string targetSaveFile = "save_test_save";
     private RunicSpecies selectedSpecies;
     private string customNickname = "";
     private int level = 1;
+    private int experience;
     private bool addToParty = false;
+    private bool useCustomValues;
+    private Sprite customIcon;
+    private GameObject customModel;
+    private float customMaxHP;
+    private float customCurrentHP;
+    private float customAttack;
+    private float customDefense;
+    private float customSpeed;
+    private float customMagic;
+    private float customMagicDefense;
+    private RunicSpecies lastSelectedSpecies;
 
     [MenuItem("Runicos/Injetor de Rúnicos")]
     public static void ShowWindow()
@@ -21,19 +34,74 @@ public class RunicInjectorWindow : EditorWindow
 
         targetSaveFile = EditorGUILayout.TextField("Nome do Save", targetSaveFile);
         selectedSpecies = EditorGUILayout.ObjectField("Espécie", selectedSpecies, typeof(RunicSpecies), false) as RunicSpecies;
-        customNickname = EditorGUILayout.TextField("Apelido (Opcional)", customNickname);
-        level = EditorGUILayout.IntField("Nível", level);
+        if (selectedSpecies != lastSelectedSpecies)
+        {
+            lastSelectedSpecies = selectedSpecies;
+            LoadSpeciesDefaults();
+        }
+        useCustomValues = EditorGUILayout.Toggle("Usar valores customizados", useCustomValues);
+
+        if (useCustomValues)
+        {
+            DrawCustomFields();
+        }
+        else
+        {
+            EditorGUILayout.HelpBox("Ícone, modelo, atributos, elementos e habilidades serão copiados da espécie. O nível será 1 e o XP será 0.", MessageType.Info);
+        }
+
         addToParty = EditorGUILayout.Toggle("Adicionar à Party", addToParty);
 
-        if (GUILayout.Button("Injetar Rúnico no Save"))
+        using (new EditorGUI.DisabledScope(selectedSpecies == null))
         {
-            InjectRunicToSave();
-        }
+            if (GUILayout.Button("Injetar Rúnico no Save"))
+            {
+                InjectRunicToSave();
+            }
 
-        if (GUILayout.Button("Injetar Rúnico na Box de Runtime"))
-        {
-            InjectRunicToRuntimeBox();
+            if (GUILayout.Button("Injetar Rúnico na Box de Runtime"))
+            {
+                InjectRunicToRuntimeBox();
+            }
         }
+    }
+
+    private void DrawCustomFields()
+    {
+        customNickname = EditorGUILayout.TextField("Apelido (Opcional)", customNickname);
+        level = Mathf.Max(1, EditorGUILayout.IntField("Nível", level));
+        experience = Mathf.Max(0, EditorGUILayout.IntField("Experiência", experience));
+
+        EditorGUILayout.LabelField("Visual", EditorStyles.boldLabel);
+        customIcon = EditorGUILayout.ObjectField("Ícone", customIcon, typeof(Sprite), false) as Sprite;
+        customModel = EditorGUILayout.ObjectField("Modelo", customModel, typeof(GameObject), false) as GameObject;
+
+        EditorGUILayout.LabelField("Atributos", EditorStyles.boldLabel);
+        customMaxHP = EditorGUILayout.FloatField("HP Máximo", customMaxHP);
+        customCurrentHP = EditorGUILayout.FloatField("HP Atual", customCurrentHP);
+        customAttack = EditorGUILayout.FloatField("Ataque", customAttack);
+        customDefense = EditorGUILayout.FloatField("Defesa", customDefense);
+        customSpeed = EditorGUILayout.FloatField("Velocidade", customSpeed);
+        customMagic = EditorGUILayout.FloatField("Magia", customMagic);
+        customMagicDefense = EditorGUILayout.FloatField("Defesa Mágica", customMagicDefense);
+    }
+
+    private void LoadSpeciesDefaults()
+    {
+        if (selectedSpecies == null) return;
+
+        customNickname = selectedSpecies.speciesName;
+        customIcon = selectedSpecies.speciesIcon;
+        customModel = selectedSpecies.speciesModels != null && selectedSpecies.speciesModels.Count > 0
+            ? selectedSpecies.speciesModels[0]
+            : null;
+        customMaxHP = selectedSpecies.baseHP;
+        customCurrentHP = selectedSpecies.baseHP;
+        customAttack = selectedSpecies.baseAttack;
+        customDefense = selectedSpecies.baseDefense;
+        customSpeed = selectedSpecies.baseSpeed;
+        customMagic = selectedSpecies.baseMagic;
+        customMagicDefense = selectedSpecies.baseMagicDefense;
     }
 
     private void InjectRunicToSave()
@@ -44,30 +112,12 @@ public class RunicInjectorWindow : EditorWindow
             return;
         }
 
-        // Carrega os dados atuais
         SaveDataContainer saveData = SaveManager.Instance.LoadGame(targetSaveFile);
-
-        // Cria o rúnico de save básico
-        RunicSaveData newRunic = new RunicSaveData
-        {
-            runicInstanceId = System.Guid.NewGuid().ToString(),
-            speciesId = selectedSpecies.speciesId,
-            nickname = customNickname,
-            level = level,
-            currentHP = 100f * level,
-            maxHP = 100f * level,
-            attack = 10f * level,
-            defense = 10f * level,
-            speed = 10f,
-            magic = 10f * level,
-            magicDefense = 10f * level
-        };
+        RunicSaveData newRunic = CreateRunicData();
 
         if (addToParty)
         {
             saveData.partyIds.Add(newRunic.runicInstanceId);
-            // Nota: Dependendo de como seu RunicStorageManager guarda os dados, 
-            // certifique-se de onde a lista de rúnicos totais fica armazenada.
         }
         
         saveData.boxStorage.Add(newRunic);
@@ -85,23 +135,64 @@ public class RunicInjectorWindow : EditorWindow
             return;
         }
 
-        // Cria o rúnico de runtime básico
-        RunicSaveData newRunic = new RunicSaveData
-        {
-            runicInstanceId = System.Guid.NewGuid().ToString(),
-            speciesId = selectedSpecies.speciesId,
-            nickname = customNickname,
-            level = level,
-            currentHP = 100f * level,
-            maxHP = 100f * level,
-            attack = 10f * level,
-            defense = 10f * level,
-            speed = 10f,
-            magic = 10f * level,
-            magicDefense = 10f * level
-        };
+        RunicSaveData newRunic = CreateRunicData();
 
         RunicStorageManager.Instance.AddCapturedRunic(newRunic);
         EditorUtility.DisplayDialog("Sucesso", $"Rúnico da espécie '{selectedSpecies.speciesName}' injetado com sucesso na box de runtime!", "OK");
+    }
+
+    private RunicSaveData CreateRunicData()
+    {
+        float defaultHP = selectedSpecies.baseHP;
+        List<string> elementIds = new List<string>();
+        List<string> basicSkillIds = new List<string>();
+        List<string> skillIds = new List<string>();
+
+        if (selectedSpecies.elements != null)
+        {
+            foreach (Element element in selectedSpecies.elements)
+            {
+                if (element != null) elementIds.Add(element.elementId);
+            }
+        }
+
+        if (selectedSpecies.basicSkills != null)
+        {
+            foreach (Skill skill in selectedSpecies.basicSkills)
+            {
+                if (skill != null) basicSkillIds.Add(skill.skillId);
+            }
+        }
+
+        if (selectedSpecies.skills != null)
+        {
+            foreach (Skill skill in selectedSpecies.skills)
+            {
+                if (skill != null) skillIds.Add(skill.skillId);
+            }
+        }
+
+        return new RunicSaveData
+        {
+            runicInstanceId = System.Guid.NewGuid().ToString(),
+            speciesId = selectedSpecies.speciesId,
+            nickname = useCustomValues && !string.IsNullOrWhiteSpace(customNickname) ? customNickname : selectedSpecies.speciesName,
+            runicIcon = useCustomValues && customIcon != null ? customIcon : selectedSpecies.speciesIcon,
+            runicModel = useCustomValues && customModel != null
+                ? customModel
+                : selectedSpecies.speciesModels != null && selectedSpecies.speciesModels.Count > 0 ? selectedSpecies.speciesModels[0] : null,
+            level = useCustomValues ? level : 1,
+            experience = useCustomValues ? experience : 0,
+            currentHP = useCustomValues ? customCurrentHP : defaultHP,
+            maxHP = useCustomValues ? customMaxHP : defaultHP,
+            attack = useCustomValues ? customAttack : selectedSpecies.baseAttack,
+            defense = useCustomValues ? customDefense : selectedSpecies.baseDefense,
+            speed = useCustomValues ? customSpeed : selectedSpecies.baseSpeed,
+            magic = useCustomValues ? customMagic : selectedSpecies.baseMagic,
+            magicDefense = useCustomValues ? customMagicDefense : selectedSpecies.baseMagicDefense,
+            elementIds = elementIds,
+            learnedBasicSkillIds = basicSkillIds,
+            learnedSkillIds = skillIds
+        };
     }
 }

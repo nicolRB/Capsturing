@@ -12,6 +12,7 @@ public class RunicStorageManager : MonoBehaviour
 
     [Header("Party")]
     public List<string> partyIds = new List<string>();
+    public Runic activeSummonedRunic;
 
     [Header("References")]
     public PlayerController player;
@@ -51,21 +52,10 @@ public class RunicStorageManager : MonoBehaviour
     // GETTERS
     // ============================================================
 
-    public RunicSaveData GetBoxRunic(int boxIndex)
+    public RunicSaveData GetBoxRunicBySlot(int boxIndex)
     {
         if (boxIndex < 0 || boxIndex >= boxStorage.Count) return null;
         return boxStorage[boxIndex];
-    }
-
-    // Resolve o RunicSaveData de um slot da party via ID
-    public RunicSaveData GetPartyRunic(int partySlot)
-    {
-        if (partySlot < 0 || partySlot >= partyIds.Count) return null;
-        string id = partyIds[partySlot];
-        if (string.IsNullOrEmpty(id)) return null;
-
-        // Garante que não vai estourar erro se houver algum elemento nulo na boxStorage
-        return boxStorage.Find(data => data != null && data.runicInstanceId == id);
     }
 
     public bool IsRunicInParty(string runicId)
@@ -83,6 +73,15 @@ public class RunicStorageManager : MonoBehaviour
         return boxStorage.FindIndex(data => data != null && data.runicInstanceId == runicId);
     }
 
+    public RunicSaveData GetRunicById(string runicId)
+    {
+        if (string.IsNullOrEmpty(runicId))
+            return null;
+
+        return boxStorage.Find(data =>
+            data != null && data.runicInstanceId == runicId);
+    }
+
     public int GetBoxCount()
     {
         return boxStorage.Count;
@@ -96,6 +95,44 @@ public class RunicStorageManager : MonoBehaviour
     public int GetNextAvailablePartySlot()
     {
         return partyIds.FindIndex(id => string.IsNullOrEmpty(id));
+    }
+
+    public RunicSaveData GetPartyRunicBySlot(int partyIndex)
+    {
+        if (partyIndex < 0 || partyIndex >= partyIds.Count)
+            return null;
+
+        string runicId = partyIds[partyIndex];
+        if (string.IsNullOrEmpty(runicId))
+            return null;
+
+        return boxStorage.Find(data =>
+                        data != null && data.runicInstanceId == runicId);
+    }
+
+    public RunicSaveData GetPartyRunicBySequence(int sequentialPosition)
+    {
+        if (sequentialPosition <= 0)
+            return null;
+
+        int currentPosition = 1;
+
+        for (int i = 0; i < partyIds.Count; i++)
+        {
+            string runicId = partyIds[i];
+            if (!string.IsNullOrEmpty(runicId))
+            {
+                if (currentPosition == sequentialPosition)
+                {
+                    return boxStorage.Find(data =>
+                        data != null && data.runicInstanceId == runicId);
+                }
+
+                currentPosition++;
+            }
+        }
+
+        return null;
     }
 
     // ============================================================
@@ -267,5 +304,14 @@ public class RunicStorageManager : MonoBehaviour
     {
         if (species == null) return;
         AddCapturedRunic(CreateRunicSaveData(species, level));
+    }
+
+    // ============================================================
+    // 
+    // ============================================================
+
+    public void CreateRunicFromSaveData(RunicSaveData saveData)
+    {
+        
     }
 }

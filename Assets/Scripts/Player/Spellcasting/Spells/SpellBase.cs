@@ -8,7 +8,7 @@ public abstract class SpellBase : MonoBehaviour
     public string spellId;
     public string description;
     public float cooldownTime = 1f;
-    public enum SpellType { Projectile, Targeted, Self, Ally }
+    public enum SpellType { Projectile, Targeted, PointTargeted, Self, Ally }
     public SpellType spellType;
     public TargetMapAsset spellMap;
     public Sprite spellIcon;

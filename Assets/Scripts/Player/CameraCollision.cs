@@ -31,6 +31,8 @@ public class CameraCollision : MonoBehaviour
     private float targetSideOffset;
     private float targetLookSideOffset;
 
+    public float TargetSideOffset => targetSideOffset;
+
     void Start()
     {
         // Initialize camera distance

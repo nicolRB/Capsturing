@@ -4,13 +4,10 @@ public class BlankSpell : SpellBase
 {
     public override void OnCastStart()
     {
-        Debug.Log("Blank spell: channeling started.");
+        OnSpellCast();
     }
 
-    public override void OnChannelComplete(ChannelingGameScript.ChannelingResult result)
-    {
-        Debug.Log($"Blank spell: channel complete. Perfects={result.perfects} Goods={result.goods} Misses={result.misses}");
-    }
+    public override void OnChannelComplete(ChannelingGameScript.ChannelingResult result){}
 
     public override void OnSpellCast()
     {

@@ -16,13 +16,17 @@ MonoBehaviour:
   speciesId: cilindre
   description: Dummy cilinder guys that aren't good for much
   speciesIcon: {fileID: 21300000, guid: 65a7948ddae13a54d991842e467c4ba8, type: 3}
-  speciesModels: []
-  baseHP: 0
-  baseAttack: 0
-  baseDefense: 0
-  baseSpeed: 0
-  baseMagic: 0
-  baseMagicDefense: 0
+  speciesModels:
+  - {fileID: 1333037246354868708, guid: 49a5af1ff1d7dc6468b7ec3ac0c5f118, type: 3}
+  - {fileID: 1333037246354868708, guid: 9c1b43bdde9d72e49ad3f8ed79a627d2, type: 3}
+  - {fileID: 1333037246354868708, guid: 10cf2cdd48a4bf44d817a2dfc951dcb5, type: 3}
+  - {fileID: 1333037246354868708, guid: 095c4227988d8724c846345b581c0f77, type: 3}
+  baseHP: 10
+  baseAttack: 1
+  baseDefense: 1
+  baseSpeed: 1
+  baseMagic: 1
+  baseMagicDefense: 1
   elements: []
   basicSkills: []
   skills: []

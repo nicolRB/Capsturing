@@ -104,6 +104,17 @@ public class PointTargetScript : MonoBehaviour
         }
     }
 
+    public void ClearPoint()
+    {
+        groundIndicator.SetActive(false);
+        indicatedPosition = Vector3.zero;
+        selected = false;
+        selecting = false;
+        followPoint = false;
+        timer = 0f;
+        SetIndicatorIntensity(fadeStartValue);
+    }
+
     void Point()
     {
         ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x, 
@@ -126,9 +137,22 @@ public class PointTargetScript : MonoBehaviour
             groundIndicator.SetActive(true);
             groundIndicator.transform.position = hit.point + Vector3.up * 0.01f;
             groundIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+            indicatedPosition = groundIndicator.transform.position;
             selected = true;
             timer = 0f;
             SetIndicatorIntensity(fadeStartValue);
+        }
+        else if (aimingSpell && terrainHit && !creaturePointed)
+        {
+            groundIndicator.SetActive(true);
+            groundIndicator.transform.position = hit.point + Vector3.up * 0.01f;
+            groundIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+            indicatedPosition = groundIndicator.transform.position;
+            SetIndicatorIntensity(fadeStartValue);
+        }
+        else if (aimingSpell && (creaturePointed || !terrainHit))
+        {
+            groundIndicator.SetActive(false);
         }
         else if (inputActive && (creaturePointed || !terrainHit))
         {

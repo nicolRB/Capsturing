@@ -20,6 +20,7 @@ public class Runic : MonoBehaviour
     public GameObject runicModel; // The model of the creature, loaded from species or set in the inspector
 
     [Header("Runtime Stats")]
+    public string runicInstanceId;
     public string nickname;
     public int level = 1;
     public float experience;
@@ -78,6 +79,7 @@ public class Runic : MonoBehaviour
     private NavMeshAgent agent;
     public PlayerInteractionScript playerInteraction;
     public RunicDatabase runicDatabase;
+    public RunicStorageManager runicStorageManager;
 
     [Header("Follow Behavior")]
     public float followerOffset = 2f;
@@ -106,6 +108,8 @@ public class Runic : MonoBehaviour
 
         if (runicDatabase == null) runicDatabase = FindFirstObjectByType<RunicDatabase>();
 
+        if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
+
         agent = GetComponent<NavMeshAgent>();
 
         if (tameState == RunicState.Tamed || tameState == RunicState.Fainted) capturable = false;
@@ -122,6 +126,7 @@ public class Runic : MonoBehaviour
     // Initializes creature state from a save file entry
     public void InitializeFromData(RunicSaveData data)
     {
+        runicInstanceId = data.runicInstanceId;
         species = runicDatabase != null ? runicDatabase.GetSpeciesById(data.speciesId) : null;
         if (species == null)
         {
@@ -203,8 +208,8 @@ public class Runic : MonoBehaviour
 
         RunicSaveData capturedData = ExportToSaveData();
 
-        if (RunicStorageManager.Instance != null)
-            RunicStorageManager.Instance.AddCapturedRunic(capturedData);
+        if (runicStorageManager != null)
+            runicStorageManager.AddCapturedRunic(capturedData);
         else
             Debug.LogError("Runic.Capture: RunicStorageManager não encontrado na cena.", this);
 

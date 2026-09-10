@@ -33,6 +33,9 @@ public class SpellcastingScript : MonoBehaviour
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
 
+        if (player != null && player.cameraCollision == null)
+            player.cameraCollision = FindFirstObjectByType<CameraCollision>();
+
         if (channelingGame == null) channelingGame = FindFirstObjectByType<ChannelingGameScript>();
 
         if (targetMapPlayer == null) targetMapPlayer = FindFirstObjectByType<TargetMapPlayer>();
@@ -64,7 +67,7 @@ public class SpellcastingScript : MonoBehaviour
         if (player.castState != PlayerController.CastState.Idle || player.menuManager.isPaused) return;
 
         // método de seleção de feitiço por scroll do mouse
-        float scrollValue = Mouse.current.scroll.ReadValue().y;
+        float scrollValue = -Mouse.current.scroll.ReadValue().y;
         
         if (scrollValue > 0f)
         {
@@ -88,13 +91,7 @@ public class SpellcastingScript : MonoBehaviour
             {
                 if (spellCooldowns[spellIndex] <= 0)
                 {
-                    if (CurrentSpell.spellMap == null) {
-                        CastSpell();
-                        Debug.Log("No map for this spell");
-                        return;
-                    }
                     BeginChannel();
-                    player.playerHUD.SetActive(false);
                 }            
                 else
                 {
@@ -114,12 +111,41 @@ public class SpellcastingScript : MonoBehaviour
 
     void BeginChannel()
     {
-        SpellBase spell = CurrentSpell;
-        if (spell == null || spell.spellMap == null)
+        if (player == null || player.cameraCollision == null)
         {
-            Debug.LogWarning("SpellcastingScript: no spell selected or spell has no map assigned.");
+            Debug.LogError("SpellcastingScript: PlayerController or CameraCollision is not assigned.", this);
             return;
         }
+
+        if (channelingGame == null)
+        {
+            Debug.LogError("SpellcastingScript: ChannelingGameScript is not assigned.", this);
+            return;
+        }
+
+        Vector3 channelingPosition = channelingGame.transform.localPosition;
+        channelingPosition.x = player.cameraCollision.TargetSideOffset > 0f ? 500f : -500f;
+        channelingGame.transform.localPosition = channelingPosition;
+        SpellBase spell = CurrentSpell;
+        if (spell == null)
+        {
+            Debug.LogWarning("SpellcastingScript: no spell selected.");
+            return;
+        }
+        
+        if (spell.spellMap == null)
+        {
+            Debug.Log("Spell has no map. Delegating flow entirely to the spell.");
+            
+            spell.OnSpellResolved += HandleSpellResolved;
+            
+            player.castState = PlayerController.CastState.Casting;
+
+            spell.OnCastStart();
+            return; 
+        }
+        
+        player.playerHUD.SetActive(false);
 
         if (castingUI != null)
         {
