@@ -27,7 +27,7 @@ public class SpawnEnemy : MonoBehaviour
 
             GameObject newEnemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
 
-            if (targetHolder != null) targetHolder.SetTarget(newEnemy.GetComponent<EnemyScript>());
+            if (targetHolder != null) targetHolder.SetTarget(newEnemy.GetComponent<Runic>());
 
             if (deletePrevious) originalEnemy = newEnemy;
         }
