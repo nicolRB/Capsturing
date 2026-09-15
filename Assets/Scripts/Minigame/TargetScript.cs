@@ -24,7 +24,7 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
     [SerializeField] private Transform targetRingTransform;
     [SerializeField] private Image timingRing;
     [SerializeField] private Image rootImage;
-    private ChannelingGameScript cast;
+    private ChannelingGameCoordinator cast;
     private FeedbackUI feedback;
 
     private const float InactiveTargetAlpha = 0.35f;
@@ -50,7 +50,7 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        cast = FindFirstObjectByType<ChannelingGameScript>();
+        cast = FindFirstObjectByType<ChannelingGameCoordinator>();
         feedback = FindFirstObjectByType<FeedbackUI>();
 
         if (targetRing == null || timingRing == null)
@@ -85,7 +85,7 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
         timingRing.color = c;
     }
 
-    public void Setup(float size, float lifetime, float perfectWindow, float hitWindow, int targetIndex, ChannelingGameScript cast)
+    public void Setup(float size, float lifetime, float perfectWindow, float hitWindow, int targetIndex, ChannelingGameCoordinator cast)
     {
         this.size = size;
         this.lifetime = lifetime;

@@ -7,7 +7,7 @@ public class SpellcastingCoordinator : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerController player;
-    [SerializeField] private ChannelingGameScript channelingGame;
+    [SerializeField] private ChannelingGameCoordinator channelingGame;
     [SerializeField] private TargetMapPlayer targetMapPlayer;
     [SerializeField] private PointTargetScript pointTarget;
     [SerializeField] private GameObject castingUI;
@@ -18,7 +18,7 @@ public class SpellcastingCoordinator : MonoBehaviour
 
     public GameObject CastingUI => castingUI;
     public TargetMapPlayer TargetMapPlayer => targetMapPlayer;
-    public ChannelingGameScript ChannelingGame => channelingGame;
+    public ChannelingGameCoordinator ChannelingGame => channelingGame;
     public ChannelingPercentageCounterScript PercentageCounter => percentageCounter;
     public PercentageResultUI PercentageResult => percentageResult;
 
@@ -45,7 +45,7 @@ public class SpellcastingCoordinator : MonoBehaviour
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
 
-        if (channelingGame == null) channelingGame = FindFirstObjectByType<ChannelingGameScript>();
+        if (channelingGame == null) channelingGame = FindFirstObjectByType<ChannelingGameCoordinator>();
 
         if (targetMapPlayer == null) targetMapPlayer = FindFirstObjectByType<TargetMapPlayer>();
 
@@ -128,7 +128,7 @@ public class SpellcastingCoordinator : MonoBehaviour
 
         if (channelingGame == null)
         {
-            Debug.LogError("SpellcastingCoordinator: ChannelingGameScript is not assigned.", this);
+            Debug.LogError("SpellcastingCoordinator: ChannelingGameCoordinator is not assigned.", this);
             return;
         }
 
@@ -187,7 +187,7 @@ public class SpellcastingCoordinator : MonoBehaviour
         CurrentSpell.OnSpellCast();
     }
 
-    void HandleChannelResolved(ChannelingGameScript.ChannelingResult result)
+    void HandleChannelResolved(ChannelingGameCoordinator.ChannelingResult result)
     {
         channelingGame.OnChannelingResolved -=
             HandleChannelResolved;

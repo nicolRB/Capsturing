@@ -85,7 +85,7 @@ public class TargetMapPlayer : MonoBehaviour
     public IReadOnlyList<TargetData> Map => map;
     public int TotalTargets => map.Count;
     
-    private ChannelingGameScript castingGameScript;
+    private ChannelingGameCoordinator castingGameScript;
 
     private float startTime;
     private int currentIndex = 0;
@@ -95,9 +95,9 @@ public class TargetMapPlayer : MonoBehaviour
     void Start()
     {
         startTime = Time.time;
-        castingGameScript = Object.FindFirstObjectByType<ChannelingGameScript>();
+        castingGameScript = Object.FindFirstObjectByType<ChannelingGameCoordinator>();
         if (castingGameScript == null)
-            Debug.LogError("TargetMapPlayer: ChannelingGameScript not found in the scene.", this);
+            Debug.LogError("TargetMapPlayer: ChannelingGameCoordinator not found in the scene.", this);
 
         if (targetPrefab == null)
             Debug.LogError("TargetMapPlayer: target prefab is not assigned.", this);

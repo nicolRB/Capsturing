@@ -34,7 +34,7 @@ public abstract class SpellBase : MonoBehaviour
     public ChannelingPercentageCounterScript percentageCounter;
 
     public event Action OnSpellResolved;
-    public ChannelingGameScript.ChannelingResult channelResult;
+    public ChannelingGameCoordinator.ChannelingResult channelResult;
 
     protected void RaiseSpellResolved() => OnSpellResolved?.Invoke();
 
@@ -46,9 +46,9 @@ public abstract class SpellBase : MonoBehaviour
         if (percentageCounter == null) percentageCounter = FindFirstObjectByType<ChannelingPercentageCounterScript>();
     }
 
-    protected float ComputeChannelScore(ChannelingGameScript.ChannelingResult result)
+    protected float ComputeChannelScore(ChannelingGameCoordinator.ChannelingResult result)
     {
-        return ChannelingGameScript.ComputeScore(
+        return ChannelingGameCoordinator.ComputeScore(
             result.perfects, result.goods, result.misses, result.total,
             perfectWeight, goodWeight, missWeight);
     }
@@ -57,7 +57,7 @@ public abstract class SpellBase : MonoBehaviour
     public abstract void OnCastStart();
 
     // Called when the channeling minigame ends and the spell enters its casting state.
-    public abstract void OnChannelComplete(ChannelingGameScript.ChannelingResult result);
+    public abstract void OnChannelComplete(ChannelingGameCoordinator.ChannelingResult result);
 
     // Called when the player confirms the spell target with the left mouse button.
     public abstract void OnSpellCast();

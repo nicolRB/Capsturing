@@ -131,7 +131,7 @@ public class SummonRunicSpell : SpellBase
             activeSummonedRunic.RunicInstanceId == runicId;
     }
 
-    public override void OnChannelComplete(ChannelingGameScript.ChannelingResult result)
+    public override void OnChannelComplete(ChannelingGameCoordinator.ChannelingResult result)
     {
         // This spell does not use a channeling result.
     }

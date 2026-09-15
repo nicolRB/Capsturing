@@ -76,7 +76,7 @@ public class Runic : MonoBehaviour
     [SerializeField] private PlayerController player;
     [SerializeField] private PointTargetScript pointer;
     private NavMeshAgent agent;
-    [SerializeField] private PlayerInteractionUI playerInteraction;
+    [SerializeField] private PlayerInteraction playerInteraction;
     [SerializeField] private RunicDatabase runicDatabase;
     [SerializeField] private RunicStorageManager runicStorageManager;
 

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInteractionUI : MonoBehaviour
+public class PlayerInteraction : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerController player;

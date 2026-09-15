@@ -8,7 +8,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
     public float Percentage => percentage;
 
     [Header("References")]
-    [SerializeField] private ChannelingGameScript channelingGame;
+    [SerializeField] private ChannelingGameCoordinator channelingGame;
     [SerializeField] private TextMeshProUGUI percentageText;
 
     public TextMeshProUGUI PercentageText => percentageText;
@@ -56,7 +56,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
     {
         if (channelingGame == null)
             channelingGame =
-                GetComponentInParent<ChannelingGameScript>();
+                GetComponentInParent<ChannelingGameCoordinator>();
 
         if (percentageText == null)
             percentageText =
@@ -98,7 +98,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
     // ============================================================
 
     public void RecalculatePercentage(
-        ChannelingGameScript.ChannelingResult result)
+        ChannelingGameCoordinator.ChannelingResult result)
     {
         RecalculatePercentage(
             result.perfects,
@@ -118,7 +118,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
         int misses,
         int total)
     {
-        percentage = ChannelingGameScript.ComputeScore(
+        percentage = ChannelingGameCoordinator.ComputeScore(
             perfects,
             goods,
             misses,

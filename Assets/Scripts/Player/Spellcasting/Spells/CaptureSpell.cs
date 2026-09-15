@@ -35,7 +35,7 @@ public class CaptureSpell : SpellBase
         Debug.Log("Capture spell: preparation channeling started.");
     }
 
-    public override void OnChannelComplete(ChannelingGameScript.ChannelingResult result)
+    public override void OnChannelComplete(ChannelingGameCoordinator.ChannelingResult result)
     {
         channelResult = result;
 
@@ -178,7 +178,7 @@ public class CaptureSpell : SpellBase
         player.SetCastingState(PlayerController.CastState.Channeling);
     }
 
-    private void HandleCaptureChannelResolved(ChannelingGameScript.ChannelingResult result)
+    private void HandleCaptureChannelResolved(ChannelingGameCoordinator.ChannelingResult result)
     {
         spellcastingCoordinator.ChannelingGame
             .OnChannelingResolved -=
@@ -189,10 +189,10 @@ public class CaptureSpell : SpellBase
         player.PlayerHUD.SetActive(true);
     }
 
-    private void ResolveCapture(ChannelingGameScript.ChannelingResult result)
+    private void ResolveCapture(ChannelingGameCoordinator.ChannelingResult result)
     {
         // Use the same formula as the percentage counter during channeling.
-        float captureChance = ChannelingGameScript.ComputeScore(
+        float captureChance = ChannelingGameCoordinator.ComputeScore(
                 result.perfects,
                 result.goods,
                 result.misses,

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class ChannelingGameScript : MonoBehaviour
+public class ChannelingGameCoordinator : MonoBehaviour
 {
     [Header("Channeling Stats")]
     [Tooltip("Index of the target currently accepting input.")]
