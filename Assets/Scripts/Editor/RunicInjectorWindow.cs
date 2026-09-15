@@ -47,7 +47,7 @@ public class RunicInjectorWindow : EditorWindow
         }
         else
         {
-            EditorGUILayout.HelpBox("The icon, model, stats, elements, and skills will be copied from the species. Level will be 1 and XP will be 0.", MessageType.Info);
+            EditorGUILayout.HelpBox("The icon, model, stats, Elements, and Skills will be copied from the species. Level will be 1 and XP will be 0.", MessageType.Info);
         }
 
         addToParty = EditorGUILayout.Toggle("Add to Party", addToParty);
@@ -90,18 +90,18 @@ public class RunicInjectorWindow : EditorWindow
     {
         if (selectedSpecies == null) return;
 
-        customNickname = selectedSpecies.speciesName;
-        customIcon = selectedSpecies.speciesIcon;
-        customModel = selectedSpecies.speciesModels != null && selectedSpecies.speciesModels.Count > 0
-            ? selectedSpecies.speciesModels[0]
+        customNickname = selectedSpecies.SpeciesName;
+        customIcon = selectedSpecies.SpeciesIcon;
+        customModel = selectedSpecies.SpeciesModels != null && selectedSpecies.SpeciesModels.Count > 0
+            ? selectedSpecies.SpeciesModels[0]
             : null;
-        customMaxHP = selectedSpecies.baseHP;
-        customCurrentHP = selectedSpecies.baseHP;
-        customAttack = selectedSpecies.baseAttack;
-        customDefense = selectedSpecies.baseDefense;
-        customSpeed = selectedSpecies.baseSpeed;
-        customMagic = selectedSpecies.baseMagic;
-        customMagicDefense = selectedSpecies.baseMagicDefense;
+        customMaxHP = selectedSpecies.BaseHP;
+        customCurrentHP = selectedSpecies.BaseHP;
+        customAttack = selectedSpecies.BaseAttack;
+        customDefense = selectedSpecies.BaseDefense;
+        customSpeed = selectedSpecies.BaseSpeed;
+        customMagic = selectedSpecies.BaseMagic;
+        customMagicDefense = selectedSpecies.BaseMagicDefense;
     }
 
     private void InjectRunicToSave()
@@ -124,7 +124,7 @@ public class RunicInjectorWindow : EditorWindow
 
         // Save the updated data.
         SaveManager.Instance.SaveGame(targetSaveFile, saveData);
-        EditorUtility.DisplayDialog("Success", $"Runic species '{selectedSpecies.speciesName}' was injected into save '{targetSaveFile}'.", "OK");
+        EditorUtility.DisplayDialog("Success", $"Runic species '{selectedSpecies.SpeciesName}' was injected into save '{targetSaveFile}'.", "OK");
     }
 
     private void InjectRunicToRuntimeBox()
@@ -138,60 +138,60 @@ public class RunicInjectorWindow : EditorWindow
         RunicSaveData newRunic = CreateRunicData();
 
         RunicStorageManager.Instance.AddCapturedRunic(newRunic);
-        EditorUtility.DisplayDialog("Success", $"Runic species '{selectedSpecies.speciesName}' was injected into the runtime box.", "OK");
+        EditorUtility.DisplayDialog("Success", $"Runic species '{selectedSpecies.SpeciesName}' was injected into the runtime box.", "OK");
     }
 
     private RunicSaveData CreateRunicData()
     {
-        float defaultHP = selectedSpecies.baseHP;
-        List<string> elementIds = new List<string>();
+        float defaultHP = selectedSpecies.BaseHP;
+        List<string> ElementIds = new List<string>();
         List<string> basicSkillIds = new List<string>();
-        List<string> skillIds = new List<string>();
+        List<string> SkillIds = new List<string>();
 
-        if (selectedSpecies.elements != null)
+        if (selectedSpecies.Elements != null)
         {
-            foreach (Element element in selectedSpecies.elements)
+            foreach (Element element in selectedSpecies.Elements)
             {
-                if (element != null) elementIds.Add(element.elementId);
+                if (element != null) ElementIds.Add(element.ElementId);
             }
         }
 
-        if (selectedSpecies.basicSkills != null)
+        if (selectedSpecies.BasicSkills != null)
         {
-            foreach (Skill skill in selectedSpecies.basicSkills)
+            foreach (Skill skill in selectedSpecies.BasicSkills)
             {
-                if (skill != null) basicSkillIds.Add(skill.skillId);
+                if (skill != null) basicSkillIds.Add(skill.SkillId);
             }
         }
 
-        if (selectedSpecies.skills != null)
+        if (selectedSpecies.Skills != null)
         {
-            foreach (Skill skill in selectedSpecies.skills)
+            foreach (Skill skill in selectedSpecies.Skills)
             {
-                if (skill != null) skillIds.Add(skill.skillId);
+                if (skill != null) SkillIds.Add(skill.SkillId);
             }
         }
 
         return new RunicSaveData
         {
             runicInstanceId = System.Guid.NewGuid().ToString(),
-            speciesId = selectedSpecies.speciesId,
-            nickname = useCustomValues && !string.IsNullOrWhiteSpace(customNickname) ? customNickname : selectedSpecies.speciesName,
-            modelIndex = useCustomValues && customModel != null && selectedSpecies.speciesModels != null
-                ? Mathf.Max(0, selectedSpecies.speciesModels.IndexOf(customModel))
+            speciesId = selectedSpecies.SpeciesId,
+            nickname = useCustomValues && !string.IsNullOrWhiteSpace(customNickname) ? customNickname : selectedSpecies.SpeciesName,
+            modelIndex = useCustomValues && customModel != null && selectedSpecies.SpeciesModels != null
+                ? Mathf.Max(0, selectedSpecies.SpeciesModels.IndexOf(customModel))
                 : 0,
             level = useCustomValues ? level : 1,
             experience = useCustomValues ? experience : 0,
             currentHP = useCustomValues ? customCurrentHP : defaultHP,
             maxHP = useCustomValues ? customMaxHP : defaultHP,
-            attack = useCustomValues ? customAttack : selectedSpecies.baseAttack,
-            defense = useCustomValues ? customDefense : selectedSpecies.baseDefense,
-            speed = useCustomValues ? customSpeed : selectedSpecies.baseSpeed,
-            magic = useCustomValues ? customMagic : selectedSpecies.baseMagic,
-            magicDefense = useCustomValues ? customMagicDefense : selectedSpecies.baseMagicDefense,
-            elementIds = elementIds,
+            attack = useCustomValues ? customAttack : selectedSpecies.BaseAttack,
+            defense = useCustomValues ? customDefense : selectedSpecies.BaseDefense,
+            speed = useCustomValues ? customSpeed : selectedSpecies.BaseSpeed,
+            magic = useCustomValues ? customMagic : selectedSpecies.BaseMagic,
+            magicDefense = useCustomValues ? customMagicDefense : selectedSpecies.BaseMagicDefense,
+            elementIds = ElementIds,
             learnedBasicSkillIds = basicSkillIds,
-            learnedSkillIds = skillIds
+            learnedSkillIds = SkillIds
         };
     }
 }
