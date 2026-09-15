@@ -1,20 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RunicWheelScript : MonoBehaviour
+public class RunicWheelUI : MonoBehaviour
 {
-    public float iconOffset = 100f;
-    public float iconScale = 1f;
-    private int runicsInParty;
-    public SummonRunicSpell summonRunicSpell;
-    public RunicStorageManager runicStorageManager;
-    public GameObject runicIconPrefab;
-    public GameObject symbol;
+    [SerializeField] private float iconOffset = 100f;
+    [SerializeField] private float iconScale = 1f;
+    [SerializeField] private SummonRunicSpell summonRunicSpell;
+    [SerializeField] private RunicStorageManager runicStorageManager;
+    [SerializeField] private GameObject runicIconPrefab;
+    [SerializeField] private GameObject symbol;
+    [SerializeField] private float symbolTargetAngle;
+
     private List<GameObject> RunicIcons = new List<GameObject>();
     private List<Sprite> runicIconSprites = new List<Sprite>();
-    public float symbolTargetAngle;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private int runicsInParty;
+    
     void OnEnable()
     {
         if (runicStorageManager == null) 
@@ -63,18 +63,15 @@ public class RunicWheelScript : MonoBehaviour
         for (int i = 0 ; i < runicsInParty; i++)
         {
             RunicSaveData runic = partyRunics[i];
-            runicIconSprites.Add(runic.runicIcon);
+            Sprite runicIcon = runicStorageManager.GetRunicIcon(runic);
+            runicIconSprites.Add(runicIcon);
 
             GameObject newIcon = Instantiate(runicIconPrefab, transform);
             RunicIcons.Add(newIcon);
-            RunicWheelIconScript newIconScript = newIcon.GetComponent<RunicWheelIconScript>();
+            RunicWheelIconUI newIconScript = newIcon.GetComponent<RunicWheelIconUI>();
             bool isSummoned = summonRunicSpell != null &&
                 summonRunicSpell.IsRunicSummoned(runic.runicInstanceId);
-            newIconScript.Setup(runic.runicIcon, runic.runicInstanceId, iconScale, isSummoned);
-            newIconScript.originalScale = iconScale;
-            newIconScript.targetScale = iconScale;
-            newIconScript.angle = -angleStep * i;
-            newIconScript.UpdateAngle();
+            newIconScript.Setup(runicIcon, runic.runicInstanceId, iconScale, -angleStep * i, isSummoned);
 
             RectTransform iconTransform = newIcon.transform as RectTransform;
             if (iconTransform != null)
@@ -85,6 +82,11 @@ public class RunicWheelScript : MonoBehaviour
                     Mathf.Sin(angle)) * iconOffset;
             }
         }
+    }
+
+    public void SetSymbolTargetAngle(float angle)
+    {
+        symbolTargetAngle = angle;
     }
 
     void SymbolAngleUpdate()
@@ -101,14 +103,14 @@ public class RunicWheelScript : MonoBehaviour
     {
         if (summonRunicSpell == null || runicStorageManager == null)
         {
-            Debug.LogError("RunicWheelScript: summon spell or storage manager is missing.", this);
+            Debug.LogError("RunicWheelUI: summon spell or storage manager is missing.", this);
             return;
         }
 
         RunicSaveData selectedRunic = runicStorageManager.GetRunicById(runicId);
         if (selectedRunic == null)
         {
-            Debug.LogWarning($"RunicWheelScript: no runic found with ID '{runicId}'.", this);
+            Debug.LogWarning($"RunicWheelUI: no runic found with ID '{runicId}'.", this);
             return;
         }
 

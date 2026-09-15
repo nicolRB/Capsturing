@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,29 +7,32 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [Header("Stats")]
-    public int maxHP = 100;
-    public int currentHP = 100;
+    [SerializeField] private int maxHP = 100;
+    [SerializeField] private int currentHP = 100;
+
+    public int MaxHP => maxHP;
+    public int CurrentHP => currentHP;
 
     [Header("Movement")]
-    public float walkSpeed = 2f;
-    public float jogSpeed = 5f;
-    public float runningSpeed = 10f;
-    public float currentSpeed;
-    public Key runKey = Key.LeftShift;
-    public Key walkKey = Key.LeftAlt;
+    [SerializeField] private float walkSpeed = 2f;
+    [SerializeField] private float jogSpeed = 5f;
+    [SerializeField] private float runningSpeed = 10f;
+    [SerializeField] private float currentSpeed;
+    [SerializeField] private Key runKey = Key.LeftShift;
+    [SerializeField] private Key walkKey = Key.LeftAlt;
 
     [Header("Jump Settings")]
-    public float jumpForce = 5f;
-    public float coyoteTime = 0.2f;
-    public float jumpBufferTime = 0.2f;
+    [SerializeField] private float jumpForce = 5f;
+    [SerializeField] private float coyoteTime = 0.2f;
+    [SerializeField] private float jumpBufferTime = 0.2f;
 
     private float coyoteTimer = 0f;
     private float jumpBufferTimer = 0f;
 
     [Header("Dash")]
-    public float dashForce = 6f;
-    public float dashDuration = 0.2f;
-    public float dashCooldown = 1f;
+    [SerializeField] private float dashForce = 6f;
+    [SerializeField] private float dashDuration = 0.2f;
+    [SerializeField] private float dashCooldown = 1f;
 
     private float dashTimer = 0f;
     private float cooldownTimer = 0f;
@@ -36,37 +40,51 @@ public class PlayerController : MonoBehaviour
     private Vector3 dashDirection;
 
     [Header("Dash Input")]
-    public float tapThreshold = 0.2f;
+    [SerializeField] private float tapThreshold = 0.2f;
     private float shiftPressedTime = 0f;
     private bool isHoldingShift = false;
 
     [Header("Mouse Look")]
-    public float mouseSensitivity = 15f;
+    [SerializeField] private float mouseSensitivity = 15f;
 
     private Rigidbody rb;
     private CapsuleCollider capsule;
     private Animator animator;
 
     [Header("State Flags")]
-    public bool moving = false;
+    [SerializeField] private bool moving = false;
 
-    // Idle - não está fazendo nada, Channeling - carregando feitiço (minigame), 
-    // Aiming - mirando feitiço (feitiço carregado e pronto para lançar), 
+    public bool Moving => moving;
+
+    // Idle - no active action; Channeling - playing the spell minigame;
+    // Aiming - the spell is charged and ready to launch;
     // Casting - lançando feitiço
     public enum CastState { Idle, Channeling, Aiming, Casting } 
-    public CastState castState = CastState.Idle;
+    private CastState castingState = CastState.Idle;
+
+    public CastState CastingState => castingState;
 
     [Header("Runics")]
-    public int maxPartySize = 3;
+    [SerializeField] private int maxPartySize = 3;
+
+    public int MaxPartySize => maxPartySize;
 
     [Header("References")]
-    public GameObject playerCharacter;
-    public CameraController cameraController;
-    public CameraCollision cameraCollision;
-    public MenuManager menuManager;
-    public GameObject playerHUD;
-    public GameObject aimIndicator;
-    public bool useAimIndicator = true;
+    [SerializeField] private GameObject playerCharacter;
+    [SerializeField] private CameraController cameraController;
+    [SerializeField] private CameraCollision cameraCollision;
+    [SerializeField] private MenuManager menuManager;
+    [SerializeField] private GameObject playerHUD;
+    [SerializeField] private GameObject aimIndicator;
+    [SerializeField] private bool useAimIndicator = true;
+
+    public GameObject PlayerCharacter => playerCharacter;
+    public CameraController CameraController => cameraController;
+    public CameraCollision CameraCollision => cameraCollision;
+    public MenuManager MenuManager => menuManager;
+    public GameObject PlayerHUD => playerHUD;
+    public GameObject AimIndicator => aimIndicator;
+    public bool UseAimIndicator => useAimIndicator;
 
     private void Awake()
     {
@@ -94,6 +112,21 @@ public class PlayerController : MonoBehaviour
         if (cameraCollision == null) cameraCollision = FindFirstObjectByType<CameraCollision>();
     }
 
+    public void SetCastingState(CastState newState)
+    {
+        if (castingState == newState)
+            return;
+
+        castingState = newState;
+
+        Debug.Log("Casting State changed to" + castingState);
+    }
+
+    public void ToggleAimIndicator(bool state)
+    {
+        useAimIndicator = state;
+    }
+
     private void Update()
     {
         HandleMovementInput();
@@ -103,7 +136,7 @@ public class PlayerController : MonoBehaviour
         UpdateCooldowns();
         UpdateAnimator();
         if (currentHP <= 0) Die();
-        if (castState == CastState.Aiming && useAimIndicator) 
+        if (castingState == CastState.Aiming && useAimIndicator) 
         {
             aimIndicator.SetActive(true);
             AimIndicatorAnimation();
@@ -121,16 +154,16 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = Vector2.zero;
 
-        if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed 
+        if (castingState != CastState.Channeling && (Keyboard.current.wKey.isPressed 
         || Keyboard.current.upArrowKey.isPressed)) 
             moveInput.y += 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed 
+        if (castingState != CastState.Channeling && (Keyboard.current.sKey.isPressed 
         || Keyboard.current.downArrowKey.isPressed)) 
             moveInput.y -= 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.aKey.isPressed 
+        if (castingState != CastState.Channeling && (Keyboard.current.aKey.isPressed 
         || Keyboard.current.leftArrowKey.isPressed)) 
             moveInput.x -= 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.dKey.isPressed 
+        if (castingState != CastState.Channeling && (Keyboard.current.dKey.isPressed 
         || Keyboard.current.rightArrowKey.isPressed)) 
             moveInput.x += 1f;
 
@@ -170,25 +203,25 @@ public class PlayerController : MonoBehaviour
             return;
         }
         Vector2 moveInput = Vector2.zero;
-        if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
+        if (castingState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
+        if (castingState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
+        if (castingState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
+        if (castingState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
 
         Vector3 movement = transform.forward * moveInput.y + transform.right * moveInput.x;
 
-        if (castState != CastState.Channeling && Keyboard.current[runKey].wasPressedThisFrame)
+        if (castingState != CastState.Channeling && Keyboard.current[runKey].wasPressedThisFrame)
         {
             shiftPressedTime = 0f;
             isHoldingShift = true;
         }
 
-        if (castState != CastState.Channeling && isHoldingShift && Keyboard.current[runKey].isPressed)
+        if (castingState != CastState.Channeling && isHoldingShift && Keyboard.current[runKey].isPressed)
         {
             shiftPressedTime += Time.deltaTime;
         }
 
-        if (castState != CastState.Channeling && isHoldingShift && Keyboard.current[runKey].wasReleasedThisFrame)
+        if (castingState != CastState.Channeling && isHoldingShift && Keyboard.current[runKey].wasReleasedThisFrame)
         {
             if (shiftPressedTime <= tapThreshold && cooldownTimer <= 0f && !isDashing &&
                 (Keyboard.current.wKey.isPressed || Keyboard.current.sKey.isPressed || 
@@ -230,7 +263,7 @@ public class PlayerController : MonoBehaviour
     // ---------------- JUMP ----------------
     private void HandleJumpInput()
     {
-        if (castState != CastState.Channeling && Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (castingState != CastState.Channeling && Keyboard.current.spaceKey.wasPressedThisFrame)
             jumpBufferTimer = jumpBufferTime;
         else
             jumpBufferTimer -= Time.deltaTime;
@@ -259,10 +292,10 @@ public class PlayerController : MonoBehaviour
     // ---------------- ROTATION ----------------
     private void HandleRotation()
     {
-        if (castState == CastState.Channeling || isDashing || menuManager.currentMenu != null) return;
+        if (castingState == CastState.Channeling || isDashing || menuManager.CurrentMenu != null) return;
 
         if (moving || Mouse.current.rightButton.isPressed || Mouse.current.leftButton.isPressed 
-        || Keyboard.current[runKey].isPressed || castState == CastState.Aiming)
+        || Keyboard.current[runKey].isPressed || castingState == CastState.Aiming)
         {
             // player gira para o yaw da câmera
             Quaternion targetRotation = Quaternion.Euler(0f, cameraController.yRotation, 0f);
@@ -303,10 +336,10 @@ public class PlayerController : MonoBehaviour
         // -------- INPUT --------
         Vector2 moveInput = Vector2.zero;
 
-        if (castState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
-        if (castState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
+        if (castingState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
+        if (castingState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
+        if (castingState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
+        if (castingState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
 
         float inputAmount = moveInput.magnitude;
 
@@ -354,7 +387,7 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (castState == CastState.Channeling) return;
+        if (castingState == CastState.Channeling) return;
 
         currentHP -= damage;
         if (currentHP <= 0)

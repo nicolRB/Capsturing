@@ -1,23 +1,22 @@
 using UnityEngine;
 
-// Mantém a referência ao inimigo "atual" sempre atualizada.
-// A ligação do UnityEvent no Inspector aponta pra ESTE script,
-// que nunca é destruído — só o campo currentTarget muda.
+// Keeps a stable UnityEvent target while the referenced enemy changes.
 public class EnemyTargetHolder : MonoBehaviour
 {
-    public Runic currentTarget;
+    [Header("Current Target")]
+    [SerializeField] private Runic currentTarget;
 
     public void SetTarget(Runic newTarget)
     {
         currentTarget = newTarget;
     }
 
-    // Chamado pelo onInteract do Interactable via Inspector
+    // Called by the Interactable onInteract UnityEvent.
     public void KillCurrentTarget()
     {
         if (currentTarget == null)
         {
-            Debug.LogWarning("EnemyTargetHolder: nenhum alvo definido.");
+            Debug.LogWarning("EnemyTargetHolder: no target is assigned.");
             return;
         }
 
@@ -29,7 +28,7 @@ public class EnemyTargetHolder : MonoBehaviour
     {
         if (currentTarget == null)
         {
-            Debug.LogWarning("EnemyTargetHolder: nenhum alvo definido.");
+            Debug.LogWarning("EnemyTargetHolder: no target is assigned.");
             return;
         }
 

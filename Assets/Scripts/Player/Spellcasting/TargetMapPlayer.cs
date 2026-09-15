@@ -10,8 +10,12 @@ public enum EventType
 [System.Serializable]
 public class MapSettings
 {
+    [Header("Timing")]
+    [Tooltip("Maximum delay after the ideal hit time that still counts as a hit.")]
     public float hitWindow = 0.2f;
+    [Tooltip("Maximum delay from the ideal hit time for a perfect result.")]
     public float perfectWindow = 0.08f;
+    [Tooltip("Display name used to identify the map.")]
     public string name = "Novo Mapa";
 }
 
@@ -42,14 +46,14 @@ public class MapEvent
     public EventType type;
     public float spawnTime;
 
-    // target
+    // Target event settings.
     public Vector2 position;
     public float size;
     public float lifetime;
     public float activationTime;
     public float fadeInDuration;
 
-    // line
+    // Line event settings.
     public LineSettings line = new LineSettings();
     public TargetSettings target = new TargetSettings();
 }
@@ -75,13 +79,13 @@ public class TargetSettings
 
 public class TargetMapPlayer : MonoBehaviour
 {
-    public GameObject targetPrefab;
+    [SerializeField] private GameObject targetPrefab;
+    private List<TargetData> map = new List<TargetData>();
 
-    public List<TargetData> map;
+    public IReadOnlyList<TargetData> Map => map;
+    public int TotalTargets => map.Count;
     
     private ChannelingGameScript castingGameScript;
-
-    public int totalTargets;
 
     private float startTime;
     private int currentIndex = 0;
@@ -92,12 +96,23 @@ public class TargetMapPlayer : MonoBehaviour
     {
         startTime = Time.time;
         castingGameScript = Object.FindFirstObjectByType<ChannelingGameScript>();
-        if (castingGameScript == null) Debug.LogError("ChannelingGameScript not found in the scene!");
+        if (castingGameScript == null)
+            Debug.LogError("TargetMapPlayer: ChannelingGameScript not found in the scene.", this);
+
+        if (targetPrefab == null)
+            Debug.LogError("TargetMapPlayer: target prefab is not assigned.", this);
     }
 
     void Update()
     {
-        if (castingGameScript.player.castState == PlayerController.CastState.Channeling)
+        if (castingGameScript == null ||
+            castingGameScript.Player == null ||
+            castingGameScript.Player.CastingState != PlayerController.CastState.Channeling)
+        {
+            return;
+        }
+
+        if (map.Count > currentIndex)
         {
             float elapsed = Time.time - startTime;
 
@@ -111,59 +126,59 @@ public class TargetMapPlayer : MonoBehaviour
 
     void SpawnTarget(TargetData data, int index)
     {
+        if (targetPrefab == null)
+            return;
+
         GameObject obj = Instantiate(targetPrefab, transform);
 
         RectTransform rt = obj.GetComponent<RectTransform>();
+        if (rt == null)
+        {
+            Debug.LogError("TargetMapPlayer: target prefab requires a RectTransform.", obj);
+            Destroy(obj);
+            return;
+        }
+
         rt.anchoredPosition = data.position;
 
         TargetScript targetScript = obj.GetComponent<TargetScript>();
 
         if (targetScript != null)
-        {
-            targetScript.size = data.size;
-            targetScript.lifetime = data.lifetime;
-            targetScript.activationTime = data.activationTime;
-            targetScript.fadeInDuration = data.fadeInDuration;
-
-            targetScript.perfectWindow = mapPerfectWindow > 0 ? mapPerfectWindow : 0.01f;
-            targetScript.hitWindow = mapHitWindow > 0 ? mapHitWindow : 0.2f;
-            targetScript.missDuration = 0.2f;
-
-            targetScript.targetIndex = index;
-        }
+            targetScript.Setup(data.size, data.lifetime, mapPerfectWindow, mapHitWindow, index, castingGameScript);
+        
     }
 
-    // Carrega o mapa a partir de um TargetMapAsset (ScriptableObject)
+    // Load a map from a TargetMapAsset.
     public void LoadMap(TargetMapAsset mapAsset)
     {
         if (mapAsset == null)
         {
-            Debug.LogError("TargetMapPlayer.LoadMap: nenhum asset atribuído.");
+            Debug.LogError("TargetMapPlayer.LoadMap: no asset assigned.");
             return;
         }
 
         if (mapAsset.GeneratedMap == null || mapAsset.GeneratedMap.Count == 0)
         {
-            Debug.LogWarning($"TargetMapPlayer.LoadMap: o asset '{mapAsset.name}' não tem mapa gerado. Clique em 'Gerar Mapa' no Inspector do asset.");
+            Debug.LogWarning($"TargetMapPlayer.LoadMap: asset '{mapAsset.name}' has no generated map. Generate it in the asset Inspector.");
             return;
         }
 
-        // Copia a lista para não modificar os dados congelados dentro do asset
+        // Copy the list so the asset data remains unchanged.
         map = new List<TargetData>(mapAsset.GeneratedMap);
 
-        if (mapAsset.mapSettings != null)
+        if (mapAsset.MapSettings != null)
         {
-            mapHitWindow    = mapAsset.mapSettings.hitWindow;
-            mapPerfectWindow = mapAsset.mapSettings.perfectWindow;
+            mapHitWindow    = mapAsset.MapSettings.hitWindow;
+            mapPerfectWindow = mapAsset.MapSettings.perfectWindow;
         }
         else
         {
-            Debug.LogWarning($"TargetMapPlayer.LoadMap: asset '{mapAsset.name}' sem MapSettings, usando valores padrão.");
+            Debug.LogWarning($"TargetMapPlayer.LoadMap: asset '{mapAsset.name}' has no MapSettings; using defaults.");
             mapHitWindow    = 0.2f;
             mapPerfectWindow = 0.08f;
         }
 
-        Debug.Log($"Mapa '{mapAsset.name}' carregado com {map.Count} alvos.");
+        Debug.Log($"Map '{mapAsset.name}' loaded with {map.Count} targets.");
     }
 
     public void ResetMap()

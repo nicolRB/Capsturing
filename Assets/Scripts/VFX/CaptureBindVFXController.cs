@@ -3,25 +3,25 @@ using UnityEngine;
 
 public class CaptureBindVFXController : MonoBehaviour
 {
-    [Header("References")]
-    public Renderer manaBallRenderer;
-    public Renderer lightCenterRenderer;
-    public Renderer manaChainRenderer;
+    [Header("ReferCaptureBindVFXControllerences")]
+    [SerializeField] private Renderer manaBallRenderer;
+    [SerializeField] private Renderer lightCenterRenderer;
+    [SerializeField] private Renderer manaChainRenderer;
 
     [Header("Timing (Inspector-tunable)")]
-    public float sphereStart = 0f;
-    public float sphereDuration = 0.3f;
+    [SerializeField] private float sphereStart = 0f;
+    [SerializeField] private float sphereDuration = 0.3f;
 
-    public float lightStart = 0.15f;
-    public float lightDuration = 0.3f;
+    [SerializeField] private float lightStart = 0.15f;
+    [SerializeField] private float lightDuration = 0.3f;
 
-    public float chainStart = 0.25f;
-    public float chainDuration = 0.5f;
+    [SerializeField] private float chainStart = 0.25f;
+    [SerializeField] private float chainDuration = 0.5f;
 
     [Header("Shader Property Names")]
-    public string sphereProgressProperty = "_Progress";
-    public string lightProgressProperty = "_Progress";
-    public string chainProgressProperty = "_Progress";
+    [SerializeField] private string sphereProgressProperty = "_Progress";
+    [SerializeField] private string lightProgressProperty = "_Progress";
+    [SerializeField] private string chainProgressProperty = "_Progress";
 
     private float elapsed = 0f;
     private MaterialPropertyBlock block;
@@ -60,10 +60,10 @@ public class CaptureBindVFXController : MonoBehaviour
         if (duration <= 0f)
             return currentElapsed >= startTime ? 1f : -0.01f;
 
-        // Normaliza o tempo de 0 a 1
+        // Normalizes the time from 0 to 1
         float t = Mathf.Clamp01((currentElapsed - startTime) / duration);
 
-        // Mapeia o progresso de -0.01f até 1.0f
+        // Maps the progress from -0.01f to 1.0f
         return Mathf.Lerp(-0.01f, 1f, t);
     }
 

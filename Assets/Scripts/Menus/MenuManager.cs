@@ -11,25 +11,32 @@ using UnityEditor;
 public class MenuManager : MonoBehaviour
 {
     [Header("Menus")]
-    public GameObject pauseMenu;
-    public GameObject saveLoadMenu;
-    public GameObject runicStorageMenu;
-    public GameObject settingsMenu;
-    public GameObject currentMenu;
-    public List<GameObject> previousMenus = new List<GameObject>();
+    [SerializeField] private GameObject pauseMenu;
+    [SerializeField] private GameObject saveLoadMenu;
+    [SerializeField] private GameObject runicStorageMenu;
+    [SerializeField] private GameObject settingsMenu;
+    private GameObject currentMenu;
+    private readonly List<GameObject> previousMenus = new List<GameObject>();
+
+    public GameObject CurrentMenu => currentMenu;
 
     [Header("Other References")]
-    public PlayerController player;
+    [SerializeField] private PlayerController player;
 
-    [Header("Menu Variables")]
-    public bool onGame = true; // can't access pause and other menus on main menu
-    public bool isPaused = false;
+    public PlayerController Player => player;
+
+    [Header("Menu State")]
+    [Tooltip("Enables pause and gameplay menus while the player is in the game.")]
+    [SerializeField] private bool onGame = true;
+    private bool isPaused = false;
+
+    public bool IsPaused => isPaused;
 
     void Start()
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
         if (pauseMenu == null) pauseMenu = GameObject.Find("PauseMenu");
-        Resume(); // ensure correct initial state
+        Resume();
         if (saveLoadMenu != null) saveLoadMenu.SetActive(false);
         if (runicStorageMenu != null) runicStorageMenu.SetActive(false);
         if (settingsMenu != null) settingsMenu.SetActive(false);
@@ -53,9 +60,9 @@ public class MenuManager : MonoBehaviour
         currentMenu = menu;
         currentMenu.SetActive(true);
 
-        if (player != null && player.playerHUD != null)
+        if (player != null && player.PlayerHUD != null)
         {
-            player.playerHUD.SetActive(false);
+            player.PlayerHUD.SetActive(false);
         }
     }
 
@@ -76,9 +83,9 @@ public class MenuManager : MonoBehaviour
             currentMenu.SetActive(false);
             currentMenu = null;
 
-            if (!isPaused && player != null && player.playerHUD != null)
+            if (!isPaused && player != null && player.PlayerHUD != null)
             {
-                player.playerHUD.SetActive(true);
+                player.PlayerHUD.SetActive(true);
             }
         }
     }
@@ -93,7 +100,7 @@ public class MenuManager : MonoBehaviour
 
         currentMenu = pauseMenu;
 
-        player.playerHUD.SetActive(false);
+        player.PlayerHUD.SetActive(false);
 
         pauseMenu.SetActive(true);
 
@@ -108,7 +115,7 @@ public class MenuManager : MonoBehaviour
 
         pauseMenu.SetActive(false);
 
-        if (player.castState != PlayerController.CastState.Channeling) player.playerHUD.SetActive(true);
+        if (player.CastingState != PlayerController.CastState.Channeling) player.PlayerHUD.SetActive(true);
 
         Time.timeScale = 1f;
     }

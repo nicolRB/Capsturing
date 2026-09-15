@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class DeathZone : MonoBehaviour
 {
-    public Transform respawnPoint;
+    [SerializeField] private Transform respawnPoint;
 
     private void OnTriggerEnter(Collider other)
     {

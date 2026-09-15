@@ -22,24 +22,24 @@ public class RunicInjectorWindow : EditorWindow
     private float customMagicDefense;
     private RunicSpecies lastSelectedSpecies;
 
-    [MenuItem("Runicos/Injetor de Rúnicos")]
+    [MenuItem("Runic/Runic Injector")]
     public static void ShowWindow()
     {
-        GetWindow<RunicInjectorWindow>("Injetor de Rúnicos");
+        GetWindow<RunicInjectorWindow>("Runic Injector");
     }
 
     private void OnGUI()
     {
-        GUILayout.Label("Ferramenta de Injeção de Rúnicos", EditorStyles.boldLabel);
+        GUILayout.Label("Runic Injection Tool", EditorStyles.boldLabel);
 
-        targetSaveFile = EditorGUILayout.TextField("Nome do Save", targetSaveFile);
-        selectedSpecies = EditorGUILayout.ObjectField("Espécie", selectedSpecies, typeof(RunicSpecies), false) as RunicSpecies;
+        targetSaveFile = EditorGUILayout.TextField("Save Name", targetSaveFile);
+        selectedSpecies = EditorGUILayout.ObjectField("Species", selectedSpecies, typeof(RunicSpecies), false) as RunicSpecies;
         if (selectedSpecies != lastSelectedSpecies)
         {
             lastSelectedSpecies = selectedSpecies;
             LoadSpeciesDefaults();
         }
-        useCustomValues = EditorGUILayout.Toggle("Usar valores customizados", useCustomValues);
+        useCustomValues = EditorGUILayout.Toggle("Use Custom Values", useCustomValues);
 
         if (useCustomValues)
         {
@@ -47,19 +47,19 @@ public class RunicInjectorWindow : EditorWindow
         }
         else
         {
-            EditorGUILayout.HelpBox("Ícone, modelo, atributos, elementos e habilidades serão copiados da espécie. O nível será 1 e o XP será 0.", MessageType.Info);
+            EditorGUILayout.HelpBox("The icon, model, stats, elements, and skills will be copied from the species. Level will be 1 and XP will be 0.", MessageType.Info);
         }
 
-        addToParty = EditorGUILayout.Toggle("Adicionar à Party", addToParty);
+        addToParty = EditorGUILayout.Toggle("Add to Party", addToParty);
 
         using (new EditorGUI.DisabledScope(selectedSpecies == null))
         {
-            if (GUILayout.Button("Injetar Rúnico no Save"))
+            if (GUILayout.Button("Inject Runic into Save"))
             {
                 InjectRunicToSave();
             }
 
-            if (GUILayout.Button("Injetar Rúnico na Box de Runtime"))
+            if (GUILayout.Button("Inject Runic into Runtime Box"))
             {
                 InjectRunicToRuntimeBox();
             }
@@ -68,22 +68,22 @@ public class RunicInjectorWindow : EditorWindow
 
     private void DrawCustomFields()
     {
-        customNickname = EditorGUILayout.TextField("Apelido (Opcional)", customNickname);
-        level = Mathf.Max(1, EditorGUILayout.IntField("Nível", level));
-        experience = Mathf.Max(0, EditorGUILayout.IntField("Experiência", experience));
+        customNickname = EditorGUILayout.TextField("Nickname (Optional)", customNickname);
+        level = Mathf.Max(1, EditorGUILayout.IntField("Level", level));
+        experience = Mathf.Max(0, EditorGUILayout.IntField("Experience", experience));
 
-        EditorGUILayout.LabelField("Visual", EditorStyles.boldLabel);
-        customIcon = EditorGUILayout.ObjectField("Ícone", customIcon, typeof(Sprite), false) as Sprite;
-        customModel = EditorGUILayout.ObjectField("Modelo", customModel, typeof(GameObject), false) as GameObject;
+        EditorGUILayout.LabelField("Visuals", EditorStyles.boldLabel);
+        customIcon = EditorGUILayout.ObjectField("Icon", customIcon, typeof(Sprite), false) as Sprite;
+        customModel = EditorGUILayout.ObjectField("Model", customModel, typeof(GameObject), false) as GameObject;
 
-        EditorGUILayout.LabelField("Atributos", EditorStyles.boldLabel);
-        customMaxHP = EditorGUILayout.FloatField("HP Máximo", customMaxHP);
-        customCurrentHP = EditorGUILayout.FloatField("HP Atual", customCurrentHP);
-        customAttack = EditorGUILayout.FloatField("Ataque", customAttack);
-        customDefense = EditorGUILayout.FloatField("Defesa", customDefense);
-        customSpeed = EditorGUILayout.FloatField("Velocidade", customSpeed);
-        customMagic = EditorGUILayout.FloatField("Magia", customMagic);
-        customMagicDefense = EditorGUILayout.FloatField("Defesa Mágica", customMagicDefense);
+        EditorGUILayout.LabelField("Stats", EditorStyles.boldLabel);
+        customMaxHP = EditorGUILayout.FloatField("Max HP", customMaxHP);
+        customCurrentHP = EditorGUILayout.FloatField("Current HP", customCurrentHP);
+        customAttack = EditorGUILayout.FloatField("Attack", customAttack);
+        customDefense = EditorGUILayout.FloatField("Defense", customDefense);
+        customSpeed = EditorGUILayout.FloatField("Speed", customSpeed);
+        customMagic = EditorGUILayout.FloatField("Magic", customMagic);
+        customMagicDefense = EditorGUILayout.FloatField("Magic Defense", customMagicDefense);
     }
 
     private void LoadSpeciesDefaults()
@@ -108,7 +108,7 @@ public class RunicInjectorWindow : EditorWindow
     {
         if (SaveManager.Instance == null)
         {
-            EditorUtility.DisplayDialog("Erro", "O SaveManager não foi encontrado na cena ativa. Entre no modo Play primeiro.", "OK");
+            EditorUtility.DisplayDialog("Error", "SaveManager was not found in the active scene. Enter Play mode first.", "OK");
             return;
         }
 
@@ -122,23 +122,23 @@ public class RunicInjectorWindow : EditorWindow
         
         saveData.boxStorage.Add(newRunic);
 
-        // Salva de volta
+        // Save the updated data.
         SaveManager.Instance.SaveGame(targetSaveFile, saveData);
-        EditorUtility.DisplayDialog("Sucesso", $"Rúnico da espécie '{selectedSpecies.speciesName}' injetado com sucesso no save '{targetSaveFile}'!", "OK");
+        EditorUtility.DisplayDialog("Success", $"Runic species '{selectedSpecies.speciesName}' was injected into save '{targetSaveFile}'.", "OK");
     }
 
     private void InjectRunicToRuntimeBox()
     {
         if (RunicStorageManager.Instance == null)
         {
-            EditorUtility.DisplayDialog("Erro", "O RunicStorageManager não foi encontrado na cena ativa. Entre no modo Play primeiro.", "OK");
+            EditorUtility.DisplayDialog("Error", "RunicStorageManager was not found in the active scene. Enter Play mode first.", "OK");
             return;
         }
 
         RunicSaveData newRunic = CreateRunicData();
 
         RunicStorageManager.Instance.AddCapturedRunic(newRunic);
-        EditorUtility.DisplayDialog("Sucesso", $"Rúnico da espécie '{selectedSpecies.speciesName}' injetado com sucesso na box de runtime!", "OK");
+        EditorUtility.DisplayDialog("Success", $"Runic species '{selectedSpecies.speciesName}' was injected into the runtime box.", "OK");
     }
 
     private RunicSaveData CreateRunicData()
@@ -177,10 +177,9 @@ public class RunicInjectorWindow : EditorWindow
             runicInstanceId = System.Guid.NewGuid().ToString(),
             speciesId = selectedSpecies.speciesId,
             nickname = useCustomValues && !string.IsNullOrWhiteSpace(customNickname) ? customNickname : selectedSpecies.speciesName,
-            runicIcon = useCustomValues && customIcon != null ? customIcon : selectedSpecies.speciesIcon,
-            runicModel = useCustomValues && customModel != null
-                ? customModel
-                : selectedSpecies.speciesModels != null && selectedSpecies.speciesModels.Count > 0 ? selectedSpecies.speciesModels[0] : null,
+            modelIndex = useCustomValues && customModel != null && selectedSpecies.speciesModels != null
+                ? Mathf.Max(0, selectedSpecies.speciesModels.IndexOf(customModel))
+                : 0,
             level = useCustomValues ? level : 1,
             experience = useCustomValues ? experience : 0,
             currentHP = useCustomValues ? customCurrentHP : defaultHP,

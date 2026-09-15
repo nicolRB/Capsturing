@@ -1,21 +1,31 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class ChannelingGameScript : MonoBehaviour
 {
-    [Header("Casting Stats")]
-    public int currentTargetIndex = 0;
-    public int hits;
-    public int perfects;
-    public int misses;
-    public int totalTargets;
+    [Header("Channeling Stats")]
+    [Tooltip("Index of the target currently accepting input.")]
+    [SerializeField] private int currentTargetIndex = 0;
+    [Tooltip("Number of targets hit within any valid window.")]
+    [SerializeField] private int hits;
+    [Tooltip("Number of targets hit within the perfect window.")]
+    [SerializeField] private int perfects;
+    [Tooltip("Number of targets missed or clicked outside the valid window.")]
+    [SerializeField] private int misses;
+    [SerializeField] private int totalTargets;
+
+    public int CurrentTargetIndex => currentTargetIndex;
+    public int Hits => hits;
+    public int Perfects => perfects;
+    public int Misses => misses;
+    public int TotalTargets => totalTargets;
 
     [Header("References")]
-    public PlayerController player;
-    public ComboCounter comboCounter;
-    public TargetMapPlayer targetMapPlayer;
+    [SerializeField] private PlayerController player;
+    [SerializeField] private ComboCounter comboCounter;
+    [SerializeField] private TargetMapPlayer targetMapPlayer;
+    public PlayerController Player => player;
+    public TargetMapPlayer MapPlayer => targetMapPlayer;
 
     private bool resolved = false;
 
@@ -65,8 +75,8 @@ public class ChannelingGameScript : MonoBehaviour
         comboCounter.ResetCombo();
         targetMapPlayer.ResetMap();
 
-        totalTargets = targetMapPlayer.map != null
-            ? targetMapPlayer.map.Count
+        totalTargets = targetMapPlayer.Map != null
+            ? targetMapPlayer.Map.Count
             : 0;
 
         foreach (Transform child in transform)

@@ -3,38 +3,47 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using System;
 
-public class SpellcastingScript : MonoBehaviour
+public class SpellcastingCoordinator : MonoBehaviour
 {
     [Header("References")]
-    public PlayerController player;
-    public ChannelingGameScript channelingGame;
-    public TargetMapPlayer targetMapPlayer;
-    public PointTargetScript pointTarget;
-    public GameObject castingUI;
-    public GameObject spellList;
-    public SpellSelectUI spellSelectUI;
-    public ChannelingPercentageCounterScript percentageCounter;
-    public PercentageResultScript percentageResult;
+    [SerializeField] private PlayerController player;
+    [SerializeField] private ChannelingGameScript channelingGame;
+    [SerializeField] private TargetMapPlayer targetMapPlayer;
+    [SerializeField] private PointTargetScript pointTarget;
+    [SerializeField] private GameObject castingUI;
+    [SerializeField] private GameObject spellList;
+    [SerializeField] private SpellSelectUI spellSelectUI;
+    [SerializeField] private ChannelingPercentageCounterScript percentageCounter;
+    [SerializeField] private PercentageResultUI percentageResult;
+
+    public GameObject CastingUI => castingUI;
+    public TargetMapPlayer TargetMapPlayer => targetMapPlayer;
+    public ChannelingGameScript ChannelingGame => channelingGame;
+    public ChannelingPercentageCounterScript PercentageCounter => percentageCounter;
+    public PercentageResultUI PercentageResult => percentageResult;
 
     [Header("Spells")]
-    public SpellBase[] spells;
-    public int spellIndex = 0;
+    [SerializeField] private SpellBase[] spells;
+    [SerializeField] private int spellIndex = 0;
 
-    public List<float> spellCooldowns = new List<float>();
+    public SpellBase[] Spells => spells;
+    public int SpellIndex => spellIndex;
+
+    [SerializeField] private List<float> spellCooldowns = new List<float>();
+
+    public List<float> SpellCooldowns => spellCooldowns;
 
     private SpellBase CurrentSpell =>
         (spells != null && spells.Length > 0)
             ? spells[Mathf.Clamp(spellIndex, 0, spells.Length - 1)]
             : null;
 
-    public SpellBase.SpellType currentSpellType;
+    [SerializeField] private SpellBase.SpellType currentSpellType;
 
+    public SpellBase.SpellType CurrentSpellType => currentSpellType;
     void Start()
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
-
-        if (player != null && player.cameraCollision == null)
-            player.cameraCollision = FindFirstObjectByType<CameraCollision>();
 
         if (channelingGame == null) channelingGame = FindFirstObjectByType<ChannelingGameScript>();
 
@@ -45,14 +54,14 @@ public class SpellcastingScript : MonoBehaviour
         if (spellSelectUI == null) spellSelectUI = FindFirstObjectByType<SpellSelectUI>();
 
         if (castingUI != null) castingUI.SetActive(false);
-        else Debug.LogWarning("SpellcastingScript: castingUI GameObject is not assigned.");
+        else Debug.LogWarning("SpellcastingCoordinator: castingUI GameObject is not assigned.");
 
         if (spellList != null) UpdateSpellList(); 
-        else Debug.LogWarning("SpellcastingScript: SpellList GameObject is not assigned.");
+        else Debug.LogWarning("SpellcastingCoordinator: SpellList GameObject is not assigned.");
 
         if (percentageCounter == null) percentageCounter = FindFirstObjectByType<ChannelingPercentageCounterScript>();
 
-        if (percentageResult == null) percentageResult = FindFirstObjectByType<PercentageResultScript>();
+        if (percentageResult == null) percentageResult = FindFirstObjectByType<PercentageResultUI>();
     }
 
     void Update()
@@ -64,30 +73,30 @@ public class SpellcastingScript : MonoBehaviour
 
     void HandleSpellSelection()
     { 
-        if (player.castState != PlayerController.CastState.Idle || player.menuManager.isPaused) return;
+        if (player.CastingState != PlayerController.CastState.Idle || player.MenuManager.IsPaused) return;
 
-        // método de seleção de feitiço por scroll do mouse
+        // Select spells with the mouse wheel.
         float scrollValue = -Mouse.current.scroll.ReadValue().y;
         
         if (scrollValue > 0f)
         {
             spellIndex = (spellIndex + 1) % spells.Length;
-            Debug.Log($"Selected spell: {CurrentSpell?.spellName}");
+            Debug.Log($"Selected spell: {CurrentSpell?.SpellName}");
         }
         else if (scrollValue < 0f)
         {
             spellIndex = (spellIndex - 1 + spells.Length) % spells.Length;
-            Debug.Log($"Selected spell: {CurrentSpell?.spellName}");
+            Debug.Log($"Selected spell: {CurrentSpell?.SpellName}");
         }
 
-        currentSpellType = CurrentSpell.spellType;
+        currentSpellType = CurrentSpell.Type;
     }
 
     void HandleCastInput()
     {
-        if (Keyboard.current.eKey.wasPressedThisFrame && player.menuManager.isPaused == false)
+        if (Keyboard.current.eKey.wasPressedThisFrame && player.MenuManager.IsPaused == false)
         {
-            if (player.castState == PlayerController.CastState.Idle)
+            if (player.CastingState == PlayerController.CastState.Idle)
             {
                 if (spellCooldowns[spellIndex] <= 0)
                 {
@@ -98,11 +107,11 @@ public class SpellcastingScript : MonoBehaviour
                     Debug.Log("Spell currently in cooldown. Time left: " + spellCooldowns[spellIndex]);
                 }
             }
-            else if (player.castState == PlayerController.CastState.Channeling
-                   || player.castState == PlayerController.CastState.Aiming) CancelCast();
+            else if (player.CastingState == PlayerController.CastState.Channeling
+                   || player.CastingState == PlayerController.CastState.Aiming) CancelCast();
         }
 
-        if (player.castState == PlayerController.CastState.Aiming 
+        if (player.CastingState == PlayerController.CastState.Aiming 
         && Mouse.current.leftButton.wasPressedThisFrame)
         {
             CastSpell();
@@ -111,41 +120,41 @@ public class SpellcastingScript : MonoBehaviour
 
     void BeginChannel()
     {
-        if (player == null || player.cameraCollision == null)
+        if (player == null || player.CameraCollision == null)
         {
-            Debug.LogError("SpellcastingScript: PlayerController or CameraCollision is not assigned.", this);
+            Debug.LogError("SpellcastingCoordinator: PlayerController or CameraCollision is not assigned.", this);
             return;
         }
 
         if (channelingGame == null)
         {
-            Debug.LogError("SpellcastingScript: ChannelingGameScript is not assigned.", this);
+            Debug.LogError("SpellcastingCoordinator: ChannelingGameScript is not assigned.", this);
             return;
         }
 
         Vector3 channelingPosition = channelingGame.transform.localPosition;
-        channelingPosition.x = player.cameraCollision.TargetSideOffset > 0f ? 500f : -500f;
+        channelingPosition.x = player.CameraCollision.TargetSideOffset > 0f ? 500f : -500f;
         channelingGame.transform.localPosition = channelingPosition;
         SpellBase spell = CurrentSpell;
         if (spell == null)
         {
-            Debug.LogWarning("SpellcastingScript: no spell selected.");
+            Debug.LogWarning("SpellcastingCoordinator: no spell selected.");
             return;
         }
         
-        if (spell.spellMap == null)
+        if (spell.SpellMap == null)
         {
             Debug.Log("Spell has no map. Delegating flow entirely to the spell.");
             
             spell.OnSpellResolved += HandleSpellResolved;
             
-            player.castState = PlayerController.CastState.Casting;
+            player.SetCastingState(PlayerController.CastState.Casting);
 
             spell.OnCastStart();
             return; 
         }
         
-        player.playerHUD.SetActive(false);
+        player.PlayerHUD.SetActive(false);
 
         if (castingUI != null)
         {
@@ -157,7 +166,7 @@ public class SpellcastingScript : MonoBehaviour
             castingUI.SetActive(true);
         }
 
-        targetMapPlayer.LoadMap(spell.spellMap);
+        targetMapPlayer.LoadMap(spell.SpellMap);
         channelingGame.ResetCast();
         channelingGame.OnChannelingResolved += HandleChannelResolved;
         percentageCounter?.SetValues(
@@ -166,14 +175,14 @@ public class SpellcastingScript : MonoBehaviour
             0f, 0f, 0f,
             1f);
 
-        player.castState = PlayerController.CastState.Channeling;
+        player.SetCastingState(PlayerController.CastState.Channeling);
 
         spell.OnCastStart();
     }
 
     void CastSpell()
     {
-        player.castState = PlayerController.CastState.Casting;
+        player.SetCastingState(PlayerController.CastState.Casting);
         CurrentSpell.OnSpellResolved += HandleSpellResolved;
         CurrentSpell.OnSpellCast();
     }
@@ -183,8 +192,8 @@ public class SpellcastingScript : MonoBehaviour
         channelingGame.OnChannelingResolved -=
             HandleChannelResolved;
 
-        // Impede processamento de eventos atrasados.
-        if (player.castState !=
+        // Ignore delayed events from a previous cast.
+        if (player.CastingState !=
             PlayerController.CastState.Channeling)
             return;
 
@@ -192,16 +201,12 @@ public class SpellcastingScript : MonoBehaviour
                 SpellBase.SpellType.Projectile ||
             currentSpellType ==
                 SpellBase.SpellType.Targeted)
-        {
-            player.castState =
-                PlayerController.CastState.Aiming;
-        }
+            player.SetCastingState(PlayerController.CastState.Aiming);
         else
         {
-            player.castState =
-                PlayerController.CastState.Casting;
+            player.SetCastingState(PlayerController.CastState.Casting);
 
-            player.playerHUD.SetActive(true);
+            player.PlayerHUD.SetActive(true);
         }
 
         CurrentSpell?.OnChannelComplete(result);
@@ -213,8 +218,8 @@ public class SpellcastingScript : MonoBehaviour
         if (percentageCounter != null)
         {
             percentageResult?.ShowResult(
-                percentageCounter.percentage,
-                percentageCounter.percentageText.color
+                percentageCounter.Percentage,
+                percentageCounter.PercentageText.color
             );
         }
 
@@ -228,8 +233,8 @@ public class SpellcastingScript : MonoBehaviour
     void HandleSpellResolved()
     {
         CurrentSpell.OnSpellResolved -= HandleSpellResolved;
-        spellCooldowns[spellIndex] = CurrentSpell.cooldownTime;
-        player.castState = PlayerController.CastState.Idle;
+        spellCooldowns[spellIndex] = CurrentSpell.CooldownTime;
+        player.SetCastingState(PlayerController.CastState.Idle);
         if (castingUI != null) castingUI.SetActive(false);
     }
 
@@ -237,10 +242,10 @@ public class SpellcastingScript : MonoBehaviour
     {
         channelingGame.OnChannelingResolved -= HandleChannelResolved;
         CurrentSpell?.Cancel();
-        spellCooldowns[spellIndex] = CurrentSpell.cooldownTime;
+        spellCooldowns[spellIndex] = CurrentSpell.CooldownTime;
         if (castingUI != null) castingUI.SetActive(false);
-        player.castState = PlayerController.CastState.Idle;
-        player.playerHUD.SetActive(true);
+        player.SetCastingState(PlayerController.CastState.Idle);
+        player.PlayerHUD.SetActive(true);
         Debug.Log("Cast cancelled.");
     }
 
@@ -269,7 +274,7 @@ public class SpellcastingScript : MonoBehaviour
 
     void UpdateSpellList()
     {
-        // Reads SpellBase components from the SpellList GameObject and updates the spells array
+        // Read SpellBase components from the spell list and update the spell array.
         if (spellList != null)
         {
             SpellBase[] spellComponents = spellList.GetComponentsInChildren<SpellBase>();
@@ -277,13 +282,13 @@ public class SpellcastingScript : MonoBehaviour
             spellCooldowns = new List<float>(new float[spells.Length]);
             if (spellSelectUI != null)
             {
-                spellSelectUI.spellcastingScript = this;
+                spellSelectUI.Setup(this);
                 spellSelectUI.UpdateSpellList();
             }
         }
         else
         {
-            Debug.LogWarning("SpellcastingScript: SpellList GameObject is not assigned.");
+            Debug.LogWarning("SpellcastingCoordinator: SpellList GameObject is not assigned.");
         }
     }
 }

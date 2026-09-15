@@ -2,14 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class SaveLoadMenuScript : MonoBehaviour 
+public class SaveLoadMenu : MonoBehaviour 
 {
     [Header("References")]
-    public MenuManager menuManager; 
-    public SaveManager saveManager; 
-    public GameObject saveButtonPrefab; // O botão simples de "New Save"
-    public GameObject saveFilePrefab;   // O prefab de SaveSlotUI
-    public Transform savesList;
+    [SerializeField] private MenuManager menuManager; 
+    [SerializeField] private SaveManager saveManager; 
+    [SerializeField] private GameObject saveButtonPrefab;
+    [SerializeField] private GameObject saveFilePrefab;
+    [SerializeField] private Transform savesList;
 
     void Start()
     {
@@ -18,16 +18,16 @@ public class SaveLoadMenuScript : MonoBehaviour
 
     public void ViewAllSaves()
     {
-        // Limpa a lista atual
+        // Clear the current list.
         foreach (Transform child in savesList)
         {
             Destroy(child.gameObject);
         }
 
-        // 1. Cria o botão de Novo Jogo
+        // 1. Create the new-save button.
         CreateNewSaveButton("New Save");
 
-        // 2. Gera os painéis complexos para cada save existente
+        // 2. Create a slot for each existing save.
         foreach (string saveFileName in saveManager.GetSaveFiles())
         {
             CreateSaveFileSlot(saveFileName);
@@ -46,36 +46,36 @@ public class SaveLoadMenuScript : MonoBehaviour
 
     private void CreateSaveFileSlot(string fileName)
     {
-        // Instancia o prefab
+        // Instantiate the prefab.
         GameObject slotObj = Instantiate(saveFilePrefab, savesList);
         
-        // Pega o script que acabamos de criar
+        // Get the component from the new instance.
         SaveSlotUI slotUI = slotObj.GetComponent<SaveSlotUI>();
 
         if (slotUI != null)
         {
-            // Passa os dados e as funções (Expressões Lambda) para o slot configurar seus botões
+            // Pass data and callbacks so the slot can configure its buttons.
             slotUI.Setup(
                 fileName: fileName,
                 loadAction: (name) => LoadSave(name),
                 overwriteAction: (name) => OverwriteSave(name),
                 deleteAction: (name) => DeleteSave(name),
-                renameAction: (name) => RenameSave(fileName, name) // Passa o nome antigo e o novo
+                renameAction: (name) => RenameSave(fileName, name)
             );
         }
     }
 
-    // --  --
+    // --- Data ---
 
     public SaveDataContainer GetCurrentGameData()
     {
         SaveDataContainer data = new SaveDataContainer();
-        menuManager.player.PopulateSaveData(data);
+        menuManager.Player.PopulateSaveData(data);
         RunicStorageManager.Instance.PopulateSaveData(data);
         return data;
     }
 
-    // --- Ações ---
+    // --- Actions ---
 
     public void NewSave()
     {
@@ -89,7 +89,7 @@ public class SaveLoadMenuScript : MonoBehaviour
     {
         SaveDataContainer loadedData = saveManager.LoadGame(saveFileName); 
         menuManager.CloseAllMenus(); 
-        menuManager.player.LoadPlayerData(loadedData);
+        menuManager.Player.LoadPlayerData(loadedData);
     }
 
     public void OverwriteSave(string saveFileName)
@@ -108,6 +108,6 @@ public class SaveLoadMenuScript : MonoBehaviour
     public void RenameSave(string oldFileName, string newFileName)
     {
         saveManager.RenameSaveFile(oldFileName, newFileName);
-        ViewAllSaves(); // Atualiza a lista visualmente
+        ViewAllSaves();
     }
 }

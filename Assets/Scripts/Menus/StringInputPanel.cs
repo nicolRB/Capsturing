@@ -5,9 +5,9 @@ using UnityEngine.UI;
 public class StringInputPanel : MonoBehaviour
 {
     [Header("UI References")]
-    public RectTransform boxRectTransform; // O RectTransform do filho "InputBox"
-    public TMP_Text promptText;
-    public TMP_InputField inputField;
+    [SerializeField] private RectTransform boxRectTransform;
+    [SerializeField] private TMP_Text promptText;
+    [SerializeField] private TMP_InputField inputField;
     
     private System.Action<string> onAcceptCallback;
 
@@ -24,7 +24,7 @@ public class StringInputPanel : MonoBehaviour
         onAcceptCallback = onResult;
     }
 
-    // Vinculado ao OnClick do AcceptButton no Inspector
+    // Called by the AcceptButton OnClick event in the Inspector.
     public void AcceptString()
     {
         if (onAcceptCallback != null)
@@ -32,7 +32,7 @@ public class StringInputPanel : MonoBehaviour
             onAcceptCallback.Invoke(inputField.text);
         }
         
-        // Como este script está no "StringInput" (raiz), destruímos o próprio gameObject
+        // This script is on the root panel, so destroy the panel itself.
         Destroy(gameObject); 
     }
 }

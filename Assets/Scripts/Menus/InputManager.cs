@@ -2,11 +2,13 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    public static InputManager Instance { get; private set; } // Singleton para facilitar chamar de qualquer lugar
+    public static InputManager Instance { get; private set; } // Global access point for input panels.
 
     [Header("References")]
-    public GameObject stringInputPrefab;
-    public Transform menusCanvas; // Arraste o MenusCanvas para cá no Inspector
+    [SerializeField]
+    private GameObject stringInputPrefab;
+    [SerializeField]
+    private Transform menusCanvas;
 
     private void Awake()
     {
@@ -14,13 +16,13 @@ public class InputManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    // Você pode chamar isso de qualquer outro script usando: InputManager.Instance.CallStringInput(...)
+    // Opens a string input panel and invokes the callback when the user accepts it.
     public void CallStringInput(string prompt, string placeholder, float boxWidth, float boxHeight, Vector2 coordinates, System.Action<string> onResult)
     {
-        // Instancia o prefab sendo filho do MenusCanvas
+        // Instantiate the prefab as a child of the menus canvas.
         GameObject inputScreen = Instantiate(stringInputPrefab, menusCanvas);
         
-        // Pega o script que controla a janelinha
+        // Get the component that controls the input panel.
         StringInputPanel panel = inputScreen.GetComponent<StringInputPanel>();
         
         if (panel != null)

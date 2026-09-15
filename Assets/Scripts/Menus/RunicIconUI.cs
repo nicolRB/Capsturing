@@ -2,31 +2,56 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class RunicIconScript : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class RunicIconUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Slot Information/Status")]
-    public int slotNumber;
-    public bool inParty = false; 
-    public bool partySlot = false;
+    private int slotNumber;
+    private bool inParty;
+    private bool partySlot;
 
     [Header("Visuals")]
-    public float originalScale;
-    public float hoverScale;
-    public float selectedScale;
-    public float targetScale;
-    public bool isSelected = false;
-    public bool counterpartSelected = false;
-    public Color emptyColor = Color.gray;
+    private float originalScale;
+    [SerializeField] private float hoverScale;
+    [SerializeField] private float selectedScale;
+    private float targetScale;
+    private bool isSelected;
+    private bool counterpartSelected;
+    [SerializeField] private Color emptyColor = Color.gray;
 
     [Header("Counterpart Highlight")]
-    public Image counterpartOutlineImage; // um Image extra no prefab, atrás do Frame, com sprite de borda
-    public Color counterpartHighlightColor = new Color(1f, 0.85f, 0.2f, 1f);
-    public float counterpartFadeSpeed = 6f;
+    [Tooltip("Optional outline image behind the frame used to highlight the matching slot.")]
+    [SerializeField] private Image counterpartOutlineImage;
+    [SerializeField] private Color counterpartHighlightColor = new Color(1f, 0.85f, 0.2f, 1f);
+    [SerializeField] private float counterpartFadeSpeed = 6f;
 
     [Header("References")]
-    public GameObject frame;
-    public GameObject runicIconImage;
-    public RunicsMenuScript runicsMenuScript;
+    [SerializeField] private GameObject frame;
+    [SerializeField] private GameObject runicIconImage;
+    private RunicsMenu runicsMenuScript;
+
+    public int SlotNumber => slotNumber;
+    public bool IsInParty => inParty;
+    public bool IsPartySlot => partySlot;
+    public float OriginalScale => originalScale;
+    public float SelectedScale => selectedScale;
+
+    public void ConfigureSlot(int number, bool isPartySlot, RunicsMenu menu)
+    {
+        slotNumber = number;
+        partySlot = isPartySlot;
+        runicsMenuScript = menu;
+    }
+
+    public void SetSelected(bool selected)
+    {
+        isSelected = selected;
+        targetScale = selected ? originalScale * selectedScale : originalScale;
+    }
+
+    public void ResetTargetScale()
+    {
+        targetScale = originalScale;
+    }
 
     void Start()
     {
@@ -35,7 +60,7 @@ public class RunicIconScript : MonoBehaviour, IPointerClickHandler, IPointerEnte
         if (runicIconImage == null) 
             runicIconImage = transform.Find("IconMask/RunicIconImage").gameObject;
         if (runicsMenuScript == null) 
-            runicsMenuScript = transform.parent.parent.GetComponent<RunicsMenuScript>();
+            runicsMenuScript = transform.parent.parent.GetComponent<RunicsMenu>();
 
         originalScale = transform.localScale.x;
         targetScale = originalScale;
@@ -62,7 +87,7 @@ public class RunicIconScript : MonoBehaviour, IPointerClickHandler, IPointerEnte
     {
         if (frame == null) return;
         
-        // Slot de party fica sempre em 0°. Slot da box usa o inParty (-90° ou 0°).
+        // Party slots always use -90 degrees; box slots rotate based on party membership.
         float targetRotation = partySlot ? -90f : (inParty ? -90f : 0f); 
 
         Vector3 rotation = frame.transform.eulerAngles;
@@ -95,14 +120,18 @@ public class RunicIconScript : MonoBehaviour, IPointerClickHandler, IPointerEnte
         }
         else
         {
-            inParty = targetIsInParty; // Deixa o Update() fazer o Lerp suave
+            inParty = targetIsInParty;
         }
 
         Image iconImage = runicIconImage.GetComponent<Image>();
 
-        if (runicData != null && runicData.runicIcon != null)
+        Sprite runicIcon = runicData != null && runicsMenuScript.StorageManager != null
+            ? runicsMenuScript.StorageManager.GetRunicIcon(runicData)
+            : null;
+
+        if (runicIcon != null)
         {
-            iconImage.sprite = runicData.runicIcon;
+            iconImage.sprite = runicIcon;
             iconImage.enabled = true;
             iconImage.color = Color.white;
         }
@@ -145,36 +174,34 @@ public class RunicIconScript : MonoBehaviour, IPointerClickHandler, IPointerEnte
         if (eventData.button == PointerEventData.InputButton.Left) runicsMenuScript.SelectSlot(gameObject);
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            if (runicsMenuScript.selectedSlot == gameObject)
+            if (runicsMenuScript.SelectedSlot == gameObject)
             {
-                runicsMenuScript.selectedSlot = null;
-                isSelected = false;
+                runicsMenuScript.ClearSelection(gameObject);
             }
-            else if (partySlot)
+            else if (IsPartySlot)
             {
-                runicsMenuScript.runicStorageManager.RemoveFromPartyBySlot(slotNumber);
-                isSelected = false;
+                runicsMenuScript.StorageManager.RemoveFromPartyBySlot(SlotNumber);
+                SetSelected(false);
             }
             else
             {
-                if (!inParty)
+                if (!IsInParty)
                 {    
-                    int partySlotIndex = runicsMenuScript.runicStorageManager.GetNextAvailablePartySlot();
+                    int partySlotIndex = runicsMenuScript.StorageManager.GetNextAvailablePartySlot();
                     if (partySlotIndex != -1) 
                     {
-                        runicsMenuScript.runicStorageManager.MoveToPartyBySlot(slotNumber, partySlotIndex);
-                        // O inParty vai mudar organicamente e acionar o Lerp no próximo Refresh/Update
+                        runicsMenuScript.StorageManager.MoveToPartyBySlot(SlotNumber, partySlotIndex);
                     }
                 }
                 else
                 {
-                    // Se já estiver na party, acha qual slot da party ele ocupa e remove
-                    int partyIndex = runicsMenuScript.runicStorageManager.GetPartySlotIndex(
-                        runicsMenuScript.runicStorageManager.GetBoxRunicBySlot(slotNumber)?.runicInstanceId
+                    // If already in the party, find its party slot and remove it.
+                    int partyIndex = runicsMenuScript.StorageManager.GetPartySlotIndex(
+                        runicsMenuScript.StorageManager.GetBoxRunicBySlot(SlotNumber)?.runicInstanceId
                     );
                     if (partyIndex != -1)
                     {
-                        runicsMenuScript.runicStorageManager.RemoveFromPartyBySlot(partyIndex);
+                        runicsMenuScript.StorageManager.RemoveFromPartyBySlot(partyIndex);
                     }
                 }
             }

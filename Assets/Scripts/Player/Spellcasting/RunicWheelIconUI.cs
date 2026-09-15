@@ -2,31 +2,36 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class RunicWheelIconScript : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class RunicWheelIconUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    private RunicWheelScript runicWheelScript;
-    public Image runicIcon;
-    public Sprite callbackSprite;
-    public bool isSummoned;
-    public GameObject icon;
-    public GameObject frame;
-    public string runicId;
-    public float angle;
+    [SerializeField] private RunicWheelUI runicWheelScript;
+    [SerializeField] private Image runicIcon;
+    [SerializeField] private Sprite callbackSprite;
+    [SerializeField] private bool isSummoned;
+    [SerializeField] private GameObject icon;
+    [SerializeField] private GameObject frame;
+    [SerializeField] private string runicId;
+    [SerializeField] private float angle;
 
     
-    public float originalScale;
-    public float hoverScale;
-    public float targetScale;
-    private Sprite normalSprite;
+    [SerializeField] private float originalScale;
+    [SerializeField] private float hoverScale;
+    [SerializeField] private float targetScale;
+    [SerializeField] private Sprite normalSprite;
 
     private void OnEnable()
     {
         if (runicWheelScript == null)
-            runicWheelScript = FindFirstObjectByType<RunicWheelScript>();
-        
-        frame = transform.Find("IconFrame").gameObject;
-        icon = transform.Find("IconMask/Icon").gameObject;
-        runicIcon = icon.GetComponent<Image>();
+            runicWheelScript = FindFirstObjectByType<RunicWheelUI>();
+            
+        if (frame == null)
+        frame = transform.Find("IconFrame")?.gameObject;
+
+        if (icon == null)
+            icon = transform.Find("IconMask/Icon")?.gameObject;
+
+        if (runicIcon == null && icon != null)
+            runicIcon = icon.GetComponent<Image>();
     }
 
     void Update()
@@ -34,11 +39,15 @@ public class RunicWheelIconScript : MonoBehaviour, IPointerClickHandler, IPointe
         ScaleUpdate();
     }
 
-    public void Setup(Sprite sprite, string id, float scale, bool summoned)
+    public void Setup(Sprite sprite, string id, float scale, float angle, bool summoned)
     {
         normalSprite = sprite;
+        originalScale = scale;
+        targetScale = scale;
         runicId = id;
         transform.localScale = new Vector3(scale, scale, scale);
+        this.angle = angle;
+        UpdateAngle();
         SetSummonedVisual(summoned);
     }
 
@@ -78,7 +87,7 @@ public class RunicWheelIconScript : MonoBehaviour, IPointerClickHandler, IPointe
     {
         transform.localScale = new Vector3(originalScale, originalScale, originalScale);
         targetScale = originalScale * hoverScale;
-        runicWheelScript.symbolTargetAngle = angle;
+        runicWheelScript.SetSymbolTargetAngle(angle);
     }
 
     public void OnPointerExit(PointerEventData eventData)

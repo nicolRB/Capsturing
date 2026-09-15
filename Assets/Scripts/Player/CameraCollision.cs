@@ -3,27 +3,23 @@ using UnityEngine.InputSystem;
 
 public class CameraCollision : MonoBehaviour
 {
-    public Transform pivot;
+    [SerializeField] private Transform pivot;
 
     [Header("Distance")]
-    public float distance = 4f;
-    public float minDistance = 0.5f;
-    public float smoothSpeed = 10f;
+    [SerializeField] private float distance = 4f;
+    [SerializeField] private float minDistance = 0.5f;
+    [SerializeField] private float smoothSpeed = 10f;
 
     [Header("Collision")]
-    public LayerMask collisionMask;
-    public float sphereRadius = 0.3f;
+    [SerializeField] private LayerMask collisionMask;
+    [SerializeField] private float sphereRadius = 0.3f;
 
     [Header("Offset (Shoulder)")]
-    public float sideOffset = 0.5f;
-    public float heightOffset = 0.3f;
-
-    [Header("Camera Target")]
-    public float lookSideOffset = 0.3f;
-    public float lookHeightOffset = 0.5f;
+    [SerializeField] private float sideOffset = 0.5f;
+    [SerializeField] private float heightOffset = 0.3f;
 
     [Header("Shoulder Smooth")]
-    public float shoulderSmoothSpeed = 8f;
+    [SerializeField] private float shoulderSmoothSpeed = 8f;
 
     private float currentDistance;
 
@@ -40,13 +36,20 @@ public class CameraCollision : MonoBehaviour
 
         // Initialize shoulder targets
         targetSideOffset = sideOffset;
-        targetLookSideOffset = lookSideOffset;
+
+        if (pivot == null)
+        {
+            Debug.LogError("CameraCollision: pivot is not assigned.", this);
+            enabled = false;
+            return;
+        }
     }
 
     void Update()
     {
         // Toggle shoulder side when Q is pressed
-        if (Keyboard.current.qKey.wasPressedThisFrame)
+        if (Keyboard.current != null &&
+            Keyboard.current.qKey.wasPressedThisFrame)
         {
             targetSideOffset = -targetSideOffset;
             targetLookSideOffset = -targetLookSideOffset;
@@ -81,7 +84,6 @@ public class CameraCollision : MonoBehaviour
 
         // Smoothly interpolate shoulder offset (left/right)
         sideOffset = Mathf.Lerp(sideOffset, targetSideOffset, Time.deltaTime * shoulderSmoothSpeed);
-        lookSideOffset = Mathf.Lerp(lookSideOffset, targetLookSideOffset, Time.deltaTime * shoulderSmoothSpeed);
 
         // Base camera position (behind the player)
         Vector3 basePosition = origin + backDir * currentDistance;

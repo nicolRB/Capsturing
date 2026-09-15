@@ -1,21 +1,43 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "NovaEspecieDeRunico", menuName = "Runico/Especie de Runico")]
+[CreateAssetMenu(fileName = "NewRunicSpecies", menuName = "Runic/Runic Species")]
 public class RunicSpecies : ScriptableObject
 {
-    public string speciesName;
-    public string speciesId;
-    public string description;
-    public Sprite speciesIcon;
-    public List<GameObject> speciesModels; // Lista de modelos que podem ser usados para instanciar o Runic
-    public float baseHP;
-    public float baseAttack;
-    public float baseDefense;
-    public float baseSpeed;
-    public float baseMagic;
-    public float baseMagicDefense;
-    public List<Element> elements;
-    public List<Skill> basicSkills; // Lista de habilidades sempre disponíveis para índivíduos da espécie
-    public List<Skill> skills; // Lista de habilidades que a espécie pode aprender
+    [Header("Identity")]
+    [SerializeField] private string speciesName;
+    [SerializeField] private string speciesId;
+    [SerializeField] private string description;
+    [Header("Visuals")]
+    [SerializeField] private Sprite speciesIcon;
+    [Tooltip("Models available when instantiating this species.")]
+    [SerializeField] private List<GameObject> speciesModels;
+    [Header("Base Stats")]
+    [SerializeField] private float baseHP;
+    [SerializeField] private float baseAttack;
+    [SerializeField] private float baseDefense;
+    [SerializeField] private float baseSpeed;
+    [SerializeField] private float baseMagic;
+    [SerializeField] private float baseMagicDefense;
+    [SerializeField] private List<Element> elements;
+    [Header("Abilities")]
+    [Tooltip("Skills always available to individuals of this species.")]
+    [SerializeField] private List<Skill> basicSkills;
+    [Tooltip("Skills that individuals of this species can learn.")]
+    [SerializeField] private List<Skill> skills;
+
+    public string SpeciesName => speciesName;
+    public string SpeciesId => speciesId;
+    public string Description => description;
+    public Sprite SpeciesIcon => speciesIcon;
+    public List<GameObject> SpeciesModels => speciesModels;
+    public float BaseHP => baseHP;
+    public float BaseAttack => baseAttack;
+    public float BaseDefense => baseDefense;
+    public float BaseSpeed => baseSpeed;
+    public float BaseMagic => baseMagic;
+    public float BaseMagicDefense => baseMagicDefense;
+    public List<Element> Elements => elements;
+    public List<Skill> BasicSkills => basicSkills;
+    public List<Skill> Skills => skills;
 }

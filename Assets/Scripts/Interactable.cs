@@ -4,10 +4,10 @@ using UnityEngine.Events;
 public class Interactable : MonoBehaviour
 {
     [Header("Interaction")]
-    public string interactionPrompt = "Interagir";
-    public UnityEvent onInteract;
+    [SerializeField] private string interactionPrompt = "Interagir";
+    [SerializeField] private UnityEvent onInteract;
 
-    // Chamado pelo PointTargetScript quando o jogador confirma a interação
+    // Called by PointTargetScript when player presses the interact button
     public void Interact()
     {
         onInteract?.Invoke();

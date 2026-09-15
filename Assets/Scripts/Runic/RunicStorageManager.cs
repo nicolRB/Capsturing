@@ -8,14 +8,20 @@ public class RunicStorageManager : MonoBehaviour
     public static event Action OnStorageChanged;
 
     [Header("Runtime Box")]
-    public List<RunicSaveData> boxStorage = new List<RunicSaveData>();
+    [SerializeField] private List<RunicSaveData> boxStorage = new List<RunicSaveData>();
+
+    public List<RunicSaveData> BoxStorage => boxStorage;
 
     [Header("Party")]
-    public List<string> partyIds = new List<string>();
-    public Runic activeSummonedRunic;
+    [SerializeField] private List<string> partyIds = new List<string>();
+
+    public List<string> PartyIds => partyIds;
 
     [Header("References")]
-    public PlayerController player;
+    [SerializeField] private PlayerController player;
+    [SerializeField] private RunicDatabase runicDatabase;
+
+    public PlayerController Player => player;
 
     private void Awake()
     {
@@ -36,12 +42,37 @@ public class RunicStorageManager : MonoBehaviour
     private void Start()
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
+        if (runicDatabase == null) runicDatabase = FindFirstObjectByType<RunicDatabase>();
         EnsurePartySize();
     }
 
-    private int MaxPartySize => player != null ? player.maxPartySize : 3;
+    public Sprite GetRunicIcon(RunicSaveData runicData)
+    {
+        RunicSpecies species = GetSpeciesForSaveData(runicData);
+        return species != null ? species.SpeciesIcon : null;
+    }
 
-    // Garante que partyIds sempre tenha exatamente maxPartySize slots
+    public GameObject GetRunicModel(RunicSaveData runicData)
+    {
+        RunicSpecies species = GetSpeciesForSaveData(runicData);
+        if (species == null || species.SpeciesModels == null || species.SpeciesModels.Count == 0)
+            return null;
+
+        int modelIndex = Mathf.Clamp(runicData.modelIndex, 0, species.SpeciesModels.Count - 1);
+        return species.SpeciesModels[modelIndex];
+    }
+
+    private RunicSpecies GetSpeciesForSaveData(RunicSaveData runicData)
+    {
+        if (runicData == null || runicDatabase == null || string.IsNullOrEmpty(runicData.speciesId))
+            return null;
+
+        return runicDatabase.GetSpeciesById(runicData.speciesId);
+    }
+
+    private int MaxPartySize => player != null ? player.MaxPartySize : 3;
+
+    // Keep the party list aligned with the player's maximum party size.
     private void EnsurePartySize()
     {
         while (partyIds.Count < MaxPartySize) partyIds.Add(null);
@@ -49,7 +80,7 @@ public class RunicStorageManager : MonoBehaviour
     }
 
     // ============================================================
-    // GETTERS
+    // LOOKUPS
     // ============================================================
 
     public RunicSaveData GetBoxRunicBySlot(int boxIndex)
@@ -141,8 +172,13 @@ public class RunicStorageManager : MonoBehaviour
 
     public void LoadPartyData(SaveDataContainer data)
     {
-        boxStorage = new List<RunicSaveData>(data.boxStorage);
-        partyIds = new List<string>(data.partyIds);
+        boxStorage = data.boxStorage != null
+            ? new List<RunicSaveData>(data.boxStorage)
+            : new List<RunicSaveData>();
+
+        partyIds = data.partyIds != null
+            ? new List<string>(data.partyIds)
+            : new List<string>();
         EnsurePartySize();
         NotifyStorageChanged();
     }
@@ -154,7 +190,7 @@ public class RunicStorageManager : MonoBehaviour
     }
 
     // ============================================================
-    // CAPTURA
+    // CAPTURE
     // ============================================================
 
     public void AddCapturedRunic(RunicSaveData capturedData)
@@ -168,10 +204,10 @@ public class RunicStorageManager : MonoBehaviour
     }
 
     // ============================================================
-    // REMOÇÃO
+    // REMOVAL
     // ============================================================
 
-    // Desmarca um slot da party (o rúnico continua na box)
+    // Clear a party slot without removing the runic from the box.
     public void RemoveFromPartyBySlot(int partySlot)
     {
         if (partySlot < 0 || partySlot >= partyIds.Count) return;
@@ -179,7 +215,7 @@ public class RunicStorageManager : MonoBehaviour
         NotifyStorageChanged();
     }
 
-    // Remove o rúnico da box inteiramente (e de qualquer slot de party que o referencie)
+    // Remove the runic from the box and from every party slot that references it.
     public void RemoveFromBoxByID(string runicId)
     {
         var runicData = boxStorage.Find(data => data.runicInstanceId == runicId);
@@ -205,11 +241,11 @@ public class RunicStorageManager : MonoBehaviour
     }
 
     // ============================================================
-    // MOVIMENTAÇÃO
+    // MOVEMENT
     // ============================================================
 
-    // Seleciona o rúnico do boxIndex para ocupar o slot partyIndex.
-    // O rúnico continua fisicamente na box — isto é apenas seleção.
+    // Assign the runic at boxIndex to partyIndex.
+    // The runic remains physically stored in the box.
     public void MoveToPartyBySlot(int boxIndex, int partyIndex)
     {
         if (boxIndex < 0 || boxIndex >= boxStorage.Count) return;
@@ -219,24 +255,23 @@ public class RunicStorageManager : MonoBehaviour
         NotifyStorageChanged();
     }
 
-    // Reordena a posição visual dentro da box.
-    // Não precisa corrigir a party: ela referencia por ID, não por índice.
+    // Reorder the box display without changing party references, which use IDs.
     public void MovePositionInBoxBySlot(int oldIndex, int newIndex)
     {
         if (oldIndex < 0 || oldIndex >= boxStorage.Count) return;
 
-        // Garante que a lista tenha tamanho suficiente para alcançar o newIndex
+        // Extend the list when the target index is beyond its current size.
         while (boxStorage.Count <= newIndex)
         {
             boxStorage.Add(null);
         }
 
-        // Troca os itens de lugar com segurança
+        // Swap the entries.
         RunicSaveData temp = boxStorage[oldIndex];
         boxStorage[oldIndex] = boxStorage[newIndex];
         boxStorage[newIndex] = temp;
 
-        // Limpa espaços nulos excedentes na cauda da lista
+        // Remove trailing null entries created by the move.
         CleanupBoxStorageTail();
 
         NotifyStorageChanged();
@@ -253,7 +288,7 @@ public class RunicStorageManager : MonoBehaviour
         }
     }
 
-    // Troca/reordena posições dentro da party (apenas os IDs, slots fixos)
+    // Swap fixed party slots by exchanging their IDs.
     public void MovePositionInParty(int oldIndex, int newIndex)
     {
         if (oldIndex < 0 || oldIndex >= partyIds.Count) return;
@@ -265,7 +300,7 @@ public class RunicStorageManager : MonoBehaviour
     }
 
     // ============================================================
-    // LIMPEZA
+    // CLEARING
     // ============================================================
 
     public void ClearAllRunics()
@@ -282,7 +317,7 @@ public class RunicStorageManager : MonoBehaviour
     }
 
     // ============================================================
-    // DEBUG / INJEÇÃO
+    // DEBUG / INJECTION
     // ============================================================
 
     public RunicSaveData CreateRunicSaveData(RunicSpecies species, int level = 1, int experience = 0, string nickname = null)
@@ -290,11 +325,11 @@ public class RunicStorageManager : MonoBehaviour
         RunicSaveData newRunicData = new RunicSaveData
         {
             runicInstanceId = System.Guid.NewGuid().ToString(),
-            speciesId = species.speciesId,
+            speciesId = species.SpeciesId,
             level = level,
             experience = experience,
-            nickname = string.IsNullOrEmpty(nickname) ? species.speciesName : nickname,
-            runicModel = species.speciesModels.Count > 0 ? species.speciesModels[0] : null
+            nickname = string.IsNullOrEmpty(nickname) ? species.SpeciesName : nickname,
+            modelIndex = 0
         };
 
         return newRunicData;
@@ -307,7 +342,7 @@ public class RunicStorageManager : MonoBehaviour
     }
 
     // ============================================================
-    // 
+    // SAVE DATA CONVERSION
     // ============================================================
 
     public void CreateRunicFromSaveData(RunicSaveData saveData)

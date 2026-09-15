@@ -10,95 +10,127 @@ public enum WildNature { Fearful, Friendly, Neutral, Territorial, Aggressive }
 public class Runic : MonoBehaviour
 {
     [Header("Tame State")]
-    public RunicState tameState = RunicState.Wild;
+        [SerializeField] private RunicState tameState = RunicState.Wild;
 
     [Header("Species Template")]
-    public RunicSpecies species; // Loaded from ScriptableObject asset
+    [SerializeField] private RunicSpecies species;
 
     [Header("Visuals")]
-    public Sprite runicIcon; // The icon representing this creature, loaded from species or set in the inspector
-    public GameObject runicModel; // The model of the creature, loaded from species or set in the inspector
+    [SerializeField] private Sprite runicIcon;
+    [SerializeField] private GameObject runicModel;
+    [SerializeField] private int modelIndex;
 
     [Header("Runtime Stats")]
-    public string runicInstanceId;
-    public string nickname;
-    public int level = 1;
-    public float experience;
-    public float currentHP = 10;
-    public float maxHP = 10;
-    public float attack;
-    public float defense;
-    public float speed;
-    public float magic;
-    public float magicDefense;
-    public List<Element> elements;
-    public List<Skill> basicSkills;
-    public List<Skill> skills;
+    [SerializeField] private string runicInstanceId;
+    [SerializeField] private string nickname;
+    [SerializeField] private int level = 1;
+    [SerializeField] private float experience;
+    [SerializeField] private float currentHP = 10;
+    [SerializeField] private float maxHP = 10;
+    [SerializeField] private float attack;
+    [SerializeField] private float defense;
+    [SerializeField] private float speed;
+    [SerializeField] private float magic;
+    [SerializeField] private float magicDefense;
+    [SerializeField] private List<Element> elements;
+    [SerializeField] private List<Skill> basicSkills;
+    [SerializeField] private List<Skill> skills;
 
     [Header("Capture Settings (Wild Only)")]
-    public bool capturable = true;
-    public TargetMapAsset captureMap;
-    public float minCaptureChance = 0; // chance de captura base assumindo que o player teve 0 pontos no minigame de captura
-    public float maxCaptureChance = 1;  // chance de captura assumindo que o player teve foi perfeito no minigame sem contar 
-    // modificadores externos (como dificuldade, itens, etc)
-    public float targetPerfectWeight = 2; // peso de acertos perfeitos no minigame (espera-se ser maior que o de acertos bons)
-    public float targetGoodWeight = 1; // peso de acertos bons no minigame (espera-se ser maior que o de erros)
-    public float targetMissWeight = 0; // peso de erros no minigame (maior que 0 significa q mesmo errando sempre vai ter algum 
-    // aumento de chance minimo. menor que 0 significa que errar penaliza na chance de captura)
-    public float CCModifier = 0; // modificador externo gerais de chance de captura (configurações de dificuldade/itens/situacional. 
-    // talvez não seja usado)
-    public float CCMultiplier = 0; // multiplicador externo geral de chance de captura (configurações de 
-    // dificuldade/itens/situacional. talvez não seja usado)
+    [SerializeField] private bool capturable = true;
+    [SerializeField] private TargetMapAsset captureMap;
+    [SerializeField] private float minCaptureChance = 0;
+    [SerializeField] private float maxCaptureChance = 1;
+    [SerializeField] private float targetPerfectWeight = 2;
+    [SerializeField] private float targetGoodWeight = 1;
+    [SerializeField] private float targetMissWeight = 0;
+    [Tooltip("External additive capture-chance modifier for difficulty, items, or situational effects.")]
+    [SerializeField] private float CCModifier = 0;
+    [Tooltip("External multiplicative capture-chance modifier for difficulty, items, or situational effects.")]
+    [SerializeField] private float CCMultiplier = 0;
 
     [Header("Capture Bonuses")]
-    public float perfectBonus = 0;
-    public float perfectMultiplier = 0;
-    public float goodBonus = 0;
-    public float goodMultiplier = 0;
-    public float missBonus = 0;
-    public float missMultiplier = 0;
+    [SerializeField] private float perfectBonus = 0;
+    [SerializeField] private float perfectMultiplier = 0;
+    [SerializeField] private float goodBonus = 0;
+    [SerializeField] private float goodMultiplier = 0;
+    [SerializeField] private float missBonus = 0;
+    [SerializeField] private float missMultiplier = 0;
 
     [Header("Behavior")]
-    public bool frozen = false;
-    public BehaviorState behaviorState = BehaviorState.Idle;
+    [SerializeField] private bool frozen = false;
+    [SerializeField] private BehaviorState behaviorState = BehaviorState.Idle;
     
     [Header("Chains")]
-    public GameObject captureChainsPrefab;
+    [SerializeField] private GameObject captureChainsPrefab;
     private List<GameObject> activeChains = new List<GameObject>();
-    public float chainYAngleMinVariance = 60f; // minimum angle variance for the chains on the X axis
-    public float chainYAngleMaxVariance = 60f; // maximum angle variance for the chains on the X axis
-    public float chainMinZAngle = 20f;
-    public float chainMaxZAngle = 95f;
-    public int minChainNumber = 6;
-    public int maxChainNumber = 8;
-    public float chainSpawnInterval = 0f; // for later
+    [SerializeField] private float chainYAngleMinVariance = 60f;
+    [SerializeField] private float chainYAngleMaxVariance = 60f;
+    [SerializeField] private float chainMinZAngle = 20f;
+    [SerializeField] private float chainMaxZAngle = 95f;
+    [SerializeField] private int minChainNumber = 6;
+    [SerializeField] private int maxChainNumber = 8;
+    [SerializeField] private float chainSpawnInterval = 0f;
 
     [Header("References")]
-    public PlayerController player;
-    public PointTargetScript pointer;
+    [SerializeField] private PlayerController player;
+    [SerializeField] private PointTargetScript pointer;
     private NavMeshAgent agent;
-    public PlayerInteractionScript playerInteraction;
-    public RunicDatabase runicDatabase;
-    public RunicStorageManager runicStorageManager;
+    [SerializeField] private PlayerInteractionUI playerInteraction;
+    [SerializeField] private RunicDatabase runicDatabase;
+    [SerializeField] private RunicStorageManager runicStorageManager;
 
     [Header("Follow Behavior")]
-    public float followerOffset = 2f;
-    private int followMode = 1; // 0 = atrás, 1 = lado, 2 = qualquer posição próxima
-    public int followSide = 1; // 0 = esquerda, 1 = direita
-    public bool following = true;
-    public float followRange = 0.75f;
-    public float stopRange = 2.5f;
+    [SerializeField] private float followerOffset = 2f;
+    [Tooltip("Follow position mode: 0 = behind, 1 = side, 2 = any nearby position.")]
+    private int followMode = 1;
+    [SerializeField] private int followSide = 1;
+    [SerializeField] private bool following = true;
+    [SerializeField] private float followRange = 0.75f;
+    [SerializeField] private float stopRange = 2.5f;
 
     [Header("Teleport Settings")]
-    public float timeToTeleport = 5f;
+    [SerializeField] private float timeToTeleport = 5f;
     private float teleportTimer = 0f;
-    public float teleportDistance = 10f;
+    [SerializeField] private float teleportDistance = 10f;
     private bool teleportTimerStarted = false;
 
     [Header("Update Settings")]
-    public int updateFrequency = 15;
+    [SerializeField] private int updateFrequency = 15;
     private int frameCounter = 0;
     private Quaternion lastMovingRotation;
+
+    public RunicState TameState => tameState;
+    public string RunicInstanceId => runicInstanceId;
+    public Sprite RunicIcon => runicIcon;
+    public GameObject RunicModel => runicModel;
+    public float CurrentHP => currentHP;
+    public float MaxHP => maxHP;
+    public float Attack => attack;
+    public float Defense => defense;
+    public float Speed => speed;
+    public float Magic => magic;
+    public float MagicDefense => magicDefense;
+    public bool Capturable => capturable;
+    public TargetMapAsset CaptureMap => captureMap;
+    public float TargetPerfectWeight => targetPerfectWeight;
+    public float TargetGoodWeight => targetGoodWeight;
+    public float TargetMissWeight => targetMissWeight;
+    public float CaptureChanceModifier => CCModifier;
+    public float CaptureChanceMultiplier => CCMultiplier;
+    public float PerfectBonus => perfectBonus;
+    public float PerfectMultiplier => perfectMultiplier;
+    public float GoodBonus => goodBonus;
+    public float GoodMultiplier => goodMultiplier;
+    public float MissBonus => missBonus;
+    public float MissMultiplier => missMultiplier;
+    public bool IsFrozen => frozen;
+    public RunicDatabase RunicDatabase => runicDatabase;
+
+    public void SetRunicDatabase(RunicDatabase database)
+    {
+        runicDatabase = database;
+    }
 
     void Start()
     {
@@ -134,8 +166,14 @@ public class Runic : MonoBehaviour
             return;
         }
 
-        nickname = string.IsNullOrEmpty(data.nickname) ? species.speciesName : data.nickname;
-        runicModel = data.runicModel;
+        nickname = string.IsNullOrEmpty(data.nickname) ? species.SpeciesName : data.nickname;
+        runicIcon = species.SpeciesIcon;
+        modelIndex = species.SpeciesModels != null && species.SpeciesModels.Count > 0
+            ? Mathf.Clamp(data.modelIndex, 0, species.SpeciesModels.Count - 1)
+            : 0;
+        runicModel = species.SpeciesModels != null && species.SpeciesModels.Count > 0
+            ? species.SpeciesModels[modelIndex]
+            : null;
         level = data.level;
         experience = data.experience;
         currentHP = data.currentHP;
@@ -158,7 +196,7 @@ public class Runic : MonoBehaviour
         {
             foreach (var elem in elements)
             {
-                if (elem != null) elemIds.Add(elem.elementId);
+                if (elem != null) elemIds.Add(elem.ElementId);
             }
         }
 
@@ -167,7 +205,7 @@ public class Runic : MonoBehaviour
         {
             foreach (var skill in basicSkills)
             {
-                if (skill != null) bSkillIds.Add(skill.skillId);
+                if (skill != null) bSkillIds.Add(skill.SkillId);
             }
         }
 
@@ -176,17 +214,18 @@ public class Runic : MonoBehaviour
         {
             foreach (var skill in skills)
             {
-                if (skill != null) sIds.Add(skill.skillId);
+                if (skill != null) sIds.Add(skill.SkillId);
             }
         }
 
         return new RunicSaveData
         {
             runicInstanceId = System.Guid.NewGuid().ToString(),
-            speciesId = species != null ? species.speciesId : "",
-            nickname = string.IsNullOrEmpty(nickname) && species != null ? species.speciesName : nickname,
-            runicIcon = runicIcon,
-            runicModel = runicModel,
+            speciesId = species != null ? species.SpeciesId : "",
+            nickname = string.IsNullOrEmpty(nickname) && species != null ? species.SpeciesName : nickname,
+            modelIndex = species != null && species.SpeciesModels != null
+                ? Mathf.Max(0, species.SpeciesModels.IndexOf(runicModel))
+                : 0,
             level = level,
             experience = experience,
             currentHP = currentHP,
@@ -289,7 +328,7 @@ public class Runic : MonoBehaviour
         Vector3 right = lastMovingRotation * Vector3.right;
         Vector3 forward = lastMovingRotation * Vector3.forward;
 
-        if (!pointer.followPoint)
+        if (!pointer.FollowPoint)
         {
             switch (followMode)
             {
@@ -309,7 +348,7 @@ public class Runic : MonoBehaviour
         }
         else
         {
-            targetPosition = pointer.indicatedPosition;
+            targetPosition = pointer.IndicatedPosition;
         }
 
         if (Keyboard.current.qKey.wasPressedThisFrame)
@@ -317,11 +356,11 @@ public class Runic : MonoBehaviour
             followSide = -followSide;
         }
         
-        bool interactableActive = playerInteraction != null && playerInteraction.interactableTarget != null;
+        bool interactableActive = playerInteraction != null && playerInteraction.InteractableTarget != null;
 
         if (!interactableActive && Keyboard.current.fKey.wasPressedThisFrame 
-            && (!pointer.followPoint && player.castState != PlayerController.CastState.Channeling 
-            || player.castState != PlayerController.CastState.Casting))
+            && (!pointer.FollowPoint && player.CastingState != PlayerController.CastState.Channeling 
+            || player.CastingState != PlayerController.CastState.Casting))
         {
             followMode = (followMode + 1) % 3;
         }
@@ -362,7 +401,7 @@ public class Runic : MonoBehaviour
             }
             
             // atualiza a rotação de referência só quando o player se mover
-            if (player.moving)
+            if (player.Moving)
             {
                 lastMovingRotation = player.transform.rotation;
             }

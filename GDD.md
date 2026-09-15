@@ -208,7 +208,7 @@ A arquitetura segue o princípio de responsabilidade única (SRP), com scripts
 organizados em camadas: Input/Controle (PlayerController, CameraController), 
 Coordenação de sistemas (CastingGameScript como coordinator central do minigame), 
 Dados (ScriptableObjects como TargetMapAsset para dados pré-gerados e imutáveis 
-em runtime), e UI/Feedback (FeedBackUI, ComboCounter, CastingPercentageCounterScript). 
+em runtime), e UI/Feedback (FeedbackUI, ComboCounter, CastingPercentageCounterScript). 
 O sistema de spawn do minigame usa o padrão Strategy, com duas implementações 
 intercambiáveis (TargetSpawner aleatório e TargetMapPlayer baseado em mapa). 
 A comunicação entre componentes ocorre via chamadas diretas ao coordinator, 
@@ -240,7 +240,7 @@ Iniciou-se também a primeira camada de persistência do projeto, via SaveManage
 JSON local em Application.persistentDataPath. O fluxo de Runic.Capture() converte 
 a instância ativa em cena para essa estrutura de dados, carrega o save existente, 
 adiciona à party (limite de 6) ou à boxStorage, e regrava o arquivo — fechando o 
-ciclo entre a spell de captura (CaptureSpellScript) e o armazenamento persistente 
+ciclo entre a spell de captura (CaptureSpell) e o armazenamento persistente 
 de rúnicos.
 
 ---

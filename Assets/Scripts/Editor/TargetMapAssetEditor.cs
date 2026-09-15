@@ -4,14 +4,14 @@ using UnityEditor;
 [CustomEditor(typeof(TargetMapAsset))]
 public class TargetMapAssetEditor : Editor
 {
-    // Referências às SerializedProperties dos campos do asset
+    // SerializedProperty references for the asset fields.
     private SerializedProperty mapSettings;
     private SerializedProperty events;
     private SerializedProperty generatedMap;
 
     private void OnEnable()
     {
-        // Busca as propriedades pelo nome do campo no ScriptableObject
+        // Find properties by their field names in the ScriptableObject.
         mapSettings  = serializedObject.FindProperty("mapSettings");
         events       = serializedObject.FindProperty("events");
         generatedMap = serializedObject.FindProperty("generatedMap");
@@ -19,17 +19,17 @@ public class TargetMapAssetEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        // Sincroniza o objeto serializado com os dados reais
+        // Synchronize the serialized object with the target asset.
         serializedObject.Update();
 
         // --- Map Settings ---
         EditorGUILayout.PropertyField(mapSettings, true);
 
         GUILayout.Space(8);
-        EditorGUILayout.LabelField("Eventos (editar aqui)", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Events (edit here)", EditorStyles.boldLabel);
 
-        // --- Events array (manual, com lógica condicional por tipo) ---
-        events.arraySize = EditorGUILayout.IntField("Quantidade", events.arraySize);
+        // --- Events array (manual, with type-specific fields) ---
+        events.arraySize = EditorGUILayout.IntField("Count", events.arraySize);
 
         for (int i = 0; i < events.arraySize; i++)
         {
@@ -38,15 +38,15 @@ public class TargetMapAssetEditor : Editor
             SerializedProperty type          = evt.FindPropertyRelative("type");
             SerializedProperty spawnTime     = evt.FindPropertyRelative("spawnTime");
 
-            // Cabeçalho do evento com botão de remover
+            // Event header with a remove button.
             EditorGUILayout.BeginVertical(GUI.skin.box);
 
             EditorGUILayout.BeginHorizontal();
-            evt.isExpanded = EditorGUILayout.Foldout(evt.isExpanded, $"Evento {i}  [{(EventType)type.enumValueIndex}]", true);
-            if (GUILayout.Button("−", GUILayout.Width(24)))
+            evt.isExpanded = EditorGUILayout.Foldout(evt.isExpanded, $"Event {i}  [{(EventType)type.enumValueIndex}]", true);
+            if (GUILayout.Button("-", GUILayout.Width(24)))
             {
                 events.DeleteArrayElementAtIndex(i);
-                break; // evita iterar sobre array modificado
+                break; // Avoid iterating over the modified array.
             }
             EditorGUILayout.EndHorizontal();
 
@@ -57,7 +57,7 @@ public class TargetMapAssetEditor : Editor
                 EditorGUILayout.PropertyField(type);
                 EditorGUILayout.PropertyField(spawnTime);
 
-                // Campos condicionais por tipo
+                // Type-specific fields.
                 if ((EventType)type.enumValueIndex == EventType.Target)
                 {
                     EditorGUILayout.PropertyField(evt.FindPropertyRelative("position"));
@@ -79,8 +79,8 @@ public class TargetMapAssetEditor : Editor
             GUILayout.Space(2);
         }
 
-        // Botão para adicionar novo evento no final da lista
-        if (GUILayout.Button("+ Adicionar Evento"))
+        // Add a new event at the end of the list.
+        if (GUILayout.Button("+ Add Event"))
         {
             events.arraySize++;
             SerializedProperty newEvent = events.GetArrayElementAtIndex(events.arraySize - 1);
@@ -89,18 +89,18 @@ public class TargetMapAssetEditor : Editor
 
         GUILayout.Space(10);
 
-        // --- Resultado Gerado (somente leitura visual) ---
-        EditorGUILayout.LabelField("Resultado Gerado (não editar manualmente)", EditorStyles.boldLabel);
+        // --- Generated Result (read-only view) ---
+        EditorGUILayout.LabelField("Generated Result (do not edit manually)", EditorStyles.boldLabel);
         GUI.enabled = false;
         EditorGUILayout.PropertyField(generatedMap, true);
         GUI.enabled = true;
 
         GUILayout.Space(10);
 
-        // --- Botão Gerar ---
+        // --- Generate button ---
         TargetMapAsset asset = (TargetMapAsset)target;
 
-        if (GUILayout.Button("Gerar Mapa", GUILayout.Height(30)))
+        if (GUILayout.Button("Generate Map", GUILayout.Height(30)))
         {
             asset.GenerateMap();
             EditorUtility.SetDirty(asset);
@@ -108,11 +108,11 @@ public class TargetMapAssetEditor : Editor
 
         GUILayout.Space(5);
         EditorGUILayout.HelpBox(
-            $"Alvos gerados: {asset.GeneratedMap.Count}",
+            $"Generated targets: {asset.GeneratedMap.Count}",
             MessageType.Info
         );
 
-        // Aplica mudanças feitas via SerializedProperty de volta ao objeto
+        // Apply SerializedProperty changes back to the asset.
         serializedObject.ApplyModifiedProperties();
     }
 
@@ -121,14 +121,14 @@ public class TargetMapAssetEditor : Editor
         evt.FindPropertyRelative("type").enumValueIndex = (int)EventType.Target;
         evt.FindPropertyRelative("spawnTime").floatValue = 0f;
 
-        // Target fields
+        // Target fields.
         evt.FindPropertyRelative("position").vector2Value = Vector2.zero;
         evt.FindPropertyRelative("size").floatValue = 1f;
         evt.FindPropertyRelative("lifetime").floatValue = 1f;
         evt.FindPropertyRelative("activationTime").floatValue = 0.5f;
         evt.FindPropertyRelative("fadeInDuration").floatValue = 0.5f;
 
-        // Line sub-settings
+        // Line sub-settings.
         SerializedProperty line = evt.FindPropertyRelative("line");
         line.FindPropertyRelative("startPos").vector2Value = Vector2.zero;
         line.FindPropertyRelative("endPos").vector2Value = Vector2.zero;
@@ -136,7 +136,7 @@ public class TargetMapAssetEditor : Editor
         line.FindPropertyRelative("arc").floatValue = 0f;
         line.FindPropertyRelative("duration").floatValue = 1f;
 
-        // Target sub-settings (used by Line events)
+        // Target sub-settings (used by Line events).
         SerializedProperty target = evt.FindPropertyRelative("target");
         target.FindPropertyRelative("size").floatValue = 1f;
         target.FindPropertyRelative("lifetime").floatValue = 1f;

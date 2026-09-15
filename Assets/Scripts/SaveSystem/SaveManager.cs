@@ -25,10 +25,17 @@ public class SaveManager : MonoBehaviour
 
         // Persistent data path initialization
         saveDirectory = Application.persistentDataPath;
+        Directory.CreateDirectory(saveDirectory);
     }
 
     public void SaveGame(string fileName, SaveDataContainer dataToSave)
     {
+        if (dataToSave == null)
+        {
+            Debug.LogError("SaveManager: cannot save null data.");
+            return;
+        }
+
         try
         {
             fileName = NormalizeFileName(fileName);
@@ -90,37 +97,53 @@ public class SaveManager : MonoBehaviour
 
     public string[] GetSaveFiles()
     {
-        List<string> saveFiles = new List<string>();
-        string[] paths = Directory.GetFiles(saveDirectory, "*.json");
-
-        foreach (string path in paths)
+        try
         {
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            if (fileName == LegacySaveFileName.Replace(".json", "") || fileName.StartsWith(SaveFilePrefix))
-            {
-                saveFiles.Add(fileName);
-            }
-        }
+            List<string> saveFiles = new List<string>();
+            string[] paths = Directory.GetFiles(saveDirectory, "*.json");
 
-        saveFiles.Sort();
-        return saveFiles.ToArray();
+            foreach (string path in paths)
+            {
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                if (fileName == LegacySaveFileName.Replace(".json", "") || fileName.StartsWith(SaveFilePrefix))
+                {
+                    saveFiles.Add(fileName);
+                }
+            }
+
+            saveFiles.Sort();
+            return saveFiles.ToArray();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to list save files: {e.Message}");
+            return Array.Empty<string>();
+        }
     }
 
     public string CreateNextSaveFileName()
     {
         int slotNumber = 1;
         while (SaveFileExists($"{SaveFilePrefix}SaveFile_{slotNumber}")) slotNumber++;
-        return $"{SaveFilePrefix}SaveFile_{slotNumber}";
+        return $"{SaveFilePrefix}{slotNumber}";
     }
 
     public void DeleteSaveFile(string fileName)
     {
-        string saveFilePath = GetSaveFilePath(NormalizeFileName(fileName));
-        if (File.Exists(saveFilePath))
+        try
         {
+            string normalizedFileName = NormalizeFileName(fileName);
+            string saveFilePath = GetSaveFilePath(normalizedFileName);
+            if (!File.Exists(saveFilePath))
+                return;
+
             File.Delete(saveFilePath);
-            if (activeSaveFileName == NormalizeFileName(fileName)) activeSaveFileName = "save_1";
+            if (activeSaveFileName == normalizedFileName) activeSaveFileName = "save_1";
             Debug.Log("Save file deleted.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to delete save file: {e.Message}");
         }
     }
 
@@ -149,8 +172,13 @@ public class SaveManager : MonoBehaviour
 
     public void RenameSaveFile(string oldFileName, string newFileName)
     {
-        oldFileName = NormalizeFileName(oldFileName);
-        newFileName = NormalizeFileName(newFileName);
+        try
+        {
+            oldFileName = NormalizeFileName(oldFileName);
+            newFileName = NormalizeFileName(newFileName);
+
+        if (oldFileName == newFileName)
+            return;
 
         if (!newFileName.StartsWith(SaveFilePrefix) && oldFileName.StartsWith(SaveFilePrefix))
         {
@@ -175,20 +203,25 @@ public class SaveManager : MonoBehaviour
 
         string newPath = GetSaveFilePath(newFileName);
 
-        if (File.Exists(oldPath))
-        {
-            File.Move(oldPath, newPath);
-            
-            if (activeSaveFileName == oldFileName)
+            if (File.Exists(oldPath))
             {
-                activeSaveFileName = newFileName;
+                File.Move(oldPath, newPath);
+
+                if (activeSaveFileName == oldFileName)
+                {
+                    activeSaveFileName = newFileName;
+                }
+
+                Debug.Log($"Save file renamed from {oldFileName} to {newFileName}");
             }
-            
-            Debug.Log($"Save file renamed from {oldFileName} to {newFileName}");
+            else
+            {
+                Debug.LogWarning($"Could not rename. Old save file not found: {oldPath}");
+            }
         }
-        else
+        catch (Exception e)
         {
-            Debug.LogWarning($"Could not rename. Old save file not found: {oldPath}");
+            Debug.LogError($"Failed to rename save file: {e.Message}");
         }
     }
 }

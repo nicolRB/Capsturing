@@ -1,29 +1,28 @@
 using UnityEngine;
 
-public class CaptureSpellScript : SpellBase
+public class CaptureSpell : SpellBase
 {
-    public Runic target;
+    private Runic target;
 
-    [Header("Prep Score to Global Multiplier")]
-    [Tooltip("O prepScore (0-1) da canalização de preparo é usado para interpolar entre esses dois valores, formando parte do multiplicador global aplicado na canalização de captura.")]
-    public float prepMinFactor = 0.75f;
-    public float prepMaxFactor = 1f;
+    [Header("Preparation Score")]
+    [Tooltip("Interpolates between these values using the preparation score to build the capture channel multiplier.")]
+    [SerializeField] private float prepMinFactor = 0.75f;
+    [SerializeField] private float prepMaxFactor = 1f;
 
-    [Header("HP Factor")]
-    public float maxHPFactor = 4f;
-    public float currentHPFactor = 3f;
+    [Header("Health Factor")]
+    [Tooltip("Controls how the target's current and maximum health affect capture chance.")]
+    [SerializeField] private float maxHPFactor = 4f;
+    [SerializeField] private float currentHPFactor = 3f;
 
     private float prepScore;
     private float combinedGlobalMultiplier = 1f;
 
-    // Indica se a canalização atual é a segunda canalização,
-    // responsável pela captura propriamente dita.
+    // The second channel performs the actual capture.
     private bool isCaptureChannel = false;
 
     public override void Start()
     {
         base.Start();
-        spellType = SpellType.Targeted;
     }
 
     public override void OnCastStart()
@@ -55,7 +54,7 @@ public class CaptureSpellScript : SpellBase
             if (result.perfects == 0 && result.goods == 0)
             {
                 Debug.LogWarning("Capture spell cancelled: preparation score was too low.");
-                spellcastingScript.CancelCast();
+                spellcastingCoordinator.CancelCast();
                 return;
             }
         }
@@ -73,23 +72,23 @@ public class CaptureSpellScript : SpellBase
 
     public override void OnSpellCast()
     {
-        GameObject targetObj = pointTarget.creatureTarget;
+        GameObject targetObj = pointTarget.CreatureTarget;
 
         target = targetObj != null ? targetObj.GetComponentInParent<Runic>() : null;
 
-        if (target == null || !target.capturable)
+        if (target == null || !target.Capturable)
         {
-            Debug.LogWarning("CaptureSpellScript: no valid capturable target.");
+            Debug.LogWarning("CaptureSpell: no valid capturable target.");
 
-            // DESATIVA O SEGUIDOR AQUI PARA NÃO MOVER AO ERRAR
+            // Stop following the point after an invalid target selection.
             if (pointTarget != null)
             {
-                pointTarget.followPoint = false;
+                pointTarget.ToggleFollowPoint(false);
             }
 
             RaiseSpellResolved();
 
-            player.playerHUD.SetActive(true);
+            player.PlayerHUD.SetActive(true);
 
             return;
         }
@@ -101,68 +100,67 @@ public class CaptureSpellScript : SpellBase
 
     private void BeginCaptureChannel()
     {
-        // Calcula o fator de HP baseado na vida atual e máxima do inimigo.
-        float hpFactor = target.maxHP > 0f
+        // Calculate the health factor from the target's current and maximum health.
+        float hpFactor = target.MaxHP > 0f
             ? Mathf.Clamp01(
                 (
-                    maxHPFactor * target.maxHP
+                    maxHPFactor * target.MaxHP
                     -
-                    currentHPFactor * target.currentHP
+                    currentHPFactor * target.CurrentHP
                 )
                 /
-                (maxHPFactor * target.maxHP)
+                    (maxHPFactor * target.MaxHP)
             )
             : 0f;
 
-        // Calcula o fator de preparação baseado no prepScore da canalização de preparo.
+        // Calculate the preparation factor from the preparation channel score.
         float prepFactor = Mathf.Lerp(
                 prepMinFactor,
                 prepMaxFactor,
                 prepScore
             );
 
-        // Combina os fatores de HP e preparação com os multiplicadores e modificadores do inimigo 
-        // para formar o multiplicador global final.
+        // Combine health, preparation, and target modifiers into the final multiplier.
         combinedGlobalMultiplier = Mathf.Clamp01(
                 hpFactor
                 * prepFactor
-                * (1f + target.CCMultiplier)
-                + target.CCModifier
+                * (1f + target.CaptureChanceMultiplier)
+                + target.CaptureChanceModifier
             );
 
         Debug.Log(
             $"Capture factors: " +
             $"HP={hpFactor:F3} | " +
             $"Prep={prepFactor:F3} | " +
-            $"CCMultiplier={target.CCMultiplier:F3} | " +
-            $"CCModifier={target.CCModifier:F3} | " +
+            $"CCMultiplier={target.CaptureChanceMultiplier:F3} | " +
+            $"CCModifier={target.CaptureChanceModifier:F3} | " +
             $"Global={combinedGlobalMultiplier:F3}"
         );
 
         isCaptureChannel = true;
 
-        spellcastingScript.castingUI.SetActive(true);
+        spellcastingCoordinator.CastingUI.SetActive(true);
 
-        spellcastingScript.targetMapPlayer.LoadMap(
-            target.captureMap
+        spellcastingCoordinator.TargetMapPlayer.LoadMap(
+            target.CaptureMap
         );
 
-        spellcastingScript.channelingGame.ResetCast();
+        spellcastingCoordinator.ChannelingGame.ResetCast();
 
-        if (spellcastingScript.percentageCounter != null)
+        if (spellcastingCoordinator.PercentageCounter != null)
         {
-            spellcastingScript.percentageCounter.SetValues(
-                target.targetPerfectWeight,
-                target.targetGoodWeight,
-                target.targetMissWeight,
+            spellcastingCoordinator.PercentageCounter.SetValues(
+                target.TargetPerfectWeight,
+                target.TargetGoodWeight,
+                target.TargetMissWeight,
 
-                1f + target.perfectMultiplier,
-                1f + target.goodMultiplier,
-                1f + target.missMultiplier,
+                1f + target.PerfectMultiplier,
+                1f + target.GoodMultiplier,
+                1f + target.MissMultiplier,
 
-                target.perfectBonus,
-                target.goodBonus,
-                target.missBonus,
+                target.PerfectBonus,
+                target.GoodBonus,
+                target.MissBonus,
 
                 combinedGlobalMultiplier
             );
@@ -170,48 +168,47 @@ public class CaptureSpellScript : SpellBase
         else
         {
             Debug.LogWarning(
-                "CaptureSpellScript: percentageCounter not assigned " +
-                "on SpellcastingScript — capture % won't display correctly."
+                "CaptureSpell: percentageCounter not assigned " +
+                "on SpellcastingCoordinator — capture % won't display correctly."
             );
         }
 
-        spellcastingScript.channelingGame.OnChannelingResolved += HandleCaptureChannelResolved;
+        spellcastingCoordinator.ChannelingGame.OnChannelingResolved += HandleCaptureChannelResolved;
 
-        player.castState =
-            PlayerController.CastState.Channeling;
+        player.SetCastingState(PlayerController.CastState.Channeling);
     }
 
     private void HandleCaptureChannelResolved(ChannelingGameScript.ChannelingResult result)
     {
-        spellcastingScript.channelingGame
+        spellcastingCoordinator.ChannelingGame
             .OnChannelingResolved -=
             HandleCaptureChannelResolved;
 
         ResolveCapture(result);
     
-        player.playerHUD.SetActive(true);
+        player.PlayerHUD.SetActive(true);
     }
 
     private void ResolveCapture(ChannelingGameScript.ChannelingResult result)
     {
-        // Mesma fórmula usada pelo percentageCounter durante a canalização —
+        // Use the same formula as the percentage counter during channeling.
         float captureChance = ChannelingGameScript.ComputeScore(
                 result.perfects,
                 result.goods,
                 result.misses,
                 result.total,
 
-                target.targetPerfectWeight,
-                target.targetGoodWeight,
-                target.targetMissWeight,
+                target.TargetPerfectWeight,
+                target.TargetGoodWeight,
+                target.TargetMissWeight,
 
-                1f + target.perfectMultiplier,
-                1f + target.goodMultiplier,
-                1f + target.missMultiplier,
+                1f + target.PerfectMultiplier,
+                1f + target.GoodMultiplier,
+                1f + target.MissMultiplier,
 
-                target.perfectBonus,
-                target.goodBonus,
-                target.missBonus,
+                target.PerfectBonus,
+                target.GoodBonus,
+                target.MissBonus,
 
                 combinedGlobalMultiplier
             );
@@ -230,11 +227,11 @@ public class CaptureSpellScript : SpellBase
         
         RaiseSpellResolved();
 
-        spellcastingScript.percentageCounter?.RecalculatePercentage(result);
-        spellcastingScript.percentageResult?.gameObject.SetActive(true);
-        spellcastingScript.percentageResult?.ShowResult(
-            spellcastingScript.percentageCounter.percentage,
-            spellcastingScript.percentageCounter.percentageText.color
+        spellcastingCoordinator.PercentageCounter?.RecalculatePercentage(result);
+        spellcastingCoordinator.PercentageResult?.gameObject.SetActive(true);
+        spellcastingCoordinator.PercentageResult?.ShowResult(
+            spellcastingCoordinator.PercentageCounter.Percentage,
+            spellcastingCoordinator.PercentageCounter.PercentageText.color
         );
     }
 

@@ -2,62 +2,67 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
-using Microsoft.Unity.VisualStudio.Editor;
 
 public class SpellSelectUI : MonoBehaviour
 {
     [Header("Spell Selection")]
     private List<GameObject> spellIcons = new List<GameObject>();
-    public float iconSpacing = 100f; // Spacing between spell icons
-    public float iconSize = 80f; // Size of each spell icon
-    public float iconScale = 0.91f; // Scale of each spell icon
-    public float selectionIndicatorOffset = 10f; // Offset for the selection indicator
+    [Tooltip("Horizontal spacing between spell icons.")]
+    [SerializeField] private float iconSpacing = 100f;
+    [Tooltip("Reference size of each spell icon.")]
+    [SerializeField] private float iconSize = 80f;
+    [Tooltip("Scale applied to each spell icon.")]
+    [SerializeField] private float iconScale = 0.91f;
+    [Tooltip("Vertical offset applied to the selected spell icon.")]
+    [SerializeField] private float selectionIndicatorOffset = 10f;
     private int spellCount = 0;
 
     [Header("Cooldown Visuals")]
-    public Color cooldownTint = new Color(0.25f, 0.25f, 0.25f, 1f);
+    [SerializeField] private Color cooldownTint = new Color(0.25f, 0.25f, 0.25f, 1f);
 
     [Header("References")]
-    public SpellcastingScript spellcastingScript;
-    public GameObject spellIconPrefab; // Prefab for the spell icon UI element
+    [SerializeField] private SpellcastingCoordinator spellcastingCoordinator;
+    [SerializeField] private GameObject spellIconPrefab; // Prefab for the spell icon UI element
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        if (spellcastingScript == null) spellcastingScript = FindFirstObjectByType<SpellcastingScript>();
+        if (spellcastingCoordinator == null) spellcastingCoordinator = FindFirstObjectByType<SpellcastingCoordinator>();
 
         if (spellIconPrefab == null) Debug.LogError("SpellSelectUI: Spell icon prefab is not assigned.");
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (spellcastingScript != null)
+        if (spellcastingCoordinator != null)
         {
-            UpdateSelectionIndicator(spellcastingScript.spellIndex);
+            UpdateSelectionIndicator(spellcastingCoordinator.SpellIndex);
             UpdateCoolDownTimers();
         }   
     }
 
+    public void Setup(SpellcastingCoordinator spellcastingCoordinator){
+        this.spellcastingCoordinator = spellcastingCoordinator;
+    }
+
     public void UpdateSpellList()
     {
-        // Clear existing spell icons
+        // Clear existing spell icons.
         foreach (Transform child in transform)
         {
             Destroy(child.gameObject);
         }
 
-        // Create new spell icons based on the spells in the SpellcastingScript
-        if (spellcastingScript.spells != null)
+        // Create icons from the Spells registered by the coordinator.
+        if (spellcastingCoordinator.Spells != null)
         {
-            foreach (var spell in spellcastingScript.spells)
+            foreach (var spell in spellcastingCoordinator.Spells)
             {
                 GameObject spellSelectIcon = Instantiate(spellIconPrefab, transform);
-                // each spellSelectIcon has a child called "SpellIcon" with an Image component
+                // Each icon prefab contains a child named "SpellIcon".
                 var spellIconImage = spellSelectIcon.transform.Find("SpellIcon").GetComponent<UnityEngine.UI.Image>();
                 if (spellIconImage != null)
                 {
-                    spellIconImage.sprite = spell.spellIcon;
+                    spellIconImage.sprite = spell.SpellIcon;
                 }
                 spellSelectIcon.transform.localScale = Vector3.one * iconScale;
                 spellCount++;
@@ -67,7 +72,7 @@ public class SpellSelectUI : MonoBehaviour
         ArrangeSpellIcons();
     }
 
-    // Method for positioning spells along a horizontal line, centered on the parent object
+    // Position spell icons along a centered horizontal line.
     public void ArrangeSpellIcons()
     {
         float totalWidth = (spellCount - 1) * iconSpacing;
@@ -83,9 +88,7 @@ public class SpellSelectUI : MonoBehaviour
         }
     }
 
-    // Method to update the selection indicator position based on the selected spell index in the SpellcastingScript
-    // Moves the selected spell icon up by selectionIndicatorOffset units smoothly and returns the previously selected spell icon
-    // to its original position
+    // Smoothly move the selected spell icon by the configured offset.
     public void UpdateSelectionIndicator(int selectedIndex)
     {
         for (int i = 0; i < spellCount; i++)
@@ -107,7 +110,7 @@ public class SpellSelectUI : MonoBehaviour
         {
             TextMeshProUGUI coolDownTime = transform.GetChild(i).transform.Find("CoolDownTime").GetComponent<TextMeshProUGUI>();
             UnityEngine.UI.Image icon = transform.GetChild(i).transform.Find("SpellIcon").GetComponent<UnityEngine.UI.Image>();
-            if (spellcastingScript.spellCooldowns[i] <= 0)
+            if (spellcastingCoordinator.SpellCooldowns[i] <= 0)
             {
                 icon.color = Color.white;
                 coolDownTime.text = "";
@@ -115,7 +118,7 @@ public class SpellSelectUI : MonoBehaviour
             else
             {
                 icon.color = cooldownTint;
-                coolDownTime.text = spellcastingScript.spellCooldowns[i].ToString("F0");
+                coolDownTime.text = spellcastingCoordinator.SpellCooldowns[i].ToString("F0");
             }
         }
     }

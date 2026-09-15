@@ -5,31 +5,31 @@ using TMPro;
 public class SaveSlotUI : MonoBehaviour
 {
     [Header("UI References")]
-    public TMP_Text fileNameText;
-    public Button loadButton;
-    public Button overwriteButton;
-    public Button deleteButton;
-    public Button renameButton;
+    [SerializeField] private TMP_Text fileNameText;
+    [SerializeField] private Button loadButton;
+    [SerializeField] private Button overwriteButton;
+    [SerializeField] private Button deleteButton;
+    [SerializeField] private Button renameButton;
 
-    public InputManager inputManager;
+    [SerializeField] private InputManager inputManager;
 
     private const string SaveFilePrefix = "save_";
 
-    // Variáveis para guardar as funções que o Menu vai passar
+    // Callbacks supplied by the save menu.
     private string mySaveFileName;
     private System.Action<string> onLoad;
     private System.Action<string> onOverwrite;
     private System.Action<string> onDelete;
     private System.Action<string> onRename;
 
-    // O Menu chama isso logo depois de instanciar o prefab
+    // Called by the menu immediately after instantiating the prefab.
     public void Setup(string fileName, System.Action<string> loadAction, System.Action<string> overwriteAction, 
     System.Action<string> deleteAction, System.Action<string> renameAction)
     {
         mySaveFileName = fileName;
         string displayName = fileName;
-        // remove prefixo "save_" se estiver presente para exibição
-        if (displayName.StartsWith("save_"))
+        // Remove the "save_" prefix from the display name when present.
+        if (displayName.StartsWith(SaveFilePrefix))
         {
             displayName = displayName.Substring(5);
         }
@@ -39,7 +39,7 @@ public class SaveSlotUI : MonoBehaviour
         onOverwrite = overwriteAction;
         onDelete = deleteAction;
         onRename = renameAction;
-        // Limpa os listeners antigos (boa prática) e adiciona os novos
+        // Replace existing listeners with the current callbacks.
         loadButton.onClick.RemoveAllListeners();
         loadButton.onClick.AddListener(OnLoadClicked);
 
@@ -52,10 +52,10 @@ public class SaveSlotUI : MonoBehaviour
         renameButton.onClick.RemoveAllListeners();
         renameButton.onClick.AddListener(OnRenameClicked);
 
-        inputManager = InputManager.Instance; // Pega a instância do InputManager
+        inputManager = InputManager.Instance;
     }
 
-    // Métodos chamados pelos botões
+    // Button callbacks.
     private void OnLoadClicked() => onLoad?.Invoke(mySaveFileName);
     private void OnOverwriteClicked() => onOverwrite?.Invoke(mySaveFileName);
     private void OnDeleteClicked() => onDelete?.Invoke(mySaveFileName);
@@ -70,7 +70,7 @@ public class SaveSlotUI : MonoBehaviour
             onResult: (newName) => {
                 if (!string.IsNullOrEmpty(newName) && newName != mySaveFileName)
                 {
-                    // Adiciona o prefixo visualmente se necessário antes de enviar para o menu
+                    // Add the prefix before passing the name back to the menu.
                     if (!newName.StartsWith(SaveFilePrefix))
                     {
                         newName = SaveFilePrefix + newName;

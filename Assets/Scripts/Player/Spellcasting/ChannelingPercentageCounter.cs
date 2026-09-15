@@ -4,15 +4,18 @@ using TMPro;
 
 public class ChannelingPercentageCounterScript : MonoBehaviour
 {
-    public float percentage = 0f;
+    [SerializeField] private float percentage = 0f;
+    public float Percentage => percentage;
 
     [Header("References")]
-    public ChannelingGameScript channelingGame;
-    public TextMeshProUGUI percentageText;
+    [SerializeField] private ChannelingGameScript channelingGame;
+    [SerializeField] private TextMeshProUGUI percentageText;
+
+    public TextMeshProUGUI PercentageText => percentageText;
 
     [Header("Color Settings")]
     [SerializeField]
-    public List<Color> colorShifts = new List<Color>
+    private List<Color> colorShifts = new List<Color>
     {
         new Color(0.26f, 0.26f, 0.26f, 1),
         new Color(0.62f, 0f, 0f, 1),
@@ -21,7 +24,8 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
         new Color(0.2f, 0.45f, 1f, 1)
     };
 
-    public List<float> thresholds = new List<float>
+    [SerializeField] 
+    private List<float> thresholds = new List<float>
     {
         0.125f,
         0.25f,
@@ -45,7 +49,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
     public float missModifier = 0f;
 
     [Header("Global Multiplier")]
-    [Tooltip("Aplicado por cima do score inteiro.")]
+    [Tooltip("Applied to the complete score after category weights and modifiers.")]
     public float globalMultiplier = 1f;
 
     void Start()
@@ -61,12 +65,12 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
 
     void Update()
     {
-        // Atualização normal enquanto a canalização acontece.
+        // Update the live score while channeling.
         RecalculatePercentage();
     }
 
     // ============================================================
-    // CÁLCULO NORMAL
+    // Live score calculation.
     // ============================================================
 
     public void RecalculatePercentage()
@@ -75,22 +79,22 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
             return;
 
         int mapCount =
-            channelingGame.targetMapPlayer?.map?.Count ?? 0;
+            channelingGame.MapPlayer?.Map?.Count ?? 0;
 
         int goods =
-            channelingGame.hits -
-            channelingGame.perfects;
+            channelingGame.Hits -
+            channelingGame.Perfects;
 
         RecalculatePercentage(
-            channelingGame.perfects,
+            channelingGame.Perfects,
             goods,
-            channelingGame.misses,
+            channelingGame.Misses,
             mapCount
         );
     }
 
     // ============================================================
-    // CÁLCULO DO RESULTADO FINAL
+    // Final result calculation.
     // ============================================================
 
     public void RecalculatePercentage(
@@ -105,7 +109,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
     }
 
     // ============================================================
-    // MÉTODO CENTRAL DE CÁLCULO
+    // Central calculation method.
     // ============================================================
 
     private void RecalculatePercentage(
@@ -139,7 +143,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
     }
 
     // ============================================================
-    // ATUALIZA TEXTO E COR
+    // Text and color presentation.
     // ============================================================
 
     private void UpdateVisuals()
@@ -158,7 +162,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
     }
 
     // ============================================================
-    // CÁLCULO DA COR
+    // Score color calculation.
     // ============================================================
 
     private Color CalculatePercentageColor(float p)
@@ -278,7 +282,7 @@ public class ChannelingPercentageCounterScript : MonoBehaviour
     }
 
     // ============================================================
-    // CONFIGURAÇÃO DOS VALORES
+    // Runtime score configuration.
     // ============================================================
 
     public void SetValues(

@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class Highlight : MonoBehaviour
 {
-    public bool pointed = false;
-    public int originalLayer = -1;
-    public int highlightLayer = 3; // Layer number for the "Highlight" layer
+    [Header("Highlight")]
+    [SerializeField] private bool pointed = false;
+    [SerializeField] private int originalLayer = -1;
+    [SerializeField] private int highlightLayer = 3; // Layer number for the "Highlight" layer
     
     void Start()
     {
@@ -19,6 +20,11 @@ public class Highlight : MonoBehaviour
         {
             SetLayerRecursively(gameObject, targetLayer);
         }
+    }
+
+    public void Toggle(bool state)
+    {
+        pointed = state;
     }
 
     void SetLayerRecursively(GameObject obj, int layer)

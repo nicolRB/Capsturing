@@ -7,7 +7,7 @@ public class BlankSpell : SpellBase
         OnSpellCast();
     }
 
-    public override void OnChannelComplete(ChannelingGameScript.ChannelingResult result){}
+    public override void OnChannelComplete(ChannelingGameScript.ChannelingResult result) { }
 
     public override void OnSpellCast()
     {

@@ -4,27 +4,30 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "NovoMapaDeAlvos", menuName = "Magia/Mapa de Alvos")]
 public class TargetMapAsset : ScriptableObject
 {
-    [Header("Configurações Gerais")]
-    public MapSettings mapSettings;
+    [Header("General Settings")]
+    [SerializeField] 
+    private MapSettings mapSettings;
+    public MapSettings MapSettings => mapSettings;
 
-    [Header("Eventos (editar aqui)")]
-    public MapEvent[] events;
+    [Header("Events (edit here)")]
+    [SerializeField]
+    private MapEvent[] events;
 
-    [Header("Resultado Gerado (não editar manualmente)")]
+    [Header("Generated Result (do not edit manually)")]
     [SerializeField]
     private List<TargetData> generatedMap = new List<TargetData>();
 
-    // Acesso somente leitura à lista já expandida, usada em runtime
+    // Read-only access to the expanded runtime map.
     public List<TargetData> GeneratedMap => generatedMap;
 
-    // Chamado pelo botão no Inspector (TargetMapAssetEditor)
+    // Called by the TargetMapAssetEditor Inspector button.
     public void GenerateMap()
     {
         generatedMap = new List<TargetData>();
 
         if (events == null)
         {
-            Debug.LogWarning($"TargetMapAsset '{name}': nenhum evento definido.", this);
+            Debug.LogWarning($"TargetMapAsset '{name}': no events defined.", this);
             return;
         }
 
@@ -49,7 +52,7 @@ public class TargetMapAsset : ScriptableObject
 
         generatedMap.Sort((a, b) => a.spawnTime.CompareTo(b.spawnTime));
 
-        Debug.Log($"TargetMapAsset '{name}': mapa gerado com {generatedMap.Count} alvos.", this);
+        Debug.Log($"TargetMapAsset '{name}': generated {generatedMap.Count} targets.", this);
     }
 
     private void GenerateLineTargets(MapEvent e)
@@ -59,7 +62,7 @@ public class TargetMapAsset : ScriptableObject
 
         if (line == null || tgt == null)
         {
-            Debug.LogWarning($"TargetMapAsset '{name}': evento do tipo Line sem 'line' ou 'target' configurado.", this);
+            Debug.LogWarning($"TargetMapAsset '{name}': Line event has no configured line or target settings.", this);
             return;
         }
 

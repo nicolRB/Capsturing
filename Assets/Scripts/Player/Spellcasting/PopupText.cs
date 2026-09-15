@@ -1,14 +1,16 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 
 public class PopupText : MonoBehaviour
 {
-    public float duration = 0.6f;
-    public float riseDistance = 50f;
+    [Header("Animation")]
+    [Tooltip("Time in seconds before the popup is destroyed.")]
+    [SerializeField] private float duration = 0.6f;
+    [Tooltip("Vertical distance travelled by the popup.")]
+    [SerializeField] private float riseDistance = 50f;
 
     private TextMeshProUGUI text;
-    public Vector2 startPosition;
+    private Vector2 startPosition;
 
     void Awake()
     {
@@ -18,6 +20,11 @@ public class PopupText : MonoBehaviour
     public void Play()
     {
         if (duration > 0) StartCoroutine(Animate());
+    }
+
+    public void SetStartPosition(Vector2 position)
+    {
+        startPosition = position;
     }
 
     System.Collections.IEnumerator Animate()

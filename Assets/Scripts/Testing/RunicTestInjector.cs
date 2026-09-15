@@ -3,13 +3,20 @@ using UnityEngine.InputSystem;
 
 public class RunicTestInjector : MonoBehaviour
 {
-    public bool devMode = true;
-    public RunicSpecies defaultTestSpecies;
-    public Key injectShortcutKey = Key.F12;
+    [Header("Debug Settings")]
+    [Tooltip("Enables test injection in the Unity Editor and development builds.")]
+    [SerializeField]
+    private bool devMode = true;
+    [Tooltip("Species used when creating the test runic.")]
+    [SerializeField]
+    private RunicSpecies defaultTestSpecies;
+    [Tooltip("Shortcut displayed in debug messages for the injection action.")]
+    [SerializeField]
+    private Key injectShortcutKey = Key.F12;
     
     void Update()
     {
-        // Só funciona se o devMode estiver ligado E estivermos rodando no Editor ou build de desenvolvimento
+        // Restrict test injection to the Editor and development builds.
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (!devMode) return;
 
@@ -24,29 +31,28 @@ public class RunicTestInjector : MonoBehaviour
     {
         if (RunicStorageManager.Instance == null || SaveManager.Instance == null)
         {
-            Debug.LogWarning("Gerenciadores de Storage ou Save não encontrados na cena.");
+            Debug.LogWarning("RunicTestInjector: storage or save manager not found in the scene.");
             return;
         }
 
         RunicSaveData debugRunic = new RunicSaveData
         {
             runicInstanceId = System.Guid.NewGuid().ToString(),
-            speciesId = defaultTestSpecies.speciesId,
-            nickname = "Rúnico de Teste",
-            runicIcon = defaultTestSpecies.speciesIcon,
-            runicModel = defaultTestSpecies.speciesModels.Count > 0 ? defaultTestSpecies.speciesModels[0] : null,
+            speciesId = defaultTestSpecies.SpeciesId,
+            nickname = "Test Runic",
+            modelIndex = 0,
             level = 1,
-            currentHP = defaultTestSpecies.baseHP,
-            maxHP = defaultTestSpecies.baseHP,
-            attack = defaultTestSpecies.baseAttack,
-            defense = defaultTestSpecies.baseDefense,
-            speed = defaultTestSpecies.baseSpeed,
-            magic = defaultTestSpecies.baseMagic,
-            magicDefense = defaultTestSpecies.baseMagicDefense
+            currentHP = defaultTestSpecies.BaseHP,
+            maxHP = defaultTestSpecies.BaseHP,
+            attack = defaultTestSpecies.BaseAttack,
+            defense = defaultTestSpecies.BaseDefense,
+            speed = defaultTestSpecies.BaseSpeed,
+            magic = defaultTestSpecies.BaseMagic,
+            magicDefense = defaultTestSpecies.BaseMagicDefense
         };
 
-        // Adiciona direto na box do storage atual
+        // Add the generated runic directly to the current runtime box.
         RunicStorageManager.Instance.AddCapturedRunic(debugRunic);
-        Debug.Log("Rúnico de teste injetado via tecla " + injectShortcutKey.ToString() + "!");
+        Debug.Log("Test runic injected with key " + injectShortcutKey + ".");
     }
 }

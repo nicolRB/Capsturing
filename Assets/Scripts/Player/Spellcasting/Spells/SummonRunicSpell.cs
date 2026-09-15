@@ -3,26 +3,22 @@ using UnityEngine;
 public class SummonRunicSpell : SpellBase
 {
     [Header("Summon Settings")]
-    public float cooldownTimeValue = 1.5f;
-    public float summonHeight = 1f;
-    public RunicStorageManager runicStorageManager;
-    public RunicDatabase runicDatabase;
-    public GameObject runicWheel;
+    [SerializeField] private float cooldownTimeValue = 1.5f;
+    [SerializeField] private float summonHeight = 1f;
+    [SerializeField] private RunicStorageManager runicStorageManager;
+    [SerializeField] private RunicDatabase runicDatabase;
+    [SerializeField] private GameObject runicWheel;
 
     [Header("State Tracking")]
     private RunicSaveData selectedRunicFromWheel;
+    private Runic activeSummonedRunic = null;
     
-    [HideInInspector]
-    public Runic activeSummonedRunic = null;
-    
-    // Flag para saber se a roda de escolha está aberta no momento
+    // Tracks whether the selection wheel is currently open.
     private bool isWheelOpen = false;
 
     public override void Start()
     {
         base.Start();
-        cooldownTime = cooldownTimeValue;
-        spellType = SpellType.Targeted;
 
         if (runicStorageManager == null)
             runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
@@ -46,13 +42,13 @@ public class SummonRunicSpell : SpellBase
         if (runicStorageManager == null)
         {
             Debug.LogWarning("SummonRunicSpell: RunicStorageManager not found!");
-            spellcastingScript.CancelCast();
+            spellcastingCoordinator.CancelCast();
             return;
         }
 
-        // 1. CHECAGEM: Verifica se existe pelo menos um rúnico válido na party inteira
+        // Check whether at least one valid runic is in the party.
         bool hasAnyRunicInParty = false;
-        foreach (string id in runicStorageManager.partyIds)
+        foreach (string id in runicStorageManager.PartyIds)
         {
             if (!string.IsNullOrEmpty(id))
             {
@@ -61,21 +57,21 @@ public class SummonRunicSpell : SpellBase
             }
         }
 
-        // Se a party estiver totalmente vazia, cancela a magia imediatamente antes de abrir qualquer UI
+        // Cancel before opening the UI when the party is empty.
         if (!hasAnyRunicInParty)
         {
             Debug.Log("Summon spell cancelled: No runics in party.");
-            spellcastingScript.CancelCast();
+            spellcastingCoordinator.CancelCast();
             return;
         }
 
         Debug.Log("Summon spell: Opening Party Wheel.");
         isWheelOpen = true;
-        player.castState = PlayerController.CastState.Channeling;
+        player.SetCastingState(PlayerController.CastState.Channeling);
         runicWheel.SetActive(true);
     }
 
-    // Chamado quando o jogador aperta 'E' novamente com a roda aberta para cancelar
+    // Called when the player presses E again while the wheel is open.
     public override void Cancel()
     {
         Debug.Log("Summon spell cancelled by player.");
@@ -84,16 +80,13 @@ public class SummonRunicSpell : SpellBase
             runicWheel.SetActive(false);
         pointTarget?.ClearPoint();
         selectedRunicFromWheel = null;
-        player.useAimIndicator = true;
-        player.castState = PlayerController.CastState.Idle;
+        player.ToggleAimIndicator(true);
+        player.SetCastingState(PlayerController.CastState.Idle);
         
-        // FECHAR A RODA DE ESCOLHA AQUI SE ELA ESTIVER ABERTA
-        // Exemplo: wheelUI.ClosePartyWheel();
-
         RaiseSpellResolved();
     }
 
-    // Este método seria chamado pela sua UI da roda ao escolher um rúnico
+    // Called by the wheel UI when the player chooses a runic.
     public void OnRunicSelectedFromWheel(RunicSaveData chosenRunic)
     {
         if (!isWheelOpen) return;
@@ -103,7 +96,7 @@ public class SummonRunicSpell : SpellBase
 
         if (chosenRunic == null)
         {
-            spellcastingScript.CancelCast();
+            spellcastingCoordinator.CancelCast();
             return;
         }
 
@@ -112,22 +105,22 @@ public class SummonRunicSpell : SpellBase
             Debug.Log($"Recalling runic {chosenRunic.runicInstanceId}.");
             UnsummonRunic();
             pointTarget?.ClearPoint();
-            player.useAimIndicator = true;
+            player.ToggleAimIndicator(true);
             RaiseSpellResolved();
             return;
         }
 
-        // Se escolher um rúnico NÃO INVOCADO -> Vai para o estado de Aiming para posicionar
+        // An unsummoned runic enters the aiming state for placement.
         selectedRunicFromWheel = chosenRunic;
-        player.useAimIndicator = false;
-        player.castState = PlayerController.CastState.Aiming;
+        player.ToggleAimIndicator(false);
+        player.SetCastingState(PlayerController.CastState.Aiming);
 
         RunicSpecies species = runicDatabase != null
             ? runicDatabase.GetSpeciesById(chosenRunic.speciesId)
             : null;
         string runicName = !string.IsNullOrEmpty(chosenRunic.nickname)
             ? chosenRunic.nickname
-            : species != null ? species.speciesName : chosenRunic.speciesId;
+            : species != null ? species.SpeciesName : chosenRunic.speciesId;
         Debug.Log($"Runic {runicName} selected. Enter aiming state for placement.");
     }
 
@@ -135,12 +128,12 @@ public class SummonRunicSpell : SpellBase
     {
         return activeSummonedRunic != null &&
             !string.IsNullOrEmpty(runicId) &&
-            activeSummonedRunic.runicInstanceId == runicId;
+            activeSummonedRunic.RunicInstanceId == runicId;
     }
 
     public override void OnChannelComplete(ChannelingGameScript.ChannelingResult result)
     {
-        // Não utilizado
+        // This spell does not use a channeling result.
     }
 
     public override void OnSpellCast()
@@ -152,10 +145,10 @@ public class SummonRunicSpell : SpellBase
             return;
         }
 
-        if (pointTarget == null || !pointTarget.groundIndicator.activeSelf)
+        if (pointTarget == null || !pointTarget.GroundIndicator.activeSelf)
         {
             Debug.LogWarning("SummonRunicSpell: no valid PointTarget position.");
-            player.useAimIndicator = true;
+            player.ToggleAimIndicator(true);
             selectedRunicFromWheel = null;
             RaiseSpellResolved();
             return;
@@ -163,15 +156,16 @@ public class SummonRunicSpell : SpellBase
 
         Debug.Log("Summon spell: Executing placement and spawn.");
 
-        // Se houver outro rúnico invocado em campo, limpa ele
+        // Remove any other runic currently summoned in the scene.
         if (activeSummonedRunic != null)
         {
             UnsummonRunic();
         }
 
-        Vector3 spawnPosition = pointTarget.indicatedPosition + Vector3.up * summonHeight;
+        Vector3 spawnPosition = pointTarget.IndicatedPosition + Vector3.up * summonHeight;
 
-        if (selectedRunicFromWheel.runicModel == null)
+        GameObject runicModel = runicStorageManager.GetRunicModel(selectedRunicFromWheel);
+        if (runicModel == null)
         {
             Debug.LogError($"Runic '{selectedRunicFromWheel.runicInstanceId}' has no model assigned.");
             pointTarget.ClearPoint();
@@ -180,13 +174,13 @@ public class SummonRunicSpell : SpellBase
             return;
         }
 
-        GameObject spawnedObj = Instantiate(selectedRunicFromWheel.runicModel, spawnPosition, player.transform.rotation);
+        GameObject spawnedObj = Instantiate(runicModel, spawnPosition, player.transform.rotation);
         pointTarget.ClearPoint();
         activeSummonedRunic = spawnedObj.GetComponent<Runic>();
 
         if (activeSummonedRunic != null)
         {
-            activeSummonedRunic.runicDatabase = runicDatabase;
+            activeSummonedRunic.SetRunicDatabase(runicDatabase);
             activeSummonedRunic.InitializeFromData(selectedRunicFromWheel);
         }
 
@@ -194,7 +188,7 @@ public class SummonRunicSpell : SpellBase
             Debug.Log($"Successfully summoned {activeSummonedRunic.name}");
 
         selectedRunicFromWheel = null;
-        player.useAimIndicator = true;
+        player.ToggleAimIndicator(true);
         RaiseSpellResolved();
     }
 

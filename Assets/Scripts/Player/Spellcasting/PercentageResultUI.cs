@@ -1,20 +1,22 @@
 using UnityEngine;
 using TMPro;
 
-public class PercentageResultScript : MonoBehaviour
+public class PercentageResultUI : MonoBehaviour
 {
     [Header("References")]
-    public TextMeshProUGUI percentageText;
+    [SerializeField] private TextMeshProUGUI percentageText;
 
     [Header("Result")]
-    public float percentage = 0f;
-    public Color color = Color.white;
+    private float percentage = 0f;
+    private Color color = Color.white;
 
-    public float duration = 1f;
-    public float finalSize = 1.1f;
+    [Header("Animation")]
+    [Tooltip("Time in seconds for the result to fade out.")]
+    [SerializeField] private float duration = 1f;
+    [SerializeField] private float finalSize = 1.1f;
 
-    public bool showResult = false;
-    public float alpha = 0f;
+    private bool showResult = false;
+    private float alpha = 0f;
 
     void Start()
     {

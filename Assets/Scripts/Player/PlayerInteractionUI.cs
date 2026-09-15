@@ -1,24 +1,29 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInteractionScript : MonoBehaviour
+public class PlayerInteractionUI : MonoBehaviour
 {
     [Header("References")]
-    public PlayerController player;
-    public Camera playerCamera;
+    [SerializeField] private PlayerController player;
+    [SerializeField] private Camera playerCamera;
 
     [Header("Interaction Detection")]
-    public float maxDistance = 7.5f;
-    public float sphereRadius = 1f;
-    public LayerMask interactableLayer; // layer onde ficam os interagíveis (ex: "Interactable" e "InteractableHighlight")
+    [Tooltip("Maximum distance at which an interactable can be detected.")]
+    [SerializeField] private float maxDistance = 7.5f;
+    [Tooltip("Radius of the detection sphere cast.")]
+    [SerializeField] private float sphereRadius = 1f;
+    [Tooltip("Layers containing interactable objects and their highlights.")]
+    [SerializeField] private LayerMask interactableLayer;
 
     [Header("Interaction Input")]
-    public Key interactKey = Key.F;
+    [SerializeField] private Key interactKey = Key.F;
 
     private Ray ray;
-    public GameObject interactableTarget;
+    private GameObject interactableTarget;
     private Interactable interactableComponent;
     private Highlight highlightTarget;
+
+    public GameObject InteractableTarget => interactableTarget;
 
     void Start()
     {
@@ -31,7 +36,7 @@ public class PlayerInteractionScript : MonoBehaviour
         Point();
 
         if (Keyboard.current[interactKey].wasPressedThisFrame
-            && player.castState == PlayerController.CastState.Idle
+            && player.CastingState == PlayerController.CastState.Idle
             && interactableComponent != null)
         {
             interactableComponent.Interact();
@@ -43,7 +48,7 @@ public class PlayerInteractionScript : MonoBehaviour
         ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x,
             playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
 
-        bool canTargetInteractable = player.castState == PlayerController.CastState.Idle;
+        bool canTargetInteractable = player.CastingState == PlayerController.CastState.Idle;
 
         if (canTargetInteractable
             && Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, interactableLayer))
@@ -54,12 +59,12 @@ public class PlayerInteractionScript : MonoBehaviour
             if (novoHighlight != null && novoInteractable != null)
             {
                 if (highlightTarget != null && highlightTarget != novoHighlight)
-                    highlightTarget.pointed = false;
+                    highlightTarget.Toggle(false);
 
                 interactableTarget = hit.collider.gameObject;
                 highlightTarget = novoHighlight;
                 interactableComponent = novoInteractable;
-                highlightTarget.pointed = true;
+                highlightTarget.Toggle(true);
                 return;
             }
         }
@@ -71,7 +76,7 @@ public class PlayerInteractionScript : MonoBehaviour
     {
         if (highlightTarget != null)
         {
-            highlightTarget.pointed = false;
+            highlightTarget.Toggle(false);
             highlightTarget = null;
         }
         interactableTarget = null;

@@ -2,14 +2,20 @@ using UnityEngine;
 
 public class SpawnEnemy : MonoBehaviour
 {
-    public GameObject enemyPrefab;
-    public GameObject originalEnemy;
-    public bool spawnOnStart = false;
-    public bool deletePrevious = false;
-    public Transform spawnPoint;
-    public EnemyTargetHolder targetHolder;
+    [Header("Spawn Settings")]
+    [Tooltip("Prefab used to create a new enemy.")]
+    [SerializeField] private GameObject enemyPrefab;
+    [Tooltip("Previously spawned enemy that may be removed before spawning.")]
+    [SerializeField] private GameObject originalEnemy;
+    [Tooltip("Spawn an enemy automatically when the scene starts.")]
+    [SerializeField] private bool spawnOnStart = false;
+    [Tooltip("Remove the previous enemy before spawning a new one.")]
+    [SerializeField] private bool deletePrevious = false;
+    [Tooltip("Transform that defines the enemy's spawn position and rotation.")]
+    [SerializeField] private Transform spawnPoint;
+    [Tooltip("Optional holder updated with the newly spawned enemy.")]
+    [SerializeField] private EnemyTargetHolder targetHolder;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         if (spawnOnStart)
@@ -20,7 +26,7 @@ public class SpawnEnemy : MonoBehaviour
 
     public void Spawn()
     {
-        Debug.Log("SpawnEnemy: Spawning enemy at " + spawnPoint.position);
+        Debug.Log("SpawnEnemy: spawning enemy at " + spawnPoint.position);
         if (enemyPrefab != null)
         {
             if (deletePrevious && originalEnemy != null) Destroy(originalEnemy);

@@ -1,37 +1,38 @@
 using UnityEngine;
 using TMPro;
 
-public class FeedBackUI : MonoBehaviour
+public class FeedbackUI : MonoBehaviour
 {
-    public GameObject textPrefab;
-    public Canvas canvas;
+    [Header("References")]
+    [SerializeField] private GameObject textPrefab;
+    [SerializeField] private Canvas canvas;
 
     public void Show(TargetScript.HitResult result, Vector2 position)
     {
         if (textPrefab == null)
         {
-            Debug.LogError("FeedBackUI: textPrefab is not assigned in the Inspector.", this);
+            Debug.LogError("FeedbackUI: textPrefab is not assigned in the Inspector.", this);
             return;
         }
 
         canvas = canvas ? canvas : FindFirstObjectByType<Canvas>();
         if (canvas == null)
         {
-            Debug.LogError("FeedBackUI: No Canvas found in the scene.", this);
+            Debug.LogError("FeedbackUI: No Canvas found in the scene.", this);
             return;
         }
 
         GameObject obj = Instantiate(textPrefab, canvas.transform);
         if (obj == null)
         {
-            Debug.LogError("FeedBackUI: Failed to instantiate textPrefab.", this);
+            Debug.LogError("FeedbackUI: Failed to instantiate textPrefab.", this);
             return;
         }
 
         TextMeshProUGUI text = obj.GetComponent<TextMeshProUGUI>();
         if (text == null)
         {
-            Debug.LogError("FeedBackUI: textPrefab does not have a TextMeshProUGUI component.", this);
+            Debug.LogError("FeedbackUI: textPrefab does not have a TextMeshProUGUI component.", this);
             Destroy(obj);
             return;
         }
@@ -39,24 +40,23 @@ public class FeedBackUI : MonoBehaviour
         PopupText popup = obj.GetComponent<PopupText>();
         if (popup == null)
         {
-            Debug.LogError("FeedBackUI: textPrefab does not have a PopupText component.", this);
+            Debug.LogError("FeedbackUI: textPrefab does not have a PopupText component.", this);
             Destroy(obj);
             return;
         }
 
-        // Setup text
+        // Configure and play the popup.
         text.text = GetText(result);
         text.color = GetColor(result);
         
         Vector2 finalPos = position + Vector2.up * 30f;
         obj.transform.position = finalPos;
 
-        // Set start position for animation and play
-        popup.startPosition = finalPos;
+        popup.SetStartPosition(finalPos);
         popup.Play();
     }
 
-    public string GetText(TargetScript.HitResult result)
+    private string GetText(TargetScript.HitResult result)
     {
         switch (result)
         {
@@ -67,7 +67,7 @@ public class FeedBackUI : MonoBehaviour
         }
     }
 
-    public Color GetColor(TargetScript.HitResult result)
+    private Color GetColor(TargetScript.HitResult result)
     {
         switch (result)
         {

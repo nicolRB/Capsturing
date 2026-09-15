@@ -3,7 +3,7 @@ using UnityEditor;
 
 public class FindMissingScripts
 {
-    [MenuItem("Tools/Find Missing Scripts In Scene")]
+    [MenuItem("Tools/Find Missing Scripts in Scene")]
     public static void FindMissingScriptsInScene()
     {
         int count = 0;
