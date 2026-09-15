@@ -144,15 +144,15 @@ public class RunicInjectorWindow : EditorWindow
     private RunicSaveData CreateRunicData()
     {
         float defaultHP = selectedSpecies.BaseHP;
-        List<string> ElementIds = new List<string>();
+        List<string> elementIds = new List<string>();
         List<string> basicSkillIds = new List<string>();
-        List<string> SkillIds = new List<string>();
+        List<string> skillIds = new List<string>();
 
         if (selectedSpecies.Elements != null)
         {
             foreach (Element element in selectedSpecies.Elements)
             {
-                if (element != null) ElementIds.Add(element.ElementId);
+                if (element != null) elementIds.Add(element.ElementId);
             }
         }
 
@@ -168,7 +168,7 @@ public class RunicInjectorWindow : EditorWindow
         {
             foreach (Skill skill in selectedSpecies.Skills)
             {
-                if (skill != null) SkillIds.Add(skill.SkillId);
+                if (skill != null) skillIds.Add(skill.SkillId);
             }
         }
 
@@ -189,9 +189,9 @@ public class RunicInjectorWindow : EditorWindow
             speed = useCustomValues ? customSpeed : selectedSpecies.BaseSpeed,
             magic = useCustomValues ? customMagic : selectedSpecies.BaseMagic,
             magicDefense = useCustomValues ? customMagicDefense : selectedSpecies.BaseMagicDefense,
-            elementIds = ElementIds,
+            elementIds = elementIds,
             learnedBasicSkillIds = basicSkillIds,
-            learnedSkillIds = SkillIds
+            learnedSkillIds = skillIds
         };
     }
 }
