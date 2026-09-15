@@ -28,28 +28,28 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         // Cursor
-        bool menuOpen = player.menuManager.CurrentMenu != null;
+        bool menuOpen = player.MenuManager.CurrentMenu != null;
 
-        if (menuOpen || player.castState == PlayerController.CastState.Channeling)
+        if (menuOpen || player.CastingState == PlayerController.CastState.Channeling)
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-        else if (!menuOpen && player.castState != PlayerController.CastState.Channeling)
+        else if (!menuOpen && player.CastingState != PlayerController.CastState.Channeling)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
 
         // Camera rotation.
-        if (player.castState != PlayerController.CastState.Channeling && !player.menuManager.IsPaused && !menuOpen)
+        if (player.CastingState != PlayerController.CastState.Channeling && !player.MenuManager.IsPaused && !menuOpen)
         {
             float mouseY = Mouse.current.delta.y.ReadValue()
-                           * player.mouseSensitivity
+                           * player.MouseSensitivity
                            * Time.deltaTime;
 
             float mouseX = Mouse.current.delta.x.ReadValue()
-                           * player.mouseSensitivity
+                           * player.MouseSensitivity
                            * Time.deltaTime;
 
             xRotation -= mouseY;
@@ -64,7 +64,7 @@ public class CameraController : MonoBehaviour
         pivot.position = player.transform.position;
 
         // Zoom while aiming or holding the right mouse button.
-        if ((Mouse.current.rightButton.isPressed || player.castState == PlayerController.CastState.Aiming)
+        if ((Mouse.current.rightButton.isPressed || player.CastingState == PlayerController.CastState.Aiming)
         && !menuOpen)
         {
             FOV = Mathf.Lerp(FOV, FOVSetting/2.5f, Time.deltaTime * 5f);

@@ -47,6 +47,8 @@ public class PlayerController : MonoBehaviour
     [Header("Mouse Look")]
     [SerializeField] private float mouseSensitivity = 15f;
 
+    public float MouseSensitivity => mouseSensitivity;
+
     private Rigidbody rb;
     private CapsuleCollider capsule;
     private Animator animator;
