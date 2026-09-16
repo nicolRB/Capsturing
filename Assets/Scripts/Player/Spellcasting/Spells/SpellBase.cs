@@ -21,6 +21,11 @@ public abstract class SpellBase : MonoBehaviour
     public TargetMapAsset SpellMap => spellMap;
     public Sprite SpellIcon => spellIcon;
 
+    protected void SetSpellType(SpellType type)
+    {
+        spellType = type;
+    }
+
     [Header("Channeling Scoring")]
     [Tooltip("Weights used to score this spell's channeling sequence.")]
     public float perfectWeight = 1f;

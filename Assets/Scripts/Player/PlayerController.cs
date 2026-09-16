@@ -121,7 +121,7 @@ public class PlayerController : MonoBehaviour
 
         castingState = newState;
 
-        Debug.Log("Casting State changed to" + castingState);
+        Debug.Log("Casting State changed to " + castingState);
     }
 
     public void ToggleAimIndicator(bool state)

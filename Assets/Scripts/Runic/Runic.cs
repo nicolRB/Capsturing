@@ -167,11 +167,13 @@ public class Runic : MonoBehaviour
         }
 
         nickname = string.IsNullOrEmpty(data.nickname) ? species.SpeciesName : data.nickname;
-        runicIcon = species.SpeciesIcon;
+        runicIcon = data.runtimeIcon != null ? data.runtimeIcon : species.SpeciesIcon;
         modelIndex = species.SpeciesModels != null && species.SpeciesModels.Count > 0
             ? Mathf.Clamp(data.modelIndex, 0, species.SpeciesModels.Count - 1)
             : 0;
-        runicModel = species.SpeciesModels != null && species.SpeciesModels.Count > 0
+        runicModel = data.runtimeModel != null
+            ? data.runtimeModel
+            : species.SpeciesModels != null && species.SpeciesModels.Count > 0
             ? species.SpeciesModels[modelIndex]
             : null;
         level = data.level;
@@ -223,6 +225,8 @@ public class Runic : MonoBehaviour
             runicInstanceId = System.Guid.NewGuid().ToString(),
             speciesId = species != null ? species.SpeciesId : "",
             nickname = string.IsNullOrEmpty(nickname) && species != null ? species.SpeciesName : nickname,
+            runtimeIcon = runicIcon,
+            runtimeModel = runicModel,
             modelIndex = species != null && species.SpeciesModels != null
                 ? Mathf.Max(0, species.SpeciesModels.IndexOf(runicModel))
                 : 0,

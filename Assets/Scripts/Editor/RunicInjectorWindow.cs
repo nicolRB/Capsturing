@@ -177,6 +177,8 @@ public class RunicInjectorWindow : EditorWindow
             runicInstanceId = System.Guid.NewGuid().ToString(),
             speciesId = selectedSpecies.SpeciesId,
             nickname = useCustomValues && !string.IsNullOrWhiteSpace(customNickname) ? customNickname : selectedSpecies.SpeciesName,
+            runtimeIcon = useCustomValues && customIcon != null ? customIcon : selectedSpecies.SpeciesIcon,
+            runtimeModel = useCustomValues && customModel != null ? customModel : GetDefaultModel(),
             modelIndex = useCustomValues && customModel != null && selectedSpecies.SpeciesModels != null
                 ? Mathf.Max(0, selectedSpecies.SpeciesModels.IndexOf(customModel))
                 : 0,
@@ -193,5 +195,12 @@ public class RunicInjectorWindow : EditorWindow
             learnedBasicSkillIds = basicSkillIds,
             learnedSkillIds = skillIds
         };
+    }
+
+    private GameObject GetDefaultModel()
+    {
+        return selectedSpecies.SpeciesModels != null && selectedSpecies.SpeciesModels.Count > 0
+            ? selectedSpecies.SpeciesModels[0]
+            : null;
     }
 }

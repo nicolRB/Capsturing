@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public class RunicSaveData
@@ -8,6 +9,8 @@ public class RunicSaveData
     public string speciesId;
     public string nickname;
     public int modelIndex;
+    [NonSerialized] public Sprite runtimeIcon;
+    [NonSerialized] public GameObject runtimeModel;
     public int level;
     public float experience;
     public float currentHP;

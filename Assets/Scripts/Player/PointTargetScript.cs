@@ -95,11 +95,15 @@ public class PointTargetScript : MonoBehaviour
             stateOnMousePressed = player.CastingState;
         }
 
+        selecting = Mouse.current.leftButton.isPressed
+            && player.MenuManager.CurrentMenu == null 
+            && stateOnMousePressed == PlayerController.CastState.Idle;
+
         Point();
 
-        selecting = Mouse.current.leftButton.isPressed && stateOnMousePressed == PlayerController.CastState.Idle;
 
-        if (selected && !selecting)
+        // Se foi selecionado, começa a contar o tempo do fade independentemente de o selecting atualizar depois
+        if (selected)
         {
             timer += Time.deltaTime;
             float t = fadeDuration > 0f ? timer / fadeDuration : 1f;
@@ -126,6 +130,74 @@ public class PointTargetScript : MonoBehaviour
             followPoint = false;
         }
     }
+    void Point()
+    {
+        ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x, 
+        playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
+
+        if (Mouse.current.leftButton.wasPressedThisFrame && stateOnMousePressed == PlayerController.CastState.Idle)
+        {
+            selected = false;
+            timer = 0f;
+        }
+
+        bool isAimingSpell = player.CastingState == PlayerController.CastState.Aiming;
+        bool isPointTargetedSpell = isAimingSpell
+            && spellcastingCoordinator.CurrentSpellType == SpellBase.SpellType.PointTargeted;
+        bool isCreatureTargetedSpell = isAimingSpell
+            && spellcastingCoordinator.CurrentSpellType == SpellBase.SpellType.Targeted;
+
+        // Point-targeted spells select terrain, while targeted spells select creatures.
+        bool canTargetCreature = !isPointTargetedSpell && (selecting || isCreatureTargetedSpell);
+        bool creaturePointed = canTargetCreature ? PointCreature() : ClearCreatureTarget();
+
+        bool terrainHit = Physics.Raycast(ray, out RaycastHit hit, maxDistance) 
+                        && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0;
+
+        // Mantém visível enquanto o botão está pressionado, ou se estiver em fade-out após soltar, ou se for um feitiço point-targeted ativo
+        bool canShowGroundIndicator = selecting || selected || isPointTargetedSpell;
+
+        // Se soltou o botão do mouse neste frame sobre o terreno, ativamos o selected imediatamente
+        if (terrainHit && groundIndicator.activeSelf && Mouse.current.leftButton.wasReleasedThisFrame 
+            && player.MenuManager.CurrentMenu == null
+            && stateOnMousePressed == PlayerController.CastState.Idle)
+        {
+            followPoint = true;
+            indicatedPosition = groundIndicator.transform.position;
+            selected = true; // Ativa o fade imediatamente aqui
+        }
+
+        if (canShowGroundIndicator && terrainHit && !creaturePointed)
+        {
+            groundIndicator.SetActive(true);
+            
+            // Se não estiver selecionado (ou seja, arrastando o mouse), atualiza a posição livremente
+            if (!selected)
+            {
+                groundIndicator.transform.position = hit.point + Vector3.up * 0.01f;
+                groundIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+                indicatedPosition = groundIndicator.transform.position;
+            }
+
+            if (selecting || isPointTargetedSpell)
+            {
+                timer = 0f;
+                SetIndicatorIntensity(fadeStartValue);
+            }
+        }
+        else if (!canShowGroundIndicator || creaturePointed || !terrainHit)
+        {
+            if (!selected) // Só desativa imediatamente se não estiver no processo de fade
+            {
+                groundIndicator.SetActive(false);
+            }
+        }
+
+        if (highlightTarget != null)
+        {
+            highlightTarget.Toggle(creaturePointed && (selecting || isCreatureTargetedSpell));
+        }
+    }
 
     public void ToggleFollowPoint(bool state)
     {
@@ -136,6 +208,9 @@ public class PointTargetScript : MonoBehaviour
     {
         if (indicatorRenderers == null)
             return;
+
+        if (emissionPropertyBlock == null)
+            emissionPropertyBlock = new MaterialPropertyBlock();
 
         Color emission = rayEmissionColor * (rayEmissionIntensity * alpha);
 
@@ -161,69 +236,10 @@ public class PointTargetScript : MonoBehaviour
         SetIndicatorIntensity(fadeStartValue);
     }
 
-    void Point()
-    {
-        ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x, 
-        playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
-
-        bool creaturePointed = PointCreature();
-        
-        bool inputActive = Mouse.current.leftButton.isPressed 
-                            && player.MenuManager.CurrentMenu == null
-                            && stateOnMousePressed == PlayerController.CastState.Idle;
-
-        bool aimingSpell = player.CastingState == PlayerController.CastState.Aiming 
-        && spellcastingCoordinator.CurrentSpellType == SpellBase.SpellType.Targeted;
-
-        bool terrainHit = Physics.Raycast(ray, out RaycastHit hit, maxDistance) 
-                        && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0;
-
-        if (inputActive && terrainHit && !creaturePointed)
-        {
-            groundIndicator.SetActive(true);
-            groundIndicator.transform.position = hit.point + Vector3.up * 0.01f;
-            groundIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-            indicatedPosition = groundIndicator.transform.position;
-            selected = true;
-            timer = 0f;
-            SetIndicatorIntensity(fadeStartValue);
-        }
-        else if (aimingSpell && terrainHit && !creaturePointed)
-        {
-            groundIndicator.SetActive(true);
-            groundIndicator.transform.position = hit.point + Vector3.up * 0.01f;
-            groundIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-            indicatedPosition = groundIndicator.transform.position;
-            SetIndicatorIntensity(fadeStartValue);
-        }
-        else if (aimingSpell && (creaturePointed || !terrainHit))
-        {
-            groundIndicator.SetActive(false);
-        }
-        else if (inputActive && (creaturePointed || !terrainHit))
-        {
-            groundIndicator.SetActive(false);
-            selected = false;
-            timer = 0f;
-        }
-
-        if (highlightTarget != null)
-        {
-            highlightTarget.Toggle(creaturePointed && (inputActive || aimingSpell));
-        }
-
-        if (terrainHit && groundIndicator.activeSelf && Mouse.current.leftButton.wasReleasedThisFrame 
-            && player.MenuManager.CurrentMenu == null
-            && stateOnMousePressed == PlayerController.CastState.Idle)
-        {
-            followPoint = true;
-            indicatedPosition = groundIndicator.transform.position;
-        }
-    }
 
     bool PointCreature()
     {
-        if (Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, creatureLayer) && player.CastingState != PlayerController.CastState.Casting)
+        if (Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, creatureLayer))
         {
             Highlight novoHighlight = hit.collider.gameObject.GetComponentInParent<Highlight>();
 
@@ -240,6 +256,16 @@ public class PointTargetScript : MonoBehaviour
             }
         }
 
+        creatureTarget = null;
+        return false;
+    }
+
+    bool ClearCreatureTarget()
+    {
+        if (highlightTarget != null)
+            highlightTarget.Toggle(false);
+
+        highlightTarget = null;
         creatureTarget = null;
         return false;
     }

@@ -64,6 +64,16 @@ public class SpellcastingCoordinator : MonoBehaviour
         if (percentageResult == null) percentageResult = FindFirstObjectByType<PercentageResultUI>();
     }
 
+    void OnEnable()
+    {
+        // If the game recompiles during channeling, resets the player
+        if (player != null && (player.CastingState == PlayerController.CastState.Channeling || player.CastingState == PlayerController.CastState.Casting || player.CastingState == PlayerController.CastState.Aiming))
+        {
+            Debug.LogWarning("SpellcastingCoordinator: Recompilação detectada durante conjuração. Resetando estado para Idle.");
+            CancelCast();
+        }
+    }
+
     void Update()
     {
         HandleSpellSelection();
@@ -100,6 +110,9 @@ public class SpellcastingCoordinator : MonoBehaviour
             {
                 if (spellCooldowns[spellIndex] <= 0)
                 {
+                        if (CurrentSpell != null)
+                            currentSpellType = CurrentSpell.Type;
+
                     BeginChannel();
                 }            
                 else

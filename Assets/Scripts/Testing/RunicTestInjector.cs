@@ -20,6 +20,8 @@ public class RunicTestInjector : MonoBehaviour
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (!devMode) return;
 
+        if (Keyboard.current == null) return;
+
         if (Keyboard.current != null && Keyboard.current.f12Key.wasPressedThisFrame)
         {
             InjectDebugRunic();
@@ -29,6 +31,12 @@ public class RunicTestInjector : MonoBehaviour
 
     public void InjectDebugRunic()
     {
+        if (defaultTestSpecies == null)
+        {
+            Debug.LogWarning("RunicTestInjector: Default Test Species is not assigned!");
+            return;
+        }
+        
         if (RunicStorageManager.Instance == null || SaveManager.Instance == null)
         {
             Debug.LogWarning("RunicTestInjector: storage or save manager not found in the scene.");
@@ -40,6 +48,10 @@ public class RunicTestInjector : MonoBehaviour
             runicInstanceId = System.Guid.NewGuid().ToString(),
             speciesId = defaultTestSpecies.SpeciesId,
             nickname = "Test Runic",
+            runtimeIcon = defaultTestSpecies.SpeciesIcon,
+            runtimeModel = defaultTestSpecies.SpeciesModels != null && defaultTestSpecies.SpeciesModels.Count > 0
+                ? defaultTestSpecies.SpeciesModels[0]
+                : null,
             modelIndex = 0,
             level = 1,
             currentHP = defaultTestSpecies.BaseHP,

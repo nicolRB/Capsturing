@@ -1,15 +1,27 @@
+using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class RunicWheelUI : MonoBehaviour
 {
+    [Header("Visuals")]
     [SerializeField] private float iconOffset = 100f;
     [SerializeField] private float iconScale = 1f;
+    [SerializeField] private float finalScale = 1f;
+    [SerializeField] private float initialAngle = 180f;
+    [SerializeField] private float visualUpdateSpeed = 1f;
+    private float currentAngle;
+    private float currentScale;
+
+    [Header("References")]
     [SerializeField] private SummonRunicSpell summonRunicSpell;
     [SerializeField] private RunicStorageManager runicStorageManager;
     [SerializeField] private GameObject runicIconPrefab;
     [SerializeField] private GameObject symbol;
-    [SerializeField] private float symbolTargetAngle;
+
+    private float symbolTargetAngle;
 
     private List<GameObject> RunicIcons = new List<GameObject>();
     private List<Sprite> runicIconSprites = new List<Sprite>();
@@ -26,11 +38,27 @@ public class RunicWheelUI : MonoBehaviour
         symbol = transform.Find("Symbol").gameObject;
 
         UpdateRunics();
+        SetSymbolTargetAngle(0);
+
+        currentScale = 0;
+        currentAngle = initialAngle;
+        transform.localScale = new Vector3(0, 0, 0);
+        transform.localEulerAngles = new Vector3(0, 0, initialAngle);
     }
 
     void Update()
     {
         SymbolAngleUpdate();
+        VisualUpdate();
+    }
+
+    void VisualUpdate()
+    {
+        currentScale = Mathf.Lerp(currentScale, finalScale, Time.deltaTime * visualUpdateSpeed);
+        currentAngle = Mathf.Lerp(currentAngle, 0, Time.deltaTime * visualUpdateSpeed);
+
+        transform.localScale = new Vector3(currentScale, currentScale, currentScale);
+        transform.localEulerAngles = new Vector3(0, 0, currentAngle);
     }
 
     void UpdateRunics()

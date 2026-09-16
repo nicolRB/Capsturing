@@ -48,12 +48,24 @@ public class RunicStorageManager : MonoBehaviour
 
     public Sprite GetRunicIcon(RunicSaveData runicData)
     {
+        if (runicData == null)
+            return null;
+
+        if (runicData.runtimeIcon != null)
+            return runicData.runtimeIcon;
+
         RunicSpecies species = GetSpeciesForSaveData(runicData);
         return species != null ? species.SpeciesIcon : null;
     }
 
     public GameObject GetRunicModel(RunicSaveData runicData)
     {
+        if (runicData == null)
+            return null;
+
+        if (runicData.runtimeModel != null)
+            return runicData.runtimeModel;
+
         RunicSpecies species = GetSpeciesForSaveData(runicData);
         if (species == null || species.SpeciesModels == null || species.SpeciesModels.Count == 0)
             return null;
@@ -64,6 +76,9 @@ public class RunicStorageManager : MonoBehaviour
 
     private RunicSpecies GetSpeciesForSaveData(RunicSaveData runicData)
     {
+        if (runicDatabase == null)
+            runicDatabase = FindFirstObjectByType<RunicDatabase>();
+
         if (runicData == null || runicDatabase == null || string.IsNullOrEmpty(runicData.speciesId))
             return null;
 
@@ -195,6 +210,12 @@ public class RunicStorageManager : MonoBehaviour
 
     public void AddCapturedRunic(RunicSaveData capturedData)
     {
+        if (capturedData == null)
+        {
+            Debug.LogError("RunicStorageManager: cannot add null runic data.", this);
+            return;
+        }
+
         boxStorage.Add(capturedData);
 
         int freeSlot = partyIds.FindIndex(id => string.IsNullOrEmpty(id));
@@ -329,6 +350,10 @@ public class RunicStorageManager : MonoBehaviour
             level = level,
             experience = experience,
             nickname = string.IsNullOrEmpty(nickname) ? species.SpeciesName : nickname,
+            runtimeIcon = species.SpeciesIcon,
+            runtimeModel = species.SpeciesModels != null && species.SpeciesModels.Count > 0
+                ? species.SpeciesModels[0]
+                : null,
             modelIndex = 0
         };
 

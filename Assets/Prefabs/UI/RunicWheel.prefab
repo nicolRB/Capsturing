@@ -127,6 +127,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   iconOffset: 100
   iconScale: 0.8
+  finalScale: 2.5
+  initialAngle: 180
+  visualUpdateSpeed: 8
+  summonRunicSpell: {fileID: 0}
   runicStorageManager: {fileID: 0}
   runicIconPrefab: {fileID: 2420698643900125647, guid: 9b7615d52f3a3bd40a4ee73aaf5b5548, type: 3}
   symbol: {fileID: 0}

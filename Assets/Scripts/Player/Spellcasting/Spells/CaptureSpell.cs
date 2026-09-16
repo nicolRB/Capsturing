@@ -23,6 +23,7 @@ public class CaptureSpell : SpellBase
     public override void Start()
     {
         base.Start();
+        SetSpellType(SpellType.Targeted);
     }
 
     public override void OnCastStart()
@@ -191,6 +192,14 @@ public class CaptureSpell : SpellBase
 
     private void ResolveCapture(ChannelingGameCoordinator.ChannelingResult result)
     {
+        if (target == null)
+        {
+            Debug.LogWarning("CaptureSpell: Target reference was lost before resolution.");
+            RaiseSpellResolved();
+            player.PlayerHUD.SetActive(true);
+            return;
+        }
+        
         // Use the same formula as the percentage counter during channeling.
         float captureChance = ChannelingGameCoordinator.ComputeScore(
                 result.perfects,

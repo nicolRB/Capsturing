@@ -19,6 +19,7 @@ public class SummonRunicSpell : SpellBase
     public override void Start()
     {
         base.Start();
+        SetSpellType(SpellType.PointTargeted);
 
         if (runicStorageManager == null)
             runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
@@ -113,6 +114,16 @@ public class SummonRunicSpell : SpellBase
         // An unsummoned runic enters the aiming state for placement.
         selectedRunicFromWheel = chosenRunic;
         player.ToggleAimIndicator(false);
+        if (pointTarget == null)
+        {
+            Debug.LogError("SummonRunicSpell: PointTargetScript is not assigned.", this);
+            selectedRunicFromWheel = null;
+            player.ToggleAimIndicator(true);
+            spellcastingCoordinator.CancelCast();
+            return;
+        }
+
+        pointTarget.GroundIndicator.SetActive(true);
         player.SetCastingState(PlayerController.CastState.Aiming);
 
         RunicSpecies species = runicDatabase != null
@@ -138,6 +149,8 @@ public class SummonRunicSpell : SpellBase
 
     public override void OnSpellCast()
     {
+        
+
         if (selectedRunicFromWheel == null)
         {
             Debug.LogWarning("No runic selected from wheel to summon.");
@@ -153,6 +166,8 @@ public class SummonRunicSpell : SpellBase
             RaiseSpellResolved();
             return;
         }
+        
+        pointTarget.GroundIndicator.SetActive(false);
 
         Debug.Log("Summon spell: Executing placement and spawn.");
 
@@ -170,6 +185,7 @@ public class SummonRunicSpell : SpellBase
             Debug.LogError($"Runic '{selectedRunicFromWheel.runicInstanceId}' has no model assigned.");
             pointTarget.ClearPoint();
             selectedRunicFromWheel = null;
+            player.ToggleAimIndicator(true);
             RaiseSpellResolved();
             return;
         }
