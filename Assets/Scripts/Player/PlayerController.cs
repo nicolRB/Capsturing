@@ -391,11 +391,22 @@ public class PlayerController : MonoBehaviour
     {
         if (castingState == CastState.Channeling) return;
 
-        currentHP -= damage;
+        if (damage > 0)
+            currentHP -= damage;
+
         if (currentHP <= 0)
         {
             Die();
         }
+    }
+
+    public void Heal(int healing)
+    {
+        if (healing > 0)
+            currentHP += healing;
+        
+        if (currentHP > maxHP)
+            currentHP = maxHP;
     }
 
     public void Die()

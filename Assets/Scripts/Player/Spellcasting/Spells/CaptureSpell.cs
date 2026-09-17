@@ -102,17 +102,7 @@ public class CaptureSpell : SpellBase
     private void BeginCaptureChannel()
     {
         // Calculate the health factor from the target's current and maximum health.
-        float hpFactor = target.MaxHP > 0f
-            ? Mathf.Clamp01(
-                (
-                    maxHPFactor * target.MaxHP
-                    -
-                    currentHPFactor * target.CurrentHP
-                )
-                /
-                    (maxHPFactor * target.MaxHP)
-            )
-            : 0f;
+        float hpFactor = CalculateHPFactor(target.MaxHP, target.CurrentHP, maxHPFactor, currentHPFactor);
 
         // Calculate the preparation factor from the preparation channel score.
         float prepFactor = Mathf.Lerp(
@@ -122,12 +112,14 @@ public class CaptureSpell : SpellBase
             );
 
         // Combine health, preparation, and target modifiers into the final multiplier.
-        combinedGlobalMultiplier = Mathf.Clamp01(
-                hpFactor
-                * prepFactor
-                * (1f + target.CaptureChanceMultiplier)
-                + target.CaptureChanceModifier
-            );
+        combinedGlobalMultiplier = CalculateCombinedMultiplier(
+            hpFactor,
+            prepScore,
+            prepMinFactor,
+            prepMaxFactor,
+            target.CaptureChanceMultiplier,
+            target.CaptureChanceModifier
+        );
 
         Debug.Log(
             $"Capture factors: " +
@@ -256,6 +248,39 @@ public class CaptureSpell : SpellBase
 
         Debug.Log(
             "Capture spell cancelled."
+        );
+    }
+
+    public static float CalculateHPFactor(float maxHP, float currentHP, float maxHPFactor, float currentHPFactor)
+    {
+        if (maxHP <= 0f) return 0f;
+
+        return Mathf.Clamp01(
+            (
+                maxHPFactor * maxHP
+                -
+                currentHPFactor * currentHP
+            )
+            /
+                (maxHPFactor * maxHP)
+        );
+    }
+
+    public static float CalculateCombinedMultiplier(
+        float hpFactor, 
+        float prepScore, 
+        float prepMinFactor, 
+        float prepMaxFactor, 
+        float captureChanceMultiplier, 
+        float captureChanceModifier)
+    {
+        float prepFactor = Mathf.Lerp(prepMinFactor, prepMaxFactor, prepScore);
+
+        return Mathf.Clamp01(
+            hpFactor
+            * prepFactor
+            * (1f + captureChanceMultiplier)
+            + captureChanceModifier
         );
     }
 }
