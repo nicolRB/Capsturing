@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -409,8 +408,33 @@ public class PlayerController : MonoBehaviour
             currentHP = maxHP;
     }
 
+    public void SetHP(int amount)
+    {
+        if (amount > maxHP)
+        {
+            currentHP = maxHP;
+            return;
+        }
+
+        currentHP = amount;
+
+        if (amount < 0)
+            Die();
+    }
+
+    public void SetMaxHP(int amount)
+    {
+        maxHP = amount > 0 ? amount : 1;
+    }
+
     public void Die()
     {
-        // gameover logic
+        if (currentHP > 0)
+            currentHP = 0;
+
+        if (currentHP < 0)
+            Debug.Log("Overkill Damage Amout = " + (-currentHP));
+
+        // gameover logic...
     }
 }

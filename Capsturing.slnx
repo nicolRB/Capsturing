@@ -1,6 +1,6 @@
 ﻿<Solution>
   <Project Path="GameCore.csproj" />
   <Project Path="LineworkLite.csproj" />
-  <Project Path="LineworkLite.Editor.csproj" />
   <Project Path="Tests.csproj" />
+  <Project Path="LineworkLite.Editor.csproj" />
 </Solution>
