@@ -5,11 +5,12 @@ using UnityEngine;
 [Serializable]
 public class RunicSaveData
 {
-    public string runicInstanceId; // Unique identifier for this specific creature instance
-    public string speciesId;       // References RunicSpecies.speciesId
+    public string runicInstanceId;
+    public string speciesId;
     public string nickname;
-    public Sprite runicIcon; // The icon representing this creature
-    public GameObject runicModel; // The model of the creature
+    public int modelIndex;
+    [NonSerialized] public Sprite runtimeIcon;
+    [NonSerialized] public GameObject runtimeModel;
     public int level;
     public float experience;
     public float currentHP;

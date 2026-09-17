@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e5b85abe9f918c44b9dbd767f6e65583
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - spellMap: {fileID: 11400000, guid: 4067567a12279634da99654501985810, type: 2}
+  - spellIcon: {fileID: 21300000, guid: 367454dbb2336b140aa9cef3316b27a9, type: 3}
+  - spellcastingScript: {instanceID: 0}
+  - player: {instanceID: 0}
+  - pointTarget: {instanceID: 0}
+  - percentageCounter: {instanceID: 0}
+  - target: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -4,10 +4,11 @@ using System.Collections;
 
 public class ComboCounter : MonoBehaviour
 {
-    public TextMeshProUGUI comboText;
-    public RectTransform rect;
-
-    public int combo = 0;
+    [Header("References")]
+    [SerializeField] private TextMeshProUGUI comboText;
+    [SerializeField] private RectTransform rect;
+    
+    private int combo = 0;
 
     public void UpdateComboText()
     {

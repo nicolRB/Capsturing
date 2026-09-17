@@ -17,7 +17,7 @@ public class CameraController : MonoBehaviour
     {
         player = GetComponentInParent<PlayerController>();
 
-        // guarda referência ao pivot e desparenteia
+        // Cache the pivot and detach it when it is a child of the player.
         pivot = transform.parent;
         if (pivot.parent == player.transform)
         {
@@ -28,43 +28,43 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         // Cursor
-        bool menuOpen = player.menuManager.currentMenu != null;
+        bool menuOpen = player.MenuManager.CurrentMenu != null;
 
-        if (menuOpen || player.castState == PlayerController.CastState.Channeling)
+        if (menuOpen || player.CastingState == PlayerController.CastState.Channeling)
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-        else if (!menuOpen && player.castState != PlayerController.CastState.Channeling)
+        else if (!menuOpen && player.CastingState != PlayerController.CastState.Channeling)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
 
-        // Rotação da câmera
-        if (player.castState != PlayerController.CastState.Channeling && !player.menuManager.isPaused && !menuOpen)
+        // Camera rotation.
+        if (player.CastingState != PlayerController.CastState.Channeling && !player.MenuManager.IsPaused && !menuOpen)
         {
             float mouseY = Mouse.current.delta.y.ReadValue()
-                           * player.mouseSensitivity
+                           * player.MouseSensitivity
                            * Time.deltaTime;
 
             float mouseX = Mouse.current.delta.x.ReadValue()
-                           * player.mouseSensitivity
+                           * player.MouseSensitivity
                            * Time.deltaTime;
 
             xRotation -= mouseY;
             yRotation += mouseX;
             xRotation = Mathf.Clamp(xRotation, -85f, 85f);
 
-            // rotação total da câmera: pitch + yaw independentes
+            // Apply independent pitch and yaw rotation.
             pivot.rotation = Quaternion.Euler(xRotation, yRotation, 0f);
         }
 
-        // pivot segue a posição do player sem herdar rotação
+        // Keep the pivot at the player's position without inheriting player rotation.
         pivot.position = player.transform.position;
 
-        // Zoom (botão direito do mouse)
-        if ((Mouse.current.rightButton.isPressed || player.castState == PlayerController.CastState.Aiming)
+        // Zoom while aiming or holding the right mouse button.
+        if ((Mouse.current.rightButton.isPressed || player.CastingState == PlayerController.CastState.Aiming)
         && !menuOpen)
         {
             FOV = Mathf.Lerp(FOV, FOVSetting/2.5f, Time.deltaTime * 5f);
