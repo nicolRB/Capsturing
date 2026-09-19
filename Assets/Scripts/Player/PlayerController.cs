@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -394,29 +395,22 @@ public class PlayerController : MonoBehaviour
             currentHP -= damage;
 
         if (currentHP <= 0)
-        {
             Die();
-        }
     }
 
     public void Heal(int healing)
     {
         if (healing > 0)
+        {
             currentHP += healing;
-        
-        if (currentHP > maxHP)
-            currentHP = maxHP;
+            currentHP = Math.Min(currentHP, maxHP);
+        }
     }
 
     public void SetHP(int amount)
     {
-        if (amount > maxHP)
-        {
-            currentHP = maxHP;
-            return;
-        }
-
         currentHP = amount;
+        currentHP = Math.Min(currentHP, maxHP);
 
         if (amount < 0)
             Die();
