@@ -42,7 +42,6 @@ public class RunicStorageManager : MonoBehaviour
     private void Start()
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
-        if (runicDatabase == null) runicDatabase = FindFirstObjectByType<RunicDatabase>();
         EnsurePartySize();
     }
 
@@ -53,6 +52,16 @@ public class RunicStorageManager : MonoBehaviour
 
         if (runicData.runtimeIcon != null)
             return runicData.runtimeIcon;
+
+        if (!string.IsNullOrEmpty(runicData.uniqueModelPath))
+        {
+            Sprite loadedSprite = Resources.Load<Sprite>(runicData.uniqueSpritePath);
+            if (loadedSprite != null)
+            {
+                runicData.runtimeIcon = loadedSprite;
+                return loadedSprite;
+            }
+        }
 
         RunicSpecies species = GetSpeciesForSaveData(runicData);
         return species != null ? species.SpeciesIcon : null;
@@ -65,6 +74,16 @@ public class RunicStorageManager : MonoBehaviour
 
         if (runicData.runtimeModel != null)
             return runicData.runtimeModel;
+            
+        if (!string.IsNullOrEmpty(runicData.uniqueModelPath))
+        {
+            GameObject loadedPrefab = Resources.Load<GameObject>(runicData.uniqueModelPath);
+            if (loadedPrefab != null)
+            {
+                runicData.runtimeModel = loadedPrefab;
+                return loadedPrefab;
+            }
+        }
 
         RunicSpecies species = GetSpeciesForSaveData(runicData);
         if (species == null || species.SpeciesModels == null || species.SpeciesModels.Count == 0)

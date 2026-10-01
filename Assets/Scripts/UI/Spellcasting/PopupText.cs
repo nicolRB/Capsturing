@@ -22,9 +22,14 @@ public class PopupText : MonoBehaviour
         if (duration > 0) StartCoroutine(Animate());
     }
 
-    public void SetStartPosition(Vector2 position)
+    public void Setup(Vector2 position, string message, float fontSize, Color color, float fadeDuration = 0.6f, float rise = 50)
     {
         startPosition = position;
+        text.text = message;
+        text.fontSize = fontSize;
+        text.color = color;
+        duration = fadeDuration;
+        riseDistance = rise;
     }
 
     System.Collections.IEnumerator Animate()

@@ -10,7 +10,7 @@ public enum WildNature { Fearful, Friendly, Neutral, Territorial, Aggressive }
 public class Runic : MonoBehaviour
 {
     [Header("Tame State")]
-        [SerializeField] private RunicState tameState = RunicState.Wild;
+    [SerializeField] private RunicState tameState = RunicState.Wild;
 
     [Header("Species Template")]
     [SerializeField] private RunicSpecies species;
@@ -24,9 +24,9 @@ public class Runic : MonoBehaviour
     [SerializeField] private string runicInstanceId;
     [SerializeField] private string nickname;
     [SerializeField] private int level = 1;
-    [SerializeField] private float experience;
-    [SerializeField] private float currentHP = 10;
-    [SerializeField] private float maxHP = 10;
+    [SerializeField] private int experience;
+    [SerializeField] private int currentHP = 10;
+    [SerializeField] private int maxHP = 10;
     [SerializeField] private float attack;
     [SerializeField] private float defense;
     [SerializeField] private float speed;
@@ -35,6 +35,10 @@ public class Runic : MonoBehaviour
     [SerializeField] private List<Element> elements;
     [SerializeField] private List<Skill> basicSkills;
     [SerializeField] private List<Skill> skills;
+
+    [Header("Unique Features (Doesn't Rely On Species)")]
+    [SerializeField] private string uniqueSpritePath;
+    [SerializeField] private string uniqueModelAssetPath;
 
     [Header("Capture Settings (Wild Only)")]
     [SerializeField] private bool capturable = true;
@@ -71,6 +75,13 @@ public class Runic : MonoBehaviour
     [SerializeField] private int minChainNumber = 6;
     [SerializeField] private int maxChainNumber = 8;
     [SerializeField] private float chainSpawnInterval = 0f;
+
+    [Header("Sizes")]
+    [SerializeField] private float width = 1f;
+    [SerializeField] private float height = 1f;
+
+    public float Width => width;
+    public float Height => height;
 
     [Header("References")]
     [SerializeField] private PlayerController player;
@@ -167,7 +178,8 @@ public class Runic : MonoBehaviour
         }
 
         nickname = string.IsNullOrEmpty(data.nickname) ? species.SpeciesName : data.nickname;
-        runicIcon = data.runtimeIcon != null ? data.runtimeIcon : species.SpeciesIcon;
+        runicIcon = data.runtimeIcon != null 
+        ? data.runtimeIcon : species.SpeciesIcon;
         modelIndex = species.SpeciesModels != null && species.SpeciesModels.Count > 0
             ? Mathf.Clamp(data.modelIndex, 0, species.SpeciesModels.Count - 1)
             : 0;
@@ -230,6 +242,8 @@ public class Runic : MonoBehaviour
             modelIndex = species != null && species.SpeciesModels != null
                 ? Mathf.Max(0, species.SpeciesModels.IndexOf(runicModel))
                 : 0,
+            width = width,
+            height = height,
             level = level,
             experience = experience,
             currentHP = currentHP,
@@ -291,7 +305,7 @@ public class Runic : MonoBehaviour
         activeChains.Clear();
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(int damage)
     {
         if (frozen) return;
 

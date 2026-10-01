@@ -7,8 +7,10 @@ public class SaveDataContainer
     [Header("Player State")]
     public float[] playerPosition = new float[3];
     public float playerRotation;
+    public int playerMaxHP;
     public int playerHP;
-    public string lastSceneName;
+    public int lastSceneIndex;
+    public List<float> spellCooldownList = new List<float>();
     public List<RunicSaveData> boxStorage = new List<RunicSaveData>();
     public List<string> partyIds = new List<string>();
 
@@ -20,7 +22,8 @@ public class SaveDataContainer
         playerPosition[2] = 0f;
         playerRotation = 0f;
         playerHP = 100;
-        lastSceneName = "TutorialScene";
+        lastSceneIndex = 0;
+        spellCooldownList = new List<float>();
         boxStorage = new List<RunicSaveData>();
         partyIds = new List<string>();
     }

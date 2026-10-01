@@ -25,6 +25,14 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        SettingsManager.OnSettingsChanged += Apply;
+        Apply(SettingsManager.Current);
+    }
+
+    void OnDisable() => SettingsManager.OnSettingsChanged -= Apply;
+
     void Update()
     {
         // Cursor
@@ -45,11 +53,11 @@ public class CameraController : MonoBehaviour
         if (player.CastingState != PlayerController.CastState.Channeling && !player.MenuManager.IsPaused && !menuOpen)
         {
             float mouseY = Mouse.current.delta.y.ReadValue()
-                           * player.MouseSensitivity
+                           * player.CameraSensitivity
                            * Time.deltaTime;
 
             float mouseX = Mouse.current.delta.x.ReadValue()
-                           * player.MouseSensitivity
+                           * player.CameraSensitivity
                            * Time.deltaTime;
 
             xRotation -= mouseY;
@@ -75,5 +83,12 @@ public class CameraController : MonoBehaviour
         }
 
         GetComponent<Camera>().fieldOfView = FOV;
+    }
+    
+    // ---------------- Settings ---------------- 
+
+    void Apply(GameSettings s)
+    {
+        FOVSetting = s.fov;
     }
 }

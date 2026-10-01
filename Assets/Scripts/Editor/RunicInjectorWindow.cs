@@ -13,8 +13,10 @@ public class RunicInjectorWindow : EditorWindow
     private bool useCustomValues;
     private Sprite customIcon;
     private GameObject customModel;
-    private float customMaxHP;
-    private float customCurrentHP;
+    private float customWidth;
+    private float customHeight;
+    private int customMaxHP;
+    private int customCurrentHP;
     private float customAttack;
     private float customDefense;
     private float customSpeed;
@@ -76,9 +78,13 @@ public class RunicInjectorWindow : EditorWindow
         customIcon = EditorGUILayout.ObjectField("Icon", customIcon, typeof(Sprite), false) as Sprite;
         customModel = EditorGUILayout.ObjectField("Model", customModel, typeof(GameObject), false) as GameObject;
 
+        EditorGUILayout.LabelField("Sizes", EditorStyles.boldLabel);
+        customWidth = EditorGUILayout.FloatField("Width", customWidth);
+        customHeight = EditorGUILayout.FloatField("Height", customHeight);
+
         EditorGUILayout.LabelField("Stats", EditorStyles.boldLabel);
-        customMaxHP = EditorGUILayout.FloatField("Max HP", customMaxHP);
-        customCurrentHP = EditorGUILayout.FloatField("Current HP", customCurrentHP);
+        customMaxHP = EditorGUILayout.IntField("Max HP", customMaxHP);
+        customCurrentHP = EditorGUILayout.IntField("Current HP", customCurrentHP);
         customAttack = EditorGUILayout.FloatField("Attack", customAttack);
         customDefense = EditorGUILayout.FloatField("Defense", customDefense);
         customSpeed = EditorGUILayout.FloatField("Speed", customSpeed);
@@ -95,6 +101,8 @@ public class RunicInjectorWindow : EditorWindow
         customModel = selectedSpecies.SpeciesModels != null && selectedSpecies.SpeciesModels.Count > 0
             ? selectedSpecies.SpeciesModels[0]
             : null;
+        customWidth = selectedSpecies.Width;
+        customHeight = selectedSpecies.Height;
         customMaxHP = selectedSpecies.BaseHP;
         customCurrentHP = selectedSpecies.BaseHP;
         customAttack = selectedSpecies.BaseAttack;
@@ -143,7 +151,7 @@ public class RunicInjectorWindow : EditorWindow
 
     private RunicSaveData CreateRunicData()
     {
-        float defaultHP = selectedSpecies.BaseHP;
+        int defaultHP = selectedSpecies.BaseHP;
         List<string> elementIds = new List<string>();
         List<string> basicSkillIds = new List<string>();
         List<string> skillIds = new List<string>();
@@ -182,6 +190,8 @@ public class RunicInjectorWindow : EditorWindow
             modelIndex = useCustomValues && customModel != null && selectedSpecies.SpeciesModels != null
                 ? Mathf.Max(0, selectedSpecies.SpeciesModels.IndexOf(customModel))
                 : 0,
+            width  = useCustomValues ? customWidth : 1,
+            height = useCustomValues ? customHeight : 1,
             level = useCustomValues ? level : 1,
             experience = useCustomValues ? experience : 0,
             currentHP = useCustomValues ? customCurrentHP : defaultHP,

@@ -24,7 +24,7 @@ public class EnemyTargetHolder : MonoBehaviour
         currentTarget = null;
     }
 
-    public void DamageCurrentTarget(float damage)
+    public void DamageCurrentTarget(int damage)
     {
         if (currentTarget == null)
         {

@@ -262,6 +262,14 @@ public class SpellcastingCoordinator : MonoBehaviour
         Debug.Log("Cast cancelled.");
     }
 
+    public void SetSpellCooldowns(List<float> cooldowns)
+    {
+        if (cooldowns.Count == spellCooldowns.Count)
+            spellCooldowns = cooldowns;
+        else 
+            Debug.LogError("loaded cooldowns does not match spell list");
+    }
+
     void UpdateSpellCooldowns()
     {
         for (int i = 0; i < spellCooldowns.Count; i++)

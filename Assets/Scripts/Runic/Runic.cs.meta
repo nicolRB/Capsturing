@@ -1,2 +1,21 @@
 fileFormatVersion: 2
 guid: c82d0c6373881af4ea0a51516c74d6fc
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - species: {instanceID: 0}
+  - runicIcon: {instanceID: 0}
+  - runicModel: {instanceID: 0}
+  - captureMap: {instanceID: 0}
+  - captureChainsPrefab: {fileID: 6365447050532344907, guid: ef2b118e8a8c2674198a5e7aed2f4899, type: 3}
+  - player: {instanceID: 0}
+  - pointer: {instanceID: 0}
+  - playerInteraction: {instanceID: 0}
+  - runicDatabase: {instanceID: 0}
+  - runicStorageManager: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

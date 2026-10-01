@@ -181,6 +181,8 @@ MonoBehaviour:
   species: {fileID: 11400000, guid: c014a50325299d54ebd86558c955ba3f, type: 2}
   runicIcon: {fileID: 21300000, guid: 65a7948ddae13a54d991842e467c4ba8, type: 3}
   runicModel: {fileID: 1333037246354868708}
+  modelIndex: 0
+  runicInstanceId: 
   nickname: 
   level: 1
   experience: 0
@@ -219,10 +221,13 @@ MonoBehaviour:
   minChainNumber: 6
   maxChainNumber: 8
   chainSpawnInterval: 0
+  width: 1.5
+  height: 1.5
   player: {fileID: 0}
   pointer: {fileID: 0}
   playerInteraction: {fileID: 0}
   runicDatabase: {fileID: 0}
+  runicStorageManager: {fileID: 0}
   followerOffset: 2
   followSide: 1
   following: 1

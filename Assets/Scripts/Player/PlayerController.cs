@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
@@ -45,9 +46,9 @@ public class PlayerController : MonoBehaviour
     private bool isHoldingShift = false;
 
     [Header("Mouse Look")]
-    [SerializeField] private float mouseSensitivity = 15f;
+    [SerializeField] private float cameraSensitivity;
 
-    public float MouseSensitivity => mouseSensitivity;
+    public float CameraSensitivity => cameraSensitivity;
 
     private Rigidbody rb;
     private CapsuleCollider capsule;
@@ -77,8 +78,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CameraCollision cameraCollision;
     [SerializeField] private MenuManager menuManager;
     [SerializeField] private GameObject playerHUD;
+    [SerializeField] private CanvasGroup hudCanvasGroup;
     [SerializeField] private GameObject aimIndicator;
-    [SerializeField] private bool useAimIndicator = true;
+    [SerializeField] private SpellcastingCoordinator spellcastingCoordinator;
+
+    private bool useAimIndicator = true;
 
     public GameObject PlayerCharacter => playerCharacter;
     public CameraController CameraController => cameraController;
@@ -100,18 +104,33 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("CapsuleCollider missing on Player!");
         if (animator == null)
             Debug.LogError("Animator missing on Player!");
+
+        SettingsManager.OnSettingsChanged += Apply;
+        Apply(SettingsManager.Current);
     }
+
+    void OnDisable() => SettingsManager.OnSettingsChanged -= Apply;
 
     private void Start()
     {
         currentSpeed = jogSpeed;
-        if (cameraController == null) cameraController = FindFirstObjectByType<CameraController>();
+        if (cameraController == null) 
+            cameraController = FindFirstObjectByType<CameraController>();
 
-        if (menuManager == null) menuManager = FindFirstObjectByType<MenuManager>();
+        if (menuManager == null) 
+            menuManager = FindFirstObjectByType<MenuManager>();
 
-        if (playerHUD == null) playerHUD = GameObject.Find("PlayerHUD");
+        if (playerHUD == null) 
+            playerHUD = GameObject.Find("PlayerHUD");
 
-        if (cameraCollision == null) cameraCollision = FindFirstObjectByType<CameraCollision>();
+        if (cameraCollision == null) 
+            cameraCollision = FindFirstObjectByType<CameraCollision>();
+
+        if (playerCharacter == null) 
+            playerCharacter = gameObject;
+
+        if (spellcastingCoordinator == null) 
+            spellcastingCoordinator = FindFirstObjectByType<SpellcastingCoordinator>();
     }
 
     public void SetCastingState(CastState newState)
@@ -299,15 +318,15 @@ public class PlayerController : MonoBehaviour
         if (moving || Mouse.current.rightButton.isPressed || Mouse.current.leftButton.isPressed 
         || Keyboard.current[runKey].isPressed || castingState == CastState.Aiming)
         {
-            // player gira para o yaw da câmera
+            // player rotates with the camera
             Quaternion targetRotation = Quaternion.Euler(0f, cameraController.yRotation, 0f);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 15f);
         }
         else
         {
-            // parado: mouse rotaciona player e câmera juntos
+            // rotates only camera
             float mouseX = Mouse.current.delta.x.ReadValue()
-                        * mouseSensitivity * Time.deltaTime;
+                        * cameraSensitivity * Time.deltaTime;
 
             cameraController.yRotation += mouseX;
         }
@@ -370,21 +389,27 @@ public class PlayerController : MonoBehaviour
 
     public void LoadPlayerData(SaveDataContainer data)
     {
+        maxHP = data.playerMaxHP;
         currentHP = data.playerHP;
         Vector3 loadedPosition = new Vector3(data.playerPosition[0], data.playerPosition[1], data.playerPosition[2]);
         float loadedRotation = data.playerRotation;
 
         playerCharacter.transform.position = loadedPosition;
         playerCharacter.transform.rotation = Quaternion.Euler(0f, loadedRotation, 0f); // Reset rotation
+
+        spellcastingCoordinator.SetSpellCooldowns(data.spellCooldownList);
     }
 
     public void PopulateSaveData(SaveDataContainer data)
     {
+        data.playerMaxHP = maxHP;
         data.playerHP = currentHP;
         data.playerPosition[0] = transform.position.x;
         data.playerPosition[1] = transform.position.y;
         data.playerPosition[2] = transform.position.z;
         data.playerRotation = transform.rotation.eulerAngles.y;
+        if (spellcastingCoordinator != null)
+            data.spellCooldownList = spellcastingCoordinator.SpellCooldowns;
     }
 
     public void TakeDamage(int damage)
@@ -430,5 +455,24 @@ public class PlayerController : MonoBehaviour
             Debug.Log("Overkill Damage Amout = " + (-currentHP));
 
         // gameover logic...
+    }
+
+    // ---------------- Settings ---------------- 
+
+    void Apply(GameSettings s)
+    {
+        cameraSensitivity = s.cameraSensitivity;
+        
+        // Escala o HUD inteiro (o painel inferior e seus filhos)
+        playerHUD.transform.localScale = new Vector3(s.hudScale, s.hudScale, s.hudScale);
+        
+        // Controla a opacidade do HUD inteiro de uma só vez (incluindo ícones e textos filhos)
+        if (hudCanvasGroup == null)
+            hudCanvasGroup = playerHUD.GetComponent<CanvasGroup>();
+            
+        if (hudCanvasGroup != null)
+        {
+            hudCanvasGroup.alpha = s.hudOpacity / 100f; 
+        }
     }
 }

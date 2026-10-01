@@ -3,15 +3,17 @@ using UnityEngine;
 public class SummonRunicSpell : SpellBase
 {
     [Header("Summon Settings")]
-    [SerializeField] private float cooldownTimeValue = 1.5f;
     [SerializeField] private float summonHeight = 1f;
-    [SerializeField] private RunicStorageManager runicStorageManager;
-    [SerializeField] private RunicDatabase runicDatabase;
-    [SerializeField] private GameObject runicWheel;
 
     [Header("State Tracking")]
     private RunicSaveData selectedRunicFromWheel;
     private Runic activeSummonedRunic = null;
+
+    [Header("Other References")]
+    [SerializeField] private GameObject summonLightPrefab;
+    [SerializeField] private RunicStorageManager runicStorageManager;
+    [SerializeField] private RunicDatabase runicDatabase;
+    [SerializeField] private GameObject runicWheel;
     
     // Tracks whether the selection wheel is currently open.
     private bool isWheelOpen = false;
@@ -149,8 +151,6 @@ public class SummonRunicSpell : SpellBase
 
     public override void OnSpellCast()
     {
-        
-
         if (selectedRunicFromWheel == null)
         {
             Debug.LogWarning("No runic selected from wheel to summon.");
@@ -177,7 +177,7 @@ public class SummonRunicSpell : SpellBase
             UnsummonRunic();
         }
 
-        Vector3 spawnPosition = pointTarget.IndicatedPosition + Vector3.up * summonHeight;
+        Vector3 spawnPosition = pointTarget.IndicatedPosition + Vector3.up * (summonHeight / 2);
 
         GameObject runicModel = runicStorageManager.GetRunicModel(selectedRunicFromWheel);
         if (runicModel == null)
@@ -190,18 +190,42 @@ public class SummonRunicSpell : SpellBase
             return;
         }
 
-        GameObject spawnedObj = Instantiate(runicModel, spawnPosition, player.transform.rotation);
         pointTarget.ClearPoint();
+
+        StartCoroutine(SummonSequence(runicModel, spawnPosition));
+    }
+
+    private System.Collections.IEnumerator SummonSequence(GameObject runicModel, Vector3 spawnPosition)
+    {
+        Runic runicPrefabData = runicModel.GetComponent<Runic>();
+        float width = runicPrefabData != null ? runicPrefabData.Width : 1f;
+        float height = runicPrefabData != null ? runicPrefabData.Height : 1f;
+
+        float waitTime = 0f;
+
+        if (summonLightPrefab != null)
+        {
+            GameObject lightObj = Instantiate(summonLightPrefab, spawnPosition, Quaternion.identity);
+            SummonLight summonLight = lightObj.GetComponent<SummonLight>();
+            if (summonLight != null)
+            {
+                summonLight.SetSize(width, height);
+                waitTime = summonLight.FlashInDuration;
+            }
+        }
+
+        if (waitTime > 0f)
+            yield return new WaitForSeconds(waitTime);
+
+        GameObject spawnedObj = Instantiate(runicModel, spawnPosition, player.transform.rotation);
         activeSummonedRunic = spawnedObj.GetComponent<Runic>();
 
         if (activeSummonedRunic != null)
         {
             activeSummonedRunic.SetRunicDatabase(runicDatabase);
             activeSummonedRunic.InitializeFromData(selectedRunicFromWheel);
-        }
-
-        if (activeSummonedRunic != null) 
             Debug.Log($"Successfully summoned {activeSummonedRunic.name}");
+        }
 
         selectedRunicFromWheel = null;
         player.ToggleAimIndicator(true);
@@ -213,8 +237,38 @@ public class SummonRunicSpell : SpellBase
         if (activeSummonedRunic != null)
         {
             Debug.Log($"Unsummoning {activeSummonedRunic.name}");
-            Destroy(activeSummonedRunic.gameObject);
+            StartCoroutine(UnsummonSequence(activeSummonedRunic));
             activeSummonedRunic = null;
         }
+    }
+
+    private System.Collections.IEnumerator UnsummonSequence(Runic runicToUnsummon)
+    {
+        if (runicToUnsummon == null) yield break;
+
+        Vector3 unsummonPosition = runicToUnsummon.transform.position;
+        float width = runicToUnsummon.Width;
+        float height = runicToUnsummon.Height;
+
+        float waitTime = 0f;
+
+        if (summonLightPrefab != null)
+        {
+            GameObject lightObj = Instantiate(summonLightPrefab, unsummonPosition, Quaternion.identity);
+            SummonLight summonLight = lightObj.GetComponent<SummonLight>();
+            if (summonLight != null)
+            {
+                summonLight.SetSize(width, height);
+                // Caso seu componente SummonLight use outra duração para o "sair" (fade out), 
+                // você pode ajustar aqui. Usando FlashInDuration por padrão similar ao summon.
+                waitTime = summonLight.FlashInDuration; 
+            }
+        }
+
+        // Destroi o modelo imediatamente ou espera a luz sumir junto com o objeto
+        Destroy(runicToUnsummon.gameObject);
+
+        if (waitTime > 0f)
+            yield return new WaitForSeconds(waitTime);
     }
 }

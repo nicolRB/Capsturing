@@ -13,6 +13,19 @@ public class RunicTestInjector : MonoBehaviour
     [Tooltip("Shortcut displayed in debug messages for the injection action.")]
     [SerializeField]
     private Key injectShortcutKey = Key.F12;
+
+    [Header("References")]
+    [SerializeField]
+    private SaveManager saveManager;
+    [SerializeField]
+    private RunicStorageManager runicStorageManager;
+
+    void Start()
+    {
+        if (saveManager == null) saveManager = FindFirstObjectByType<SaveManager>();
+
+        if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
+    }
     
     void Update()
     {
@@ -37,7 +50,7 @@ public class RunicTestInjector : MonoBehaviour
             return;
         }
         
-        if (RunicStorageManager.Instance == null || SaveManager.Instance == null)
+        if (runicStorageManager == null || saveManager == null)
         {
             Debug.LogWarning("RunicTestInjector: storage or save manager not found in the scene.");
             return;
@@ -53,6 +66,8 @@ public class RunicTestInjector : MonoBehaviour
                 ? defaultTestSpecies.SpeciesModels[0]
                 : null,
             modelIndex = 0,
+            width = defaultTestSpecies.Width,
+            height = defaultTestSpecies.Height,
             level = 1,
             currentHP = defaultTestSpecies.BaseHP,
             maxHP = defaultTestSpecies.BaseHP,
