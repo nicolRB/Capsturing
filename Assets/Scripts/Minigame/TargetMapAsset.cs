@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "NovoMapaDeAlvos", menuName = "Magia/Mapa de Alvos")]
+[CreateAssetMenu(fileName = "NewTargetMap", menuName = "Magic/Target Map")]
 public class TargetMapAsset : ScriptableObject
 {
     [Header("General Settings")]

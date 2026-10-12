@@ -1,11 +1,40 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.InputSystem;
-using UnityEngine.AI;
 
 public enum RunicState { Wild, Tamed, Fainted }
-public enum BehaviorState { Idle, Wandering, Following, Fleeing, Hunting, Fighting }
-public enum WildNature { Fearful, Friendly, Neutral, Territorial, Aggressive }
+
+public enum BehaviorState { 
+    Idle, 
+    Wandering,
+    Investigating,
+    Eating,
+    Scouting, 
+    Patrolling, 
+    Following, 
+    CommandedMove, 
+    CommandedAttack, 
+    Threatening, 
+    Fleeing, 
+    Hunting, 
+    Fighting 
+}
+
+public enum WildNature { 
+    Fearful, 
+    FearfulFriendly, 
+    FearfulNeutral, 
+    FearfulProtective, 
+    FearfulNeutralProtective, 
+    FearfulFriendlyProtective, 
+    Friendly, 
+    Neutral, 
+    Territorial, 
+    Hostile 
+}
+
+public enum CombatStyle { Skittish, Ranger, FaceOn, Brutish, Regal }
+public enum CommandedMoveMode { Stand, Scout, Patrol }
+public enum CombatMode { Passive, Escort, Aggressive }
 
 public class Runic : MonoBehaviour
 {
@@ -27,11 +56,16 @@ public class Runic : MonoBehaviour
     [SerializeField] private int experience;
     [SerializeField] private int currentHP = 10;
     [SerializeField] private int maxHP = 10;
-    [SerializeField] private float attack;
-    [SerializeField] private float defense;
-    [SerializeField] private float speed;
-    [SerializeField] private float magic;
-    [SerializeField] private float magicDefense;
+    [SerializeField] private float attack = 1;
+    [SerializeField] private float defense = 1;
+    [SerializeField] private float weight = 1;
+    [SerializeField] private float knockbackResistance;
+    [SerializeField, Range(0f, 1f)] private float knockbackUpwardBias = 0.75f;
+    [SerializeField] private float speed = 4;
+    [SerializeField] private float walkSpeed = 2;
+    [SerializeField] private float sprintSpeed = 6;
+    [SerializeField] private float magic = 1;
+    [SerializeField] private float magicDefense = 1;
     [SerializeField] private List<Element> elements;
     [SerializeField] private List<Skill> basicSkills;
     [SerializeField] private List<Skill> skills;
@@ -63,7 +97,10 @@ public class Runic : MonoBehaviour
 
     [Header("Behavior")]
     [SerializeField] private bool frozen = false;
-    [SerializeField] private BehaviorState behaviorState = BehaviorState.Idle;
+    [SerializeField] private WildNature nature = WildNature.Neutral;
+    [SerializeField] private BehaviorState actState = BehaviorState.Idle;
+    [SerializeField] private CommandedMoveMode commandedMovementMode = CommandedMoveMode.Stand;
+    [SerializeField] private CombatMode combatCommand = CombatMode.Escort; 
     
     [Header("Chains")]
     [SerializeField] private GameObject captureChainsPrefab;
@@ -86,32 +123,34 @@ public class Runic : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerController player;
     [SerializeField] private PointTargetScript pointer;
-    private NavMeshAgent agent;
     [SerializeField] private PlayerInteraction playerInteraction;
     [SerializeField] private RunicDatabase runicDatabase;
     [SerializeField] private RunicStorageManager runicStorageManager;
+    private RunicCombat runicCombat;
+    private RunicMovement runicMovement;
+    private RunicWildAI runicWildAI;
+    private Rigidbody runicRigidbody;
+    
+    [Header("Combat Behavior")]
+    [SerializeField] private CombatStyle combatStyle;
+    [SerializeField] private float recovery = 2;
+    [SerializeField] private float specialRecovery = 10;
+    [SerializeField] private float aggression = 0.5f;
+    [SerializeField] private float specialAggression = 0.2f;
+    [SerializeField] private float iframes = 0.2f;
+    [SerializeField] private float invencibilityTime;
 
-    [Header("Follow Behavior")]
-    [SerializeField] private float followerOffset = 2f;
-    [Tooltip("Follow position mode: 0 = behind, 1 = side, 2 = any nearby position.")]
-    private int followMode = 1;
-    [SerializeField] private int followSide = 1;
-    [SerializeField] private bool following = true;
-    [SerializeField] private float followRange = 0.75f;
-    [SerializeField] private float stopRange = 2.5f;
-
-    [Header("Teleport Settings")]
-    [SerializeField] private float timeToTeleport = 5f;
-    private float teleportTimer = 0f;
-    [SerializeField] private float teleportDistance = 10f;
-    private bool teleportTimerStarted = false;
-
-    [Header("Update Settings")]
-    [SerializeField] private int updateFrequency = 15;
-    private int frameCounter = 0;
-    private Quaternion lastMovingRotation;
+    [Header("Relations")]
+    [SerializeField] private List<Runic> allies = new List<Runic>();
+    [SerializeField] private List<Runic> engagedEnemies = new List<Runic>();
+    [SerializeField] private List<Runic> threats = new List<Runic>();
 
     public RunicState TameState => tameState;
+    public WildNature Nature => nature;
+    public BehaviorState ActState => actState;
+    public CommandedMoveMode CommandedMovementMode => commandedMovementMode;
+    public CombatMode CombatCommand => combatCommand;
+    public RunicSpecies Species => species;
     public string RunicInstanceId => runicInstanceId;
     public Sprite RunicIcon => runicIcon;
     public GameObject RunicModel => runicModel;
@@ -119,9 +158,17 @@ public class Runic : MonoBehaviour
     public float MaxHP => maxHP;
     public float Attack => attack;
     public float Defense => defense;
+    public float Weight => weight;
+    public float KnockbackResistance => knockbackResistance;
     public float Speed => speed;
+    public float WalkSpeed => walkSpeed;
+    public float SprintSpeed => sprintSpeed;
     public float Magic => magic;
     public float MagicDefense => magicDefense;
+    public float Recovery => recovery;
+    public float SpecialRecovery => specialRecovery;
+    public float Aggression => aggression;
+    public float SpecialAggression => specialAggression;
     public bool Capturable => capturable;
     public TargetMapAsset CaptureMap => captureMap;
     public float TargetPerfectWeight => targetPerfectWeight;
@@ -137,6 +184,22 @@ public class Runic : MonoBehaviour
     public float MissMultiplier => missMultiplier;
     public bool IsFrozen => frozen;
     public RunicDatabase RunicDatabase => runicDatabase;
+    public PointTargetScript Pointer => pointer;
+    public PlayerController Player => player;
+    public PlayerInteraction PlayerInteraction => playerInteraction;
+    public List<Skill> BasicSkills => basicSkills;
+    public List<Skill> Skills => skills;
+    public float InvencibilityTime => invencibilityTime;
+    public List<Runic> Allies => allies;
+    public List<Runic> EngagedEnemies => engagedEnemies;
+    public List<Runic> Threats => threats;
+
+    public void PruneDestroyedRelations()
+    {
+        allies?.RemoveAll(ally => ally == null);
+        engagedEnemies?.RemoveAll(enemy => enemy == null);
+        threats?.RemoveAll(threat => threat == null);
+    }
 
     public void SetRunicDatabase(RunicDatabase database)
     {
@@ -153,17 +216,39 @@ public class Runic : MonoBehaviour
 
         if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
 
-        agent = GetComponent<NavMeshAgent>();
+        runicRigidbody = GetComponent<Rigidbody>();
 
-        if (tameState == RunicState.Tamed || tameState == RunicState.Fainted) capturable = false;
-        else following = false;
+        runicCombat = GetComponent<RunicCombat>();
+        
+        runicMovement = GetComponent<RunicMovement>();
+        
+        runicWildAI = GetComponent<RunicWildAI>();
+
+        runicCombat.SetCombatStyle(combatStyle);
+
+        if (tameState == RunicState.Tamed)
+        {
+            capturable = false;
+            actState = BehaviorState.Following;
+        }
+
+        if (runicRigidbody != null)
+            runicRigidbody.mass = weight;
     }
 
     void Update()
     {
-        frameCounter++;
+        if (invencibilityTime > 0)
+            invencibilityTime -= Time.deltaTime;
 
-        if (tameState == RunicState.Tamed) TameAI();
+        if (tameState == RunicState.Tamed)
+        {
+            if (player.CommandedTarget != null)
+                actState = BehaviorState.CommandedAttack;
+            else if (pointer.FollowPoint)
+                actState = BehaviorState.CommandedMove;
+            else actState = BehaviorState.Following;
+        }
     }
 
     // Initializes creature state from a save file entry
@@ -188,19 +273,33 @@ public class Runic : MonoBehaviour
             : species.SpeciesModels != null && species.SpeciesModels.Count > 0
             ? species.SpeciesModels[modelIndex]
             : null;
+        width = data.width;
+        height = data.height;
         level = data.level;
         experience = data.experience;
         currentHP = data.currentHP;
         maxHP = data.maxHP;
         attack = data.attack;
         defense = data.defense;
+        weight = data.weight;
+        knockbackResistance = data.knockbackResistance;
         speed = data.speed;
+        walkSpeed = data.walkSpeed;
+        sprintSpeed = data.sprintSpeed;
         magic = data.magic;
         magicDefense = data.magicDefense;
+        recovery = data.recovery;
+        specialRecovery = data.specialRecovery;
+        aggression = data.aggression;
+        specialAggression = data.specialAggression;
         basicSkills = runicDatabase.GetSkillsByIds(data.learnedBasicSkillIds);
         skills = runicDatabase.GetSkillsByIds(data.learnedSkillIds);
+        combatStyle = data.combatStyle;
         
         tameState = RunicState.Tamed;
+        
+        if (runicRigidbody != null)
+            runicRigidbody.mass = weight;
     }
 
     public RunicSaveData ExportToSaveData()
@@ -250,12 +349,21 @@ public class Runic : MonoBehaviour
             maxHP = maxHP,
             attack = attack,
             defense = defense,
+            weight = weight,
+            knockbackResistance = knockbackResistance,
             speed = speed,
+            walkSpeed = walkSpeed,
+            sprintSpeed = sprintSpeed,
             magic = magic,
             magicDefense = magicDefense,
+            recovery = recovery,
+            specialRecovery = SpecialRecovery,
+            aggression = aggression,
+            specialAggression = specialAggression,
             elementIds = elemIds,
             learnedBasicSkillIds = bSkillIds,
-            learnedSkillIds = sIds
+            learnedSkillIds = sIds,
+            combatStyle = combatStyle
         };
     }
 
@@ -305,124 +413,151 @@ public class Runic : MonoBehaviour
         activeChains.Clear();
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, Runic attacker = null, bool playerAttacker = false, Transform ambientSource = null)
     {
         if (frozen) return;
 
         currentHP -= damage;
+        Debug.Log(gameObject + " has taken " + damage + " damage.");
         if (currentHP <= 0)
         {
             Die();
+            return;
+        }
+
+        // Ambient damage
+        if (attacker == null && !playerAttacker)
+        {
+            actState = BehaviorState.Fleeing;
+            if (runicWildAI != null)
+                runicWildAI.SetEnvironmentalThreat(ambientSource);
+            return;
+        }
+
+        // If the attacker is the player
+        if (playerAttacker)
+        {
+            actState = BehaviorState.Fighting;
+            runicWildAI.SetFightPlayer(true);
+            return;
+        }
+
+        bool isSameSpecies = attacker != null && attacker.Species == species;
+        bool isPredator = CheckAttackerRelation(attacker) && !isSameSpecies;
+
+        if (!IsFearful() && !isPredator)
+        {
+            actState = BehaviorState.Fighting;
+            if (!engagedEnemies.Contains(attacker))
+                engagedEnemies.Add(attacker);
+                
+            if (attacker.TameState == RunicState.Tamed)
+                runicWildAI.SetFightPlayer(true);
+        }
+        else 
+        {
+            actState = BehaviorState.Fleeing;
+            threats.Add(attacker);
+        }
+    }
+
+    public bool IsFearful()
+    {
+        return nature == WildNature.Fearful || nature == WildNature.FearfulFriendly
+            || nature == WildNature.FearfulNeutral || nature == WildNature.FearfulProtective
+            || nature == WildNature.FearfulNeutralProtective 
+            || nature == WildNature.FearfulFriendlyProtective;
+    }
+
+    public bool IsProtective()
+    {
+        return nature == WildNature.FearfulProtective 
+            || nature == WildNature.FearfulNeutralProtective 
+            || nature == WildNature.FearfulFriendlyProtective;
+    }
+
+    public bool IsFriendly()
+    {
+        return nature == WildNature.Friendly 
+            || nature == WildNature.FearfulFriendly 
+            || nature == WildNature.FearfulFriendlyProtective;
+    }
+
+    bool CheckAttackerRelation(Runic attacker)
+    {
+        if (runicDatabase == null || attacker.species == null || species == null)
+            return false;
+
+        return runicDatabase.TryGetRelation(
+            attacker.species,
+            species,
+            out SpeciesRelation relation)
+            && relation == SpeciesRelation.Predator;
+    }
+
+    public void ApplyKnockback(Runic attacker, float knockbackValue)
+    {
+        Debug.Log("Knockback");
+
+        if (attacker == null || runicMovement == null || knockbackValue <= 0f)
+            return;
+
+        Vector3 away = transform.position - attacker.transform.position;
+        away.y = 0f;
+
+        if (away.sqrMagnitude < 0.001f)
+        {
+            away = attacker.transform.forward;
+            away.y = 0f;
+        }
+
+        if (away.sqrMagnitude < 0.001f)
+            away = Vector3.forward;
+
+        away.Normalize();
+
+        Vector3 direction = (away + Vector3.up * Mathf.Max(0f, knockbackUpwardBias)).normalized;
+        float resistance = Mathf.Clamp01(knockbackResistance / 100f);
+        float weightFactor = attacker.Weight / Mathf.Max(attacker.Weight + Weight, 0.01f);
+        float impulse = knockbackValue * weightFactor * (1f - resistance);
+
+        Debug.Log("Knockback applied: " + impulse);
+
+        if (impulse > 0f)
+            runicMovement.ApplyKnockback(direction * impulse);
+    }
+
+    public void SetBehaviorState(BehaviorState state)
+    {
+        actState = state;
+    }
+
+    public void AddThreat(Runic threat){
+        if (!threats.Contains(threat))
+        threats.Add(threat);
+    }
+    
+    public void AddEnemy(Runic enemy){
+        if (!engagedEnemies.Contains(enemy))
+        engagedEnemies.Add(enemy);
+    }
+
+    public void AddAlly(Runic ally)
+    {
+        if (!allies.Contains(ally))
+        {
+            allies.Add(ally);
         }
     }
 
     public void Die()
     {
+        Debug.Log(gameObject + " has died");
+
+        if (player.CommandedTarget == this)
+            player.SetCommandedTarget(null);
+
         // handle death logic (e.g., play animation, drop loot, etc.)
         Destroy(gameObject);
-    }
-
-    
-    private float CalculateTargetDistance(Vector3 targetPosition)
-    {
-        float targetDistance = Vector3.Distance(transform.position, targetPosition);
-
-        return targetDistance;
-    }
-
-    private void TeleportToTarget(Vector3 targetPosition)
-    {
-        transform.position = targetPosition;
-        Rigidbody rb = GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector3.zero;
-        }
-    }
-
-    private void TameAI()
-    {
-        Vector3 targetPosition;
-        Vector3 right = lastMovingRotation * Vector3.right;
-        Vector3 forward = lastMovingRotation * Vector3.forward;
-
-        if (!pointer.FollowPoint)
-        {
-            switch (followMode)
-            {
-                case 0: // Atrás
-                    targetPosition = player.transform.position - forward * followerOffset;
-                    break;
-                case 1: // Lado
-                    targetPosition = player.transform.position + right * followSide * followerOffset;
-                    break;
-                case 2: // Qualquer posição próxima
-                    targetPosition = player.transform.position;
-                    break;
-                default:
-                    targetPosition = player.transform.position;
-                    break;
-            }            
-        }
-        else
-        {
-            targetPosition = pointer.IndicatedPosition;
-        }
-
-        if (Keyboard.current.qKey.wasPressedThisFrame)
-        {
-            followSide = -followSide;
-        }
-        
-        bool interactableActive = playerInteraction != null && playerInteraction.InteractableTarget != null;
-
-        if (!interactableActive && Keyboard.current.fKey.wasPressedThisFrame 
-            && (!pointer.FollowPoint && player.CastingState != PlayerController.CastState.Channeling 
-            || player.CastingState != PlayerController.CastState.Casting))
-        {
-            followMode = (followMode + 1) % 3;
-        }
-
-        if (frameCounter >= updateFrequency)
-        {
-            frameCounter = 0; // resetar o contador de frames
-
-            float targetDistance = CalculateTargetDistance(targetPosition);
-            float playerDistance = CalculateTargetDistance(player.transform.position);
-
-            if (following && targetDistance > followRange)
-            {
-                agent.SetDestination(targetPosition);
-            }
-
-            if (followMode == 2) agent.stoppingDistance = stopRange;
-            else agent.stoppingDistance = 0f;
-
-            if (playerDistance > teleportDistance)
-            {
-                if (!teleportTimerStarted)
-                {
-                    teleportTimerStarted = true;
-                    teleportTimer = Time.time;
-                }
-
-                float elapsed = Time.time - teleportTimer;
-
-                if (elapsed >= timeToTeleport && playerDistance > teleportDistance)
-                {
-                    TeleportToTarget(player.transform.position - forward * 5f);
-                }
-            } 
-            else
-            {
-                teleportTimerStarted = false;
-            }
-            
-            // atualiza a rotação de referência só quando o player se mover
-            if (player.Moving)
-            {
-                lastMovingRotation = player.transform.rotation;
-            }
-        }
     }
 }

@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
-using System;
 
 public class SpellcastingCoordinator : MonoBehaviour
 {
@@ -249,6 +248,8 @@ public class SpellcastingCoordinator : MonoBehaviour
         spellCooldowns[spellIndex] = CurrentSpell.CooldownTime;
         player.SetCastingState(PlayerController.CastState.Idle);
         if (castingUI != null) castingUI.SetActive(false);
+        if (player.PlayerHUD != null)
+            player.PlayerHUD.SetActive(true);
     }
 
     public void CancelCast()
@@ -268,6 +269,14 @@ public class SpellcastingCoordinator : MonoBehaviour
             spellCooldowns = cooldowns;
         else 
             Debug.LogError("loaded cooldowns does not match spell list");
+    }
+
+    public void SetSpellCooldown(int spell, float cooldown)
+    {
+        if (spellCooldowns.Count < spell)
+            spellCooldowns[spell] = cooldown;
+        else 
+            Debug.LogError("loaded cooldown does not match spell list");
     }
 
     void UpdateSpellCooldowns()

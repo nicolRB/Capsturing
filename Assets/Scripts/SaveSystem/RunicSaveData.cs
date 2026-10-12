@@ -21,10 +21,19 @@ public class RunicSaveData
     public int maxHP;
     public float attack;
     public float defense;
+    public float weight;
+    public float knockbackResistance;
     public float speed;
+    public float walkSpeed;
+    public float sprintSpeed;
     public float magic;
     public float magicDefense;
+    public float recovery;
+    public float specialRecovery;
+    public float aggression;
+    public float specialAggression;
     public List<string> elementIds;
     public List<string> learnedBasicSkillIds = new List<string>();
     public List<string> learnedSkillIds = new List<string>();
+    public CombatStyle combatStyle;
 }

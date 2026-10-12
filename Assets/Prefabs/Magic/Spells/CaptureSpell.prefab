@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2567097925186889624
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8002607937562102454}
+  - component: {fileID: 8941947267285933937}
+  m_Layer: 5
+  m_Name: CaptureSpell
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8002607937562102454
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2567097925186889624}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &8941947267285933937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2567097925186889624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5b85abe9f918c44b9dbd767f6e65583, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CaptureSpellScript
+  spellName: Capture
+  spellId: 0
+  description: The base Runic Capturing Spell
+  cooldownTime: 10
+  spellType: 1
+  spellMap: {fileID: 11400000, guid: 4067567a12279634da99654501985810, type: 2}
+  spellIcon: {fileID: 21300000, guid: 367454dbb2336b140aa9cef3316b27a9, type: 3}
+  perfectWeight: 1
+  goodWeight: 0.75
+  missWeight: 0
+  spellcastingCoordinator: {fileID: 0}
+  player: {fileID: 0}
+  pointTarget: {fileID: 0}
+  percentageCounter: {fileID: 0}
+  prepMinFactor: 0.75
+  prepMaxFactor: 1
+  maxHPFactor: 4
+  currentHPFactor: 3

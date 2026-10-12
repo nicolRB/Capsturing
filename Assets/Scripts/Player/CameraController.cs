@@ -23,6 +23,11 @@ public class CameraController : MonoBehaviour
         {
             pivot.SetParent(player.transform.parent);
         }
+
+        if (player != null)
+        {
+            yRotation = player.transform.eulerAngles.y;
+        }
     }
 
     void OnEnable()

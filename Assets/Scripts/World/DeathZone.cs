@@ -17,5 +17,14 @@ public class DeathZone : MonoBehaviour
             // Teleport player
             other.transform.position = respawnPoint.position;
         }
+
+        if (other.CompareTag("Wild") || other.CompareTag("Tamed"))
+        {
+            Runic runic = other.GetComponent<Runic>();
+
+            Debug.Log(runic.gameObject + " has fallen out of the world.");
+
+            runic.Die();
+        }
     }
 }

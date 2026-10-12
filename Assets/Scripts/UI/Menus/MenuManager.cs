@@ -135,6 +135,9 @@ public class MenuManager : MonoBehaviour
         if (player.CastingState != PlayerController.CastState.Channeling) player.PlayerHUD.SetActive(true);
 
         Time.timeScale = 1f;
+        
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void CloseAllMenus()

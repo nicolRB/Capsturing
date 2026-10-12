@@ -1,7 +1,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
+
+public enum RunicFightingCommand { Pacific, Escort, Aggressive }
+public enum RunicPointCommand { Stand, Scout, Patrol, Ignore }
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
@@ -10,17 +12,29 @@ public class PlayerController : MonoBehaviour
     [Header("Stats")]
     [SerializeField] private int maxHP = 100;
     [SerializeField] private int currentHP = 100;
+    [SerializeField] private int defense = 5;
+    [SerializeField] private int knockbackResistance = 0;
 
     public int MaxHP => maxHP;
     public int CurrentHP => currentHP;
 
     [Header("Movement")]
-    [SerializeField] private float walkSpeed = 2f;
+    [SerializeField] private float walkSpeed = 1.25f;
     [SerializeField] private float jogSpeed = 5f;
-    [SerializeField] private float runningSpeed = 10f;
+    [SerializeField] private float sprintSpeed = 10f;
     [SerializeField] private float currentSpeed;
     [SerializeField] private Key runKey = Key.LeftShift;
     [SerializeField] private Key walkKey = Key.LeftAlt;
+    private bool isTryingToWalk;
+    private bool isTryingToSprint;
+
+    [SerializeField, Range(0f, 1f)] private float knockbackUpwardBias = 0.75f;
+
+    public float WalkSpeed => walkSpeed;
+    public float JogSpeed => jogSpeed;
+    public float SprintSpeed => sprintSpeed;
+    public bool IsTryingToWalk => isTryingToWalk;
+    public bool IsTryingToSprint => isTryingToSprint;
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce = 5f;
@@ -69,6 +83,9 @@ public class PlayerController : MonoBehaviour
 
     [Header("Runics")]
     [SerializeField] private int maxPartySize = 3;
+    [SerializeField] private RunicFightingCommand fightingCommand = RunicFightingCommand.Escort;
+    [SerializeField] private RunicPointCommand pointCommand = RunicPointCommand.Stand;
+    [SerializeField] private Runic commandedTarget;
 
     public int MaxPartySize => maxPartySize;
 
@@ -91,6 +108,9 @@ public class PlayerController : MonoBehaviour
     public GameObject PlayerHUD => playerHUD;
     public GameObject AimIndicator => aimIndicator;
     public bool UseAimIndicator => useAimIndicator;
+    public RunicFightingCommand FightingCommand => fightingCommand;
+    public RunicPointCommand PointCommand => pointCommand;
+    public Runic CommandedTarget => commandedTarget;
 
     private void Awake()
     {
@@ -198,15 +218,15 @@ public class PlayerController : MonoBehaviour
 
         if (!isDashing)
         {
-            bool isTryingToRun = Keyboard.current[runKey].isPressed;
-            bool isTryingToWalk = Keyboard.current[walkKey].isPressed;
+            isTryingToWalk = Keyboard.current[walkKey].isPressed;
+            isTryingToSprint = Keyboard.current[runKey].isPressed;
             bool isMovingForward = moveInput.y > 0f;
 
             float targetSpeed = jogSpeed;
             if (isTryingToWalk)
                 targetSpeed = walkSpeed;
-            else if (isTryingToRun && isMovingForward)
-                targetSpeed = runningSpeed;
+            else if (isTryingToSprint && isMovingForward)
+                targetSpeed = sprintSpeed;
 
             currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 5f);
 
@@ -368,7 +388,7 @@ public class PlayerController : MonoBehaviour
         bool grounded = IsGrounded();
 
         // -------- SPEED PARAMETER (for Blend Tree) --------
-        float normalizedSpeed = currentSpeed / runningSpeed;
+        float normalizedSpeed = currentSpeed / sprintSpeed;
         animator.SetFloat("Speed", normalizedSpeed);
 
         // -------- WALKING BOOL (optional) --------
@@ -412,15 +432,58 @@ public class PlayerController : MonoBehaviour
             data.spellCooldownList = spellcastingCoordinator.SpellCooldowns;
     }
 
+    // ---------------- Combat ---------------- 
+
     public void TakeDamage(int damage)
     {
         if (castingState == CastState.Channeling) return;
+
+        Debug.Log("Player took " + damage + " damage.");
 
         if (damage > 0)
             currentHP -= damage;
 
         if (currentHP <= 0)
             Die();
+    }
+
+    public void ApplyKnockback(Transform knockbackOrigin, float knockback)
+    {
+        if (knockback == 0 || knockbackOrigin == null)
+            return;
+        
+        Vector3 away = transform.position - knockbackOrigin.position;
+        away.y = 0f;
+
+        if (away.sqrMagnitude < 0.001f)
+        {
+            away = knockbackOrigin.transform.forward;
+            away.y = 0f;
+        }
+
+        if (away.sqrMagnitude < 0.001f)
+            away = Vector3.forward;
+
+        away.Normalize();
+
+        Vector3 direction = (away + Vector3.up * Mathf.Max(0f, knockbackUpwardBias)).normalized;
+        float resistance = Mathf.Clamp01(knockbackResistance / 100f);
+        Runic runicAttacker = knockbackOrigin.GetComponent<Runic>();
+        float weightFactor;
+        if (runicAttacker == null)
+            runicAttacker = knockbackOrigin.GetComponentInParent<Runic>();
+
+        if (runicAttacker != null)
+            weightFactor = runicAttacker.Weight / Mathf.Max(runicAttacker.Weight + rb.mass, 0.01f);
+        else 
+            weightFactor = 1;
+        
+        float impulse = knockback * weightFactor * (1f - resistance);
+        
+        Debug.Log(impulse + " impulse applied to player.");
+
+        if (impulse >= 0)
+            rb.AddForce(impulse*direction, ForceMode.Impulse);
     }
 
     public void Heal(int healing)
@@ -455,6 +518,14 @@ public class PlayerController : MonoBehaviour
             Debug.Log("Overkill Damage Amout = " + (-currentHP));
 
         // gameover logic...
+    }
+
+    public void SetCommandedTarget(Runic target)
+    {
+        commandedTarget = target;
+
+        if (target == null)
+            Debug.Log("Alvo do Rúnico limpo.");
     }
 
     // ---------------- Settings ---------------- 
