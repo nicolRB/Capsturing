@@ -53,17 +53,17 @@ public class PlayerInteraction : MonoBehaviour
         if (canTargetInteractable
             && Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, interactableLayer))
         {
-            Highlight novoHighlight = hit.collider.gameObject.GetComponentInParent<Highlight>();
-            Interactable novoInteractable = hit.collider.gameObject.GetComponentInParent<Interactable>();
+            Highlight newHighlight = hit.collider.gameObject.GetComponentInParent<Highlight>();
+            Interactable newInteractable = hit.collider.gameObject.GetComponentInParent<Interactable>();
 
-            if (novoHighlight != null && novoInteractable != null)
+            if (newHighlight != null && newInteractable != null)
             {
-                if (highlightTarget != null && highlightTarget != novoHighlight)
+                if (highlightTarget != null && highlightTarget != newHighlight)
                     highlightTarget.Toggle(false);
 
                 interactableTarget = hit.collider.gameObject;
-                highlightTarget = novoHighlight;
-                interactableComponent = novoInteractable;
+                highlightTarget = newHighlight;
+                interactableComponent = newInteractable;
                 highlightTarget.Toggle(true);
                 return;
             }

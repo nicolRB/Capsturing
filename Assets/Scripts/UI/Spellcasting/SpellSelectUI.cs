@@ -1,16 +1,11 @@
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections.Generic;
 using TMPro;
 
 public class SpellSelectUI : MonoBehaviour
 {
     [Header("Spell Selection")]
-    private List<GameObject> spellIcons = new List<GameObject>();
     [Tooltip("Horizontal spacing between spell icons.")]
     [SerializeField] private float iconSpacing = 100f;
-    [Tooltip("Reference size of each spell icon.")]
-    [SerializeField] private float iconSize = 80f;
     [Tooltip("Scale applied to each spell icon.")]
     [SerializeField] private float iconScale = 0.91f;
     [Tooltip("Vertical offset applied to the selected spell icon.")]
@@ -58,7 +53,6 @@ public class SpellSelectUI : MonoBehaviour
             foreach (var spell in spellcastingCoordinator.Spells)
             {
                 GameObject spellSelectIcon = Instantiate(spellIconPrefab, transform);
-                // Each icon prefab contains a child named "SpellIcon".
                 var spellIconImage = spellSelectIcon.transform.Find("SpellIcon").GetComponent<UnityEngine.UI.Image>();
                 if (spellIconImage != null)
                 {

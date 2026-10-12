@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NovoElemento", menuName = "Runico/Elemento")]
+[CreateAssetMenu(fileName = "NewElement", menuName = "Runic/Element")]
 public class Element : ScriptableObject
 {
     [SerializeField] private string elementId;

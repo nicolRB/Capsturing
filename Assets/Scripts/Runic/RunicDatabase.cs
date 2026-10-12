@@ -1,7 +1,17 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "RunicDatabase", menuName = "Runic/Species Database")]
+public enum SpeciesRelation { Predator, Prey, Rival, Territorial, Indifferent, Allied }
+
+[System.Serializable]
+public class SpeciesRelationEntry
+{
+    public RunicSpecies speciesA;
+    public RunicSpecies speciesB;
+    public SpeciesRelation relation;
+}
+
+[CreateAssetMenu(fileName = "RunicDatabase", menuName = "Runic/Runic Database")]
 public class RunicDatabase : ScriptableObject
 {
     [Header("Species")]
@@ -12,6 +22,13 @@ public class RunicDatabase : ScriptableObject
 
     public List<RunicSpecies> AllSpecies => allSpecies;
     public Dictionary<string, RunicSpecies> LookupSpecies => lookupSpecies;
+
+    
+    [Header("SpeciesRelations")]
+    [SerializeField] private List<SpeciesRelationEntry> speciesRelations;
+    private Dictionary<(string, string), SpeciesRelation> relationLookup;
+
+    public Dictionary<(string, string), SpeciesRelation> RelationLookup => relationLookup;
 
     [Header("Elements")]
     [SerializeField] private List<Element> allElements = new List<Element>();
@@ -57,6 +74,71 @@ public class RunicDatabase : ScriptableObject
 
         Debug.LogWarning($"RunicDatabase: no species found for SpeciesId '{SpeciesId}'.");
         return null;
+    }
+
+    private void BuildRelationLookup()
+    {
+        relationLookup = new Dictionary<(string, string), SpeciesRelation>();
+
+        foreach (SpeciesRelationEntry entry in speciesRelations)
+        {
+            if (entry == null || entry.speciesA == null || entry.speciesB == null)
+                continue;
+
+            string speciesAId = entry.speciesA.SpeciesId;
+            string speciesBId = entry.speciesB.SpeciesId;
+
+            if (string.IsNullOrEmpty(speciesAId) || string.IsNullOrEmpty(speciesBId))
+                continue;
+
+            var key = (speciesAId, speciesBId);
+
+            if (!relationLookup.ContainsKey(key))
+                relationLookup.Add(key, entry.relation);
+            else
+                Debug.LogWarning($"RunicDatabase: duplicate relation for '{speciesAId}' and '{speciesBId}'.");
+        }
+    }
+
+    public bool TryGetRelation(RunicSpecies speciesA, RunicSpecies speciesB, out SpeciesRelation relation)
+    {
+        if (relationLookup == null)
+            BuildRelationLookup();
+
+        relation = SpeciesRelation.Indifferent;
+
+        if (speciesA == null || speciesB == null)
+            return false;
+
+        string speciesAId = speciesA.SpeciesId;
+        string speciesBId = speciesB.SpeciesId;
+        if (string.IsNullOrEmpty(speciesAId) || string.IsNullOrEmpty(speciesBId))
+            return false;
+
+        if (relationLookup.TryGetValue((speciesAId, speciesBId), out relation))
+            return true;
+
+        if (!relationLookup.TryGetValue((speciesBId, speciesAId), out SpeciesRelation reverseRelation))
+            return false;
+
+        relation = reverseRelation switch
+        {
+            SpeciesRelation.Predator => SpeciesRelation.Prey,
+            SpeciesRelation.Prey => SpeciesRelation.Predator,
+            _ => reverseRelation
+        };
+
+        return true;
+    }
+
+    public SpeciesRelation GetRelation(RunicSpecies speciesA, RunicSpecies speciesB)
+    {
+        SpeciesRelation relation = SpeciesRelation.Indifferent;
+
+        if (TryGetRelation(speciesA, speciesB, out SpeciesRelation foundRelation))
+            relation = foundRelation;
+
+        return relation;
     }
 
     public Skill GetSkillById(string skillId)

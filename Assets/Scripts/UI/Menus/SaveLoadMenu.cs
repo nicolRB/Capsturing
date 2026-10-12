@@ -1,18 +1,30 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
+using UnityEditor;
 
 public class SaveLoadMenu : MonoBehaviour 
 {
     [Header("References")]
     [SerializeField] private MenuManager menuManager; 
     [SerializeField] private SaveManager saveManager; 
+    [SerializeField] private RunicStorageManager runicStorageManager;
+    [SerializeField] private SettingsManager settingsManager;
     [SerializeField] private GameObject saveButtonPrefab;
     [SerializeField] private GameObject saveFilePrefab;
     [SerializeField] private Transform savesList;
 
     void Start()
     {
+        if (menuManager == null) menuManager = FindFirstObjectByType<MenuManager>();
+        
+        if (saveManager == null) saveManager = FindFirstObjectByType<SaveManager>();
+        
+        if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
+
+        if (settingsManager == null) settingsManager = FindFirstObjectByType<SettingsManager>();
+
         ViewAllSaves();
     }
 
@@ -65,16 +77,6 @@ public class SaveLoadMenu : MonoBehaviour
         }
     }
 
-    // --- Data ---
-
-    public SaveDataContainer GetCurrentGameData()
-    {
-        SaveDataContainer data = new SaveDataContainer();
-        menuManager.Player.PopulateSaveData(data);
-        RunicStorageManager.Instance.PopulateSaveData(data);
-        return data;
-    }
-
     // --- Actions ---
 
     public void NewSave()
@@ -82,20 +84,24 @@ public class SaveLoadMenu : MonoBehaviour
         SaveDataContainer newGameData = new SaveDataContainer();
         string newSaveFileName = saveManager.CreateNextSaveFileName(); 
         saveManager.SaveGame(newSaveFileName, newGameData); 
+        settingsManager.SaveActiveSaveFile(newSaveFileName);
         ViewAllSaves(); 
     }
 
     public void LoadSave(string saveFileName)
     {
         SaveDataContainer loadedData = saveManager.LoadGame(saveFileName); 
+        settingsManager.SaveActiveSaveFile(saveFileName);
         menuManager.CloseAllMenus(); 
         menuManager.Player.LoadPlayerData(loadedData);
+        runicStorageManager.LoadPartyData(loadedData);
     }
 
     public void OverwriteSave(string saveFileName)
     {
-        SaveDataContainer newGameData = GetCurrentGameData();
+        SaveDataContainer newGameData = menuManager.GetCurrentGameData();
         saveManager.SaveGame(saveFileName, newGameData);
+        settingsManager.SaveActiveSaveFile(saveFileName);
         ViewAllSaves();
     }
 

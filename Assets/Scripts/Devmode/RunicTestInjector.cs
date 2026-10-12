@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class RunicTestInjector : MonoBehaviour
 {
@@ -13,6 +14,18 @@ public class RunicTestInjector : MonoBehaviour
     [Tooltip("Shortcut displayed in debug messages for the injection action.")]
     [SerializeField]
     private Key injectShortcutKey = Key.F12;
+
+    [Header("References")]
+    [SerializeField] private SaveManager saveManager;
+    [SerializeField] private RunicStorageManager runicStorageManager;
+    [SerializeField] private RunicDatabase runicDatabase;
+
+    void Start()
+    {
+        if (saveManager == null) saveManager = FindFirstObjectByType<SaveManager>();
+
+        if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
+    }
     
     void Update()
     {
@@ -36,35 +49,86 @@ public class RunicTestInjector : MonoBehaviour
             Debug.LogWarning("RunicTestInjector: Default Test Species is not assigned!");
             return;
         }
+
+        if (runicDatabase == null)
+        {
+            Debug.LogWarning("RunicTestInjector: Runic Database is not assigned!");
+            return;
+        }
+
+        RunicSpecies species = runicDatabase.GetSpeciesById(defaultTestSpecies.SpeciesId);
+        if (species == null)
+        {
+            Debug.LogWarning($"RunicTestInjector: Species '{defaultTestSpecies.SpeciesId}' is not registered in the Runic Database.");
+            return;
+        }
         
-        if (RunicStorageManager.Instance == null || SaveManager.Instance == null)
+        if (runicStorageManager == null || saveManager == null)
         {
             Debug.LogWarning("RunicTestInjector: storage or save manager not found in the scene.");
             return;
         }
 
+        List<string> basicSkillIds = GetRegisteredSkillIds(species.BasicSkills);
+        List<string> skillIds = GetRegisteredSkillIds(species.Skills);
+
         RunicSaveData debugRunic = new RunicSaveData
         {
             runicInstanceId = System.Guid.NewGuid().ToString(),
-            speciesId = defaultTestSpecies.SpeciesId,
+            speciesId = species.SpeciesId,
             nickname = "Test Runic",
-            runtimeIcon = defaultTestSpecies.SpeciesIcon,
-            runtimeModel = defaultTestSpecies.SpeciesModels != null && defaultTestSpecies.SpeciesModels.Count > 0
-                ? defaultTestSpecies.SpeciesModels[0]
+            runtimeIcon = species.SpeciesIcon,
+            runtimeModel = species.SpeciesModels != null && species.SpeciesModels.Count > 0
+                ? species.SpeciesModels[0]
                 : null,
             modelIndex = 0,
+            width = species.Width,
+            height = species.Height,
             level = 1,
-            currentHP = defaultTestSpecies.BaseHP,
-            maxHP = defaultTestSpecies.BaseHP,
-            attack = defaultTestSpecies.BaseAttack,
-            defense = defaultTestSpecies.BaseDefense,
-            speed = defaultTestSpecies.BaseSpeed,
-            magic = defaultTestSpecies.BaseMagic,
-            magicDefense = defaultTestSpecies.BaseMagicDefense
+            currentHP = species.BaseHP,
+            maxHP = species.BaseHP,
+            attack = species.BaseAttack,
+            defense = species.BaseDefense,
+            weight = species.BaseWeight,
+            knockbackResistance = species.BaseKnockbackResistance,
+            speed = species.BaseSpeed,
+            walkSpeed = species.BaseWalkSpeed,
+            sprintSpeed = species.BaseSprintSpeed,
+            magic = species.BaseMagic,
+            magicDefense = species.BaseMagicDefense,
+            recovery = species.Recovery,
+            specialRecovery = species.SpecialRecovery,
+            aggression = species.Aggression,
+            specialAggression = species.Specialaggression,
+            learnedBasicSkillIds = basicSkillIds,
+            learnedSkillIds = skillIds,
+            combatStyle = species.DefaultCombatStyle
         };
 
         // Add the generated runic directly to the current runtime box.
         RunicStorageManager.Instance.AddCapturedRunic(debugRunic);
         Debug.Log("Test runic injected with key " + injectShortcutKey + ".");
+    }
+
+    private List<string> GetRegisteredSkillIds(List<Skill> speciesSkills)
+    {
+        List<string> skillIds = new List<string>();
+        if (speciesSkills == null) return skillIds;
+
+        foreach (Skill skill in speciesSkills)
+        {
+            if (skill == null) continue;
+
+            Skill registeredSkill = runicDatabase.GetSkillById(skill.SkillId);
+            if (registeredSkill == null)
+            {
+                Debug.LogWarning($"RunicTestInjector: Skill '{skill.SkillId}' is not registered in the Runic Database.");
+                continue;
+            }
+
+            skillIds.Add(registeredSkill.SkillId);
+        }
+
+        return skillIds;
     }
 }

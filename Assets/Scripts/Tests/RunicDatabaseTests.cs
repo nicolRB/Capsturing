@@ -1,8 +1,6 @@
-using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.TestTools;
 using System.Collections.Generic;
 
 public class RunicDatabaseTests

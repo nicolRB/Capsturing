@@ -1,133 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1007860932078324707
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4706952510767736525}
-  - component: {fileID: 5928039423080379146}
-  - component: {fileID: 2960493016741434519}
-  - component: {fileID: 7590166302644040138}
-  m_Layer: 5
-  m_Name: SpellList
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &4706952510767736525
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1007860932078324707}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6893739829867240846}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &5928039423080379146
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1007860932078324707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5b85abe9f918c44b9dbd767f6e65583, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CaptureSpellScript
-  spellName: Capture
-  spellId: 0
-  description: The base Runic Capturing Spell
-  cooldownTime: 10
-  spellType: 1
-  spellMap: {fileID: 11400000, guid: 4067567a12279634da99654501985810, type: 2}
-  spellIcon: {fileID: 21300000, guid: 367454dbb2336b140aa9cef3316b27a9, type: 3}
-  perfectWeight: 1
-  goodWeight: 0.75
-  missWeight: 0
-  spellcastingScript: {fileID: 681781891520420819}
-  player: {fileID: 1871395203445187512}
-  pointTarget: {fileID: 8490703710057350451}
-  percentageCounter: {fileID: 8585592567725906491}
-  target: {fileID: 0}
-  prepMinFactor: 0.75
-  prepMaxFactor: 1
-  maxHPFactor: 4
-  currentHPFactor: 3
---- !u!114 &2960493016741434519
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1007860932078324707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b888d1a2a2a7b4e4d881b272b7a48354, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SummonRunicSpell
-  spellName: Summon Runic
-  spellId: 1
-  description: Conjures a captured and tamed runic out from another plane of existence,
-    or sends them back
-  cooldownTime: 2.5
-  spellType: 0
-  spellMap: {fileID: 0}
-  spellIcon: {fileID: 21300000, guid: 8a4b45b2006d2d34c96fd2a7a8696be6, type: 3}
-  perfectWeight: 1
-  goodWeight: 0.75
-  missWeight: 0
-  spellcastingScript: {fileID: 0}
-  player: {fileID: 0}
-  pointTarget: {fileID: 0}
-  percentageCounter: {fileID: 0}
-  cooldownTimeValue: 1.5
-  summonHeight: 1
-  runicStorageManager: {fileID: 0}
-  runicDatabase: {fileID: 0}
-  runicWheel: {fileID: 0}
-  activeSummonedRunic: {fileID: 0}
---- !u!114 &7590166302644040138
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1007860932078324707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19dd4a18c3e921b4eaa295d533419bb5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BlankSpell
-  spellName: Blank
-  spellId: 2
-  description: 
-  cooldownTime: 1
-  spellType: 0
-  spellMap: {fileID: 0}
-  spellIcon: {fileID: 0}
-  perfectWeight: 1
-  goodWeight: 0.75
-  missWeight: 0
-  spellcastingScript: {fileID: 0}
-  player: {fileID: 0}
-  pointTarget: {fileID: 0}
-  percentageCounter: {fileID: 0}
 --- !u!1 &1106498061901993861
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,11 +49,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpellSelectUI
   iconSpacing: 100
-  iconSize: 80
   iconScale: 0.91
   selectionIndicatorOffset: 20
   cooldownTint: {r: 0.25, g: 0.25, b: 0.25, a: 1}
-  spellcastingScript: {fileID: 681781891520420819}
+  spellcastingCoordinator: {fileID: 0}
   spellIconPrefab: {fileID: 6967911381569191064, guid: e75ce98395c9a3443858867dc129e7c3, type: 3}
 --- !u!1 &1986182200256596662
 GameObject:
@@ -659,12 +530,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PercentageResultScript
   percentageText: {fileID: 2181171258337547674}
-  percentage: 0
-  color: {r: 1, g: 1, b: 1, a: 1}
   duration: 1
   finalSize: 1.1
-  showResult: 0
-  alpha: 0
 --- !u!1 &6462391708026187448
 GameObject:
   m_ObjectHideFlags: 0
@@ -976,6 +843,185 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: de76d67d0ab88dc439b10b32370775ea, type: 3}
   m_PrefabInstance: {fileID: 84818726784557977}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &3340700998458797179
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6893739829867240846}
+    m_Modifications:
+    - target: {fileID: 525027166673975532, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1871395203445187512}
+    - target: {fileID: 525027166673975532, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: runicWheel
+      value: 
+      objectReference: {fileID: 7941567153724119372}
+    - target: {fileID: 525027166673975532, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: pointTarget
+      value: 
+      objectReference: {fileID: 8490703710057350451}
+    - target: {fileID: 525027166673975532, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: percentageCounter
+      value: 
+      objectReference: {fileID: 8585592567725906491}
+    - target: {fileID: 525027166673975532, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: spellcastingCoordinator
+      value: 
+      objectReference: {fileID: 681781891520420819}
+    - target: {fileID: 2567097925186889624, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_Name
+      value: SpellList
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8941947267285933937, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1871395203445187512}
+    - target: {fileID: 8941947267285933937, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: pointTarget
+      value: 
+      objectReference: {fileID: 8490703710057350451}
+    - target: {fileID: 8941947267285933937, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      propertyPath: percentageCounter
+      value: 
+      objectReference: {fileID: 8585592567725906491}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2567097925186889624, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2481862973458540866}
+  m_SourcePrefab: {fileID: 100100000, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+--- !u!1 &1007860932078324707 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2567097925186889624, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+  m_PrefabInstance: {fileID: 3340700998458797179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2481862973458540866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007860932078324707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19dd4a18c3e921b4eaa295d533419bb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameCore::BlankSpell
+  spellName: 
+  spellId: 
+  description: 
+  cooldownTime: 1
+  spellType: 0
+  spellMap: {fileID: 0}
+  spellIcon: {fileID: 0}
+  perfectWeight: 1
+  goodWeight: 0.75
+  missWeight: 0
+  spellcastingCoordinator: {fileID: 0}
+  player: {fileID: 0}
+  pointTarget: {fileID: 0}
+  percentageCounter: {fileID: 0}
+--- !u!224 &4706952510767736525 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8002607937562102454, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+  m_PrefabInstance: {fileID: 3340700998458797179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5928039423080379146 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8941947267285933937, guid: bcfbf42e957cd754e9d474d3bd19d6f4, type: 3}
+  m_PrefabInstance: {fileID: 3340700998458797179}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007860932078324707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5b85abe9f918c44b9dbd767f6e65583, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CaptureSpellScript
 --- !u!1001 &5435483905196156766
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1213,8 +1259,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TargetMapPlayer
   targetPrefab: {fileID: 4672179235600711493, guid: 26cc30555fb400740bec3fdbbd1e8c2b, type: 3}
-  map: []
-  totalTargets: 0
 --- !u!114 &7575547885161001504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1543,11 +1587,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PointTargetScript
   player: {fileID: 1871395203445187512}
   playerCamera: {fileID: 906033822823644925}
-  spellcastingScript: {fileID: 681781891520420819}
+  spellcastingCoordinator: {fileID: 0}
   groundIndicator: {fileID: 0}
-  indicatedPosition: {x: 0, y: 0, z: 0}
   rayEmissionColor: {r: 0.075, g: 0.47, b: 0.75, a: 1}
-  sphereEmissionColor: {r: 0.055, g: 0.37, b: 0.55, a: 1}
   sphereRadius: 0.5
   rayEmissionIntensity: 3
   sphereEmissionIntensity: 3
@@ -1559,9 +1601,6 @@ MonoBehaviour:
   fadeStartValue: 1
   followPoint: 0
   creatureTarget: {fileID: 0}
-  creatureLayer:
-    serializedVersion: 2
-    m_Bits: 264
 --- !u!114 &6715955890821539743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1582,7 +1621,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1536
   interactKey: 20
-  interactableTarget: {fileID: 0}
 --- !u!4 &8779841413109497783 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3270653042951830814, guid: ebfb4a6ffbe28a74f9d65a88539fa48b, type: 3}
@@ -1696,5 +1734,10 @@ PrefabInstance:
 --- !u!224 &7077811576030251366 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4494358799876154748, guid: 83b6fd530c0443f43bc4856ace7e0f71, type: 3}
+  m_PrefabInstance: {fileID: 6658109862396472346}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7941567153724119372 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3625475648355071318, guid: 83b6fd530c0443f43bc4856ace7e0f71, type: 3}
   m_PrefabInstance: {fileID: 6658109862396472346}
   m_PrefabAsset: {fileID: 0}

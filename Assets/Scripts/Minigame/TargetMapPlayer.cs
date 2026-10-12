@@ -16,7 +16,7 @@ public class MapSettings
     [Tooltip("Maximum delay from the ideal hit time for a perfect result.")]
     public float perfectWindow = 0.08f;
     [Tooltip("Display name used to identify the map.")]
-    public string name = "Novo Mapa";
+    public string name = "New Map";
 }
 
 [System.Serializable]

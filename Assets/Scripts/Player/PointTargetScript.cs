@@ -43,9 +43,10 @@ public class PointTargetScript : MonoBehaviour
     public bool FollowPoint => followPoint;
 
     [Header("Creature Targeting")]
-    private GameObject creatureTarget;
+    [SerializeField] private GameObject creatureTarget;
     private LayerMask creatureLayer;
     private Highlight highlightTarget;
+    private Runic hoveredRunic;
 
     public GameObject CreatureTarget => creatureTarget;
 
@@ -128,6 +129,7 @@ public class PointTargetScript : MonoBehaviour
         {
             groundIndicator.tag = "Untagged";
             followPoint = false;
+            player.SetCommandedTarget(null);
         }
     }
     void Point()
@@ -154,17 +156,25 @@ public class PointTargetScript : MonoBehaviour
         bool terrainHit = Physics.Raycast(ray, out RaycastHit hit, maxDistance) 
                         && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0;
 
-        // Mantém visível enquanto o botão está pressionado, ou se estiver em fade-out após soltar, ou se for um feitiço point-targeted ativo
+        // Keeps visible while the button is pressed, when in fade-out after releasing or when a point-targeted spells is being aimed
         bool canShowGroundIndicator = selecting || selected || isPointTargetedSpell;
 
-        // Se soltou o botão do mouse neste frame sobre o terreno, ativamos o selected imediatamente
+        // If the mouse button is released on this frame, activate selected immediately
         if (terrainHit && groundIndicator.activeSelf && Mouse.current.leftButton.wasReleasedThisFrame 
-            && player.MenuManager.CurrentMenu == null
-            && stateOnMousePressed == PlayerController.CastState.Idle)
+            && player.MenuManager.CurrentMenu == null && stateOnMousePressed == PlayerController.CastState.Idle
+            && player.PointCommand != RunicPointCommand.Ignore)
         {
             followPoint = true;
             indicatedPosition = groundIndicator.transform.position;
             selected = true; // Ativa o fade imediatamente aqui
+        }
+
+        if (Mouse.current.leftButton.wasReleasedThisFrame && player.CastingState == PlayerController.CastState.Idle)
+        {
+            if (hoveredRunic != null)
+            {
+                player.SetCommandedTarget(hoveredRunic);
+            }
         }
 
         if (canShowGroundIndicator && terrainHit && !creaturePointed)
@@ -241,22 +251,25 @@ public class PointTargetScript : MonoBehaviour
     {
         if (Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, creatureLayer))
         {
-            Highlight novoHighlight = hit.collider.gameObject.GetComponentInParent<Highlight>();
+            Highlight newHighlight = hit.collider.gameObject.GetComponentInParent<Highlight>();
+            Runic targetRunic = hit.collider.gameObject.GetComponentInParent<Runic>();
 
-            if (novoHighlight != null)
+            if (newHighlight != null && targetRunic != null)
             {
-                if (highlightTarget != null && highlightTarget != novoHighlight)
+                if (highlightTarget != null && highlightTarget != newHighlight)
                 {
                     highlightTarget.Toggle(false);
                 }
 
                 creatureTarget = hit.collider.gameObject;
-                highlightTarget = novoHighlight;
+                highlightTarget = newHighlight;
+                hoveredRunic = targetRunic;
                 return true;
             }
         }
 
         creatureTarget = null;
+        hoveredRunic = null;
         return false;
     }
 

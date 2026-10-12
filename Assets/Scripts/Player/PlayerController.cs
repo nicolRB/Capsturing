@@ -1,6 +1,9 @@
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
+public enum RunicFightingCommand { Pacific, Escort, Aggressive }
+public enum RunicPointCommand { Stand, Scout, Patrol, Ignore }
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
@@ -9,17 +12,29 @@ public class PlayerController : MonoBehaviour
     [Header("Stats")]
     [SerializeField] private int maxHP = 100;
     [SerializeField] private int currentHP = 100;
+    [SerializeField] private int defense = 5;
+    [SerializeField] private int knockbackResistance = 0;
 
     public int MaxHP => maxHP;
     public int CurrentHP => currentHP;
 
     [Header("Movement")]
-    [SerializeField] private float walkSpeed = 2f;
+    [SerializeField] private float walkSpeed = 1.25f;
     [SerializeField] private float jogSpeed = 5f;
-    [SerializeField] private float runningSpeed = 10f;
+    [SerializeField] private float sprintSpeed = 10f;
     [SerializeField] private float currentSpeed;
     [SerializeField] private Key runKey = Key.LeftShift;
     [SerializeField] private Key walkKey = Key.LeftAlt;
+    private bool isTryingToWalk;
+    private bool isTryingToSprint;
+
+    [SerializeField, Range(0f, 1f)] private float knockbackUpwardBias = 0.75f;
+
+    public float WalkSpeed => walkSpeed;
+    public float JogSpeed => jogSpeed;
+    public float SprintSpeed => sprintSpeed;
+    public bool IsTryingToWalk => isTryingToWalk;
+    public bool IsTryingToSprint => isTryingToSprint;
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce = 5f;
@@ -45,9 +60,9 @@ public class PlayerController : MonoBehaviour
     private bool isHoldingShift = false;
 
     [Header("Mouse Look")]
-    [SerializeField] private float mouseSensitivity = 15f;
+    [SerializeField] private float cameraSensitivity;
 
-    public float MouseSensitivity => mouseSensitivity;
+    public float CameraSensitivity => cameraSensitivity;
 
     private Rigidbody rb;
     private CapsuleCollider capsule;
@@ -68,6 +83,9 @@ public class PlayerController : MonoBehaviour
 
     [Header("Runics")]
     [SerializeField] private int maxPartySize = 3;
+    [SerializeField] private RunicFightingCommand fightingCommand = RunicFightingCommand.Escort;
+    [SerializeField] private RunicPointCommand pointCommand = RunicPointCommand.Stand;
+    [SerializeField] private Runic commandedTarget;
 
     public int MaxPartySize => maxPartySize;
 
@@ -77,8 +95,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CameraCollision cameraCollision;
     [SerializeField] private MenuManager menuManager;
     [SerializeField] private GameObject playerHUD;
+    [SerializeField] private CanvasGroup hudCanvasGroup;
     [SerializeField] private GameObject aimIndicator;
-    [SerializeField] private bool useAimIndicator = true;
+    [SerializeField] private SpellcastingCoordinator spellcastingCoordinator;
+
+    private bool useAimIndicator = true;
 
     public GameObject PlayerCharacter => playerCharacter;
     public CameraController CameraController => cameraController;
@@ -87,6 +108,9 @@ public class PlayerController : MonoBehaviour
     public GameObject PlayerHUD => playerHUD;
     public GameObject AimIndicator => aimIndicator;
     public bool UseAimIndicator => useAimIndicator;
+    public RunicFightingCommand FightingCommand => fightingCommand;
+    public RunicPointCommand PointCommand => pointCommand;
+    public Runic CommandedTarget => commandedTarget;
 
     private void Awake()
     {
@@ -100,18 +124,33 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("CapsuleCollider missing on Player!");
         if (animator == null)
             Debug.LogError("Animator missing on Player!");
+
+        SettingsManager.OnSettingsChanged += Apply;
+        Apply(SettingsManager.Current);
     }
+
+    void OnDisable() => SettingsManager.OnSettingsChanged -= Apply;
 
     private void Start()
     {
         currentSpeed = jogSpeed;
-        if (cameraController == null) cameraController = FindFirstObjectByType<CameraController>();
+        if (cameraController == null) 
+            cameraController = FindFirstObjectByType<CameraController>();
 
-        if (menuManager == null) menuManager = FindFirstObjectByType<MenuManager>();
+        if (menuManager == null) 
+            menuManager = FindFirstObjectByType<MenuManager>();
 
-        if (playerHUD == null) playerHUD = GameObject.Find("PlayerHUD");
+        if (playerHUD == null) 
+            playerHUD = GameObject.Find("PlayerHUD");
 
-        if (cameraCollision == null) cameraCollision = FindFirstObjectByType<CameraCollision>();
+        if (cameraCollision == null) 
+            cameraCollision = FindFirstObjectByType<CameraCollision>();
+
+        if (playerCharacter == null) 
+            playerCharacter = gameObject;
+
+        if (spellcastingCoordinator == null) 
+            spellcastingCoordinator = FindFirstObjectByType<SpellcastingCoordinator>();
     }
 
     public void SetCastingState(CastState newState)
@@ -179,15 +218,15 @@ public class PlayerController : MonoBehaviour
 
         if (!isDashing)
         {
-            bool isTryingToRun = Keyboard.current[runKey].isPressed;
-            bool isTryingToWalk = Keyboard.current[walkKey].isPressed;
+            isTryingToWalk = Keyboard.current[walkKey].isPressed;
+            isTryingToSprint = Keyboard.current[runKey].isPressed;
             bool isMovingForward = moveInput.y > 0f;
 
             float targetSpeed = jogSpeed;
             if (isTryingToWalk)
                 targetSpeed = walkSpeed;
-            else if (isTryingToRun && isMovingForward)
-                targetSpeed = runningSpeed;
+            else if (isTryingToSprint && isMovingForward)
+                targetSpeed = sprintSpeed;
 
             currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 5f);
 
@@ -299,15 +338,15 @@ public class PlayerController : MonoBehaviour
         if (moving || Mouse.current.rightButton.isPressed || Mouse.current.leftButton.isPressed 
         || Keyboard.current[runKey].isPressed || castingState == CastState.Aiming)
         {
-            // player gira para o yaw da câmera
+            // player rotates with the camera
             Quaternion targetRotation = Quaternion.Euler(0f, cameraController.yRotation, 0f);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 15f);
         }
         else
         {
-            // parado: mouse rotaciona player e câmera juntos
+            // rotates only camera
             float mouseX = Mouse.current.delta.x.ReadValue()
-                        * mouseSensitivity * Time.deltaTime;
+                        * cameraSensitivity * Time.deltaTime;
 
             cameraController.yRotation += mouseX;
         }
@@ -349,7 +388,7 @@ public class PlayerController : MonoBehaviour
         bool grounded = IsGrounded();
 
         // -------- SPEED PARAMETER (for Blend Tree) --------
-        float normalizedSpeed = currentSpeed / runningSpeed;
+        float normalizedSpeed = currentSpeed / sprintSpeed;
         animator.SetFloat("Speed", normalizedSpeed);
 
         // -------- WALKING BOOL (optional) --------
@@ -370,47 +409,141 @@ public class PlayerController : MonoBehaviour
 
     public void LoadPlayerData(SaveDataContainer data)
     {
+        maxHP = data.playerMaxHP;
         currentHP = data.playerHP;
         Vector3 loadedPosition = new Vector3(data.playerPosition[0], data.playerPosition[1], data.playerPosition[2]);
         float loadedRotation = data.playerRotation;
 
         playerCharacter.transform.position = loadedPosition;
         playerCharacter.transform.rotation = Quaternion.Euler(0f, loadedRotation, 0f); // Reset rotation
+
+        spellcastingCoordinator.SetSpellCooldowns(data.spellCooldownList);
     }
 
     public void PopulateSaveData(SaveDataContainer data)
     {
+        data.playerMaxHP = maxHP;
         data.playerHP = currentHP;
         data.playerPosition[0] = transform.position.x;
         data.playerPosition[1] = transform.position.y;
         data.playerPosition[2] = transform.position.z;
         data.playerRotation = transform.rotation.eulerAngles.y;
+        if (spellcastingCoordinator != null)
+            data.spellCooldownList = spellcastingCoordinator.SpellCooldowns;
     }
+
+    // ---------------- Combat ---------------- 
 
     public void TakeDamage(int damage)
     {
         if (castingState == CastState.Channeling) return;
 
+        Debug.Log("Player took " + damage + " damage.");
+
         if (damage > 0)
             currentHP -= damage;
 
         if (currentHP <= 0)
-        {
             Die();
+    }
+
+    public void ApplyKnockback(Transform knockbackOrigin, float knockback)
+    {
+        if (knockback == 0 || knockbackOrigin == null)
+            return;
+        
+        Vector3 away = transform.position - knockbackOrigin.position;
+        away.y = 0f;
+
+        if (away.sqrMagnitude < 0.001f)
+        {
+            away = knockbackOrigin.transform.forward;
+            away.y = 0f;
         }
+
+        if (away.sqrMagnitude < 0.001f)
+            away = Vector3.forward;
+
+        away.Normalize();
+
+        Vector3 direction = (away + Vector3.up * Mathf.Max(0f, knockbackUpwardBias)).normalized;
+        float resistance = Mathf.Clamp01(knockbackResistance / 100f);
+        Runic runicAttacker = knockbackOrigin.GetComponent<Runic>();
+        float weightFactor;
+        if (runicAttacker == null)
+            runicAttacker = knockbackOrigin.GetComponentInParent<Runic>();
+
+        if (runicAttacker != null)
+            weightFactor = runicAttacker.Weight / Mathf.Max(runicAttacker.Weight + rb.mass, 0.01f);
+        else 
+            weightFactor = 1;
+        
+        float impulse = knockback * weightFactor * (1f - resistance);
+        
+        Debug.Log(impulse + " impulse applied to player.");
+
+        if (impulse >= 0)
+            rb.AddForce(impulse*direction, ForceMode.Impulse);
     }
 
     public void Heal(int healing)
     {
         if (healing > 0)
+        {
             currentHP += healing;
-        
-        if (currentHP > maxHP)
-            currentHP = maxHP;
+            currentHP = Math.Min(currentHP, maxHP);
+        }
+    }
+
+    public void SetHP(int amount)
+    {
+        currentHP = amount;
+        currentHP = Math.Min(currentHP, maxHP);
+
+        if (amount < 0)
+            Die();
+    }
+
+    public void SetMaxHP(int amount)
+    {
+        maxHP = amount > 0 ? amount : 1;
     }
 
     public void Die()
     {
-        // gameover logic
+        if (currentHP > 0)
+            currentHP = 0;
+
+        if (currentHP < 0)
+            Debug.Log("Overkill Damage Amout = " + (-currentHP));
+
+        // gameover logic...
+    }
+
+    public void SetCommandedTarget(Runic target)
+    {
+        commandedTarget = target;
+
+        if (target == null)
+            Debug.Log("Alvo do Rúnico limpo.");
+    }
+
+    // ---------------- Settings ---------------- 
+
+    void Apply(GameSettings s)
+    {
+        cameraSensitivity = s.cameraSensitivity;
+        
+        // Escala o HUD inteiro (o painel inferior e seus filhos)
+        playerHUD.transform.localScale = new Vector3(s.hudScale, s.hudScale, s.hudScale);
+        
+        // Controla a opacidade do HUD inteiro de uma só vez (incluindo ícones e textos filhos)
+        if (hudCanvasGroup == null)
+            hudCanvasGroup = playerHUD.GetComponent<CanvasGroup>();
+            
+        if (hudCanvasGroup != null)
+        {
+            hudCanvasGroup.alpha = s.hudOpacity / 100f; 
+        }
     }
 }

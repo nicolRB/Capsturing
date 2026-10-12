@@ -18,15 +18,33 @@ MonoBehaviour:
   speciesIcon: {fileID: 21300000, guid: 65a7948ddae13a54d991842e467c4ba8, type: 3}
   speciesModels:
   - {fileID: 1333037246354868708, guid: 49a5af1ff1d7dc6468b7ec3ac0c5f118, type: 3}
-  - {fileID: 1333037246354868708, guid: 9c1b43bdde9d72e49ad3f8ed79a627d2, type: 3}
-  - {fileID: 1333037246354868708, guid: 10cf2cdd48a4bf44d817a2dfc951dcb5, type: 3}
-  - {fileID: 1333037246354868708, guid: 095c4227988d8724c846345b581c0f77, type: 3}
+  - {fileID: 1333037246354868708, guid: b3e1fafef235c624c835bf538add125c, type: 3}
+  - {fileID: 1333037246354868708, guid: 0fbd0bdc0f540c74f89c8eddbf1c1ea8, type: 3}
+  - {fileID: 1333037246354868708, guid: 825539d259081d74ba658c882df8f0d3, type: 3}
+  width: 2
+  height: 1
   baseHP: 10
   baseAttack: 1
   baseDefense: 1
-  baseSpeed: 1
+  baseWeight: 1
+  baseKnockbackResistance: 0
+  baseSpeed: 5
+  baseWalkSpeed: 2
+  baseSprintSpeed: 7
   baseMagic: 1
   baseMagicDefense: 1
+  recovery: 3
+  specialRecovery: 7
+  aggression: 0.5
+  specialAggression: 0.2
   elements: []
-  basicSkills: []
+  basicSkills:
+  - {fileID: 11400000, guid: f7f3d9c3517b1e949ac732ae4ddeba0b, type: 2}
+  - {fileID: 11400000, guid: 98e12b22e01508440b32c2a705df44a6, type: 2}
   skills: []
+  defaultCombatStyle: 0
+  packSpecies: 0
+  packSpawnChance: 0
+  minPackSize: 0
+  maxPackSize: 0
+  sameSpeciesRelation: 0

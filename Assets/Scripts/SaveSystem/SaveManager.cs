@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SaveManager : MonoBehaviour
 {
@@ -182,14 +183,13 @@ public class SaveManager : MonoBehaviour
 
         if (!newFileName.StartsWith(SaveFilePrefix) && oldFileName.StartsWith(SaveFilePrefix))
         {
-            // Se o original tinha o prefixo, garante que o novo também tenha para manter o padrão
-            // (Remova este bloco se preferir que nomes customizados não precisem começar com save_)
+            // If the original had the prefix, guarantees the new one has it to keep the pattern
             newFileName = SaveFilePrefix + newFileName;
         }
 
         string oldPath = GetSaveFilePath(oldFileName);
         
-        // Evita sobrescrita: se o arquivo com o novo nome já existir, adiciona um sufixo numérico
+        // Avoids overwrute: if the file with the new name already exists, adds a numbered suffix
         if (File.Exists(GetSaveFilePath(newFileName)))
         {
             string baseName = newFileName;

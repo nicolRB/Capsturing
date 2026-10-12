@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d30e9b79fd8808499382baaa15a44d1, type: 3}
+  m_Name: RunicDatabase
+  m_EditorClassIdentifier: GameCore::RunicDatabase
+  allSpecies:
+  - {fileID: 11400000, guid: c014a50325299d54ebd86558c955ba3f, type: 2}
+  speciesRelations:
+  - speciesA: {fileID: 11400000, guid: c014a50325299d54ebd86558c955ba3f, type: 2}
+    speciesB: {fileID: 11400000, guid: 49f099674a14a6e42b6662991e8acedf, type: 2}
+    relation: 2
+  allElements:
+  - {fileID: 11400000, guid: c454203395e047441a1ea9d2ff310eda, type: 2}
+  allSkills:
+  - {fileID: 11400000, guid: f7f3d9c3517b1e949ac732ae4ddeba0b, type: 2}
+  - {fileID: 11400000, guid: 98e12b22e01508440b32c2a705df44a6, type: 2}

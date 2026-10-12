@@ -29,14 +29,6 @@ public class FeedbackUI : MonoBehaviour
             return;
         }
 
-        TextMeshProUGUI text = obj.GetComponent<TextMeshProUGUI>();
-        if (text == null)
-        {
-            Debug.LogError("FeedbackUI: textPrefab does not have a TextMeshProUGUI component.", this);
-            Destroy(obj);
-            return;
-        }
-
         PopupText popup = obj.GetComponent<PopupText>();
         if (popup == null)
         {
@@ -44,15 +36,11 @@ public class FeedbackUI : MonoBehaviour
             Destroy(obj);
             return;
         }
-
-        // Configure and play the popup.
-        text.text = GetText(result);
-        text.color = GetColor(result);
         
         Vector2 finalPos = position + Vector2.up * 30f;
         obj.transform.position = finalPos;
 
-        popup.SetStartPosition(finalPos);
+        popup.Setup(finalPos, GetText(result), 46, GetColor(result), 0.6f, 50);
         popup.Play();
     }
 

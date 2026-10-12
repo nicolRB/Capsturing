@@ -13,16 +13,31 @@ public class RunicInjectorWindow : EditorWindow
     private bool useCustomValues;
     private Sprite customIcon;
     private GameObject customModel;
-    private float customMaxHP;
-    private float customCurrentHP;
+    private float customWidth;
+    private float customHeight;
+    private int customMaxHP;
+    private int customCurrentHP;
     private float customAttack;
     private float customDefense;
+    private float customWeight;
+    private float customKnockbackResistance;
     private float customSpeed;
+    private float customWalkSpeed;
+    private float customSprintSpeed;
     private float customMagic;
     private float customMagicDefense;
+    private float customRecovery;
+    private float customSpecialRecovery;
+    private float customaggression;
+    private float customSpecialaggression;
+    private List<Skill> customBasicSkills;
+    private List<Skill> customSkills;
+    private List<Element> customElements;
+    private CombatStyle customCombatStyle = CombatStyle.FaceOn;
     private RunicSpecies lastSelectedSpecies;
+    private Vector2 scrollPosition;
 
-    [MenuItem("Runic/Runic Injector")]
+    [MenuItem("Ingame Dev Tools/Runic/Runic Injector")]
     public static void ShowWindow()
     {
         GetWindow<RunicInjectorWindow>("Runic Injector");
@@ -30,6 +45,8 @@ public class RunicInjectorWindow : EditorWindow
 
     private void OnGUI()
     {
+        scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+
         GUILayout.Label("Runic Injection Tool", EditorStyles.boldLabel);
 
         targetSaveFile = EditorGUILayout.TextField("Save Name", targetSaveFile);
@@ -64,6 +81,8 @@ public class RunicInjectorWindow : EditorWindow
                 InjectRunicToRuntimeBox();
             }
         }
+
+        EditorGUILayout.EndScrollView();
     }
 
     private void DrawCustomFields()
@@ -76,14 +95,52 @@ public class RunicInjectorWindow : EditorWindow
         customIcon = EditorGUILayout.ObjectField("Icon", customIcon, typeof(Sprite), false) as Sprite;
         customModel = EditorGUILayout.ObjectField("Model", customModel, typeof(GameObject), false) as GameObject;
 
+        EditorGUILayout.LabelField("Sizes", EditorStyles.boldLabel);
+        customWidth = EditorGUILayout.FloatField("Width", customWidth);
+        customHeight = EditorGUILayout.FloatField("Height", customHeight);
+
         EditorGUILayout.LabelField("Stats", EditorStyles.boldLabel);
-        customMaxHP = EditorGUILayout.FloatField("Max HP", customMaxHP);
-        customCurrentHP = EditorGUILayout.FloatField("Current HP", customCurrentHP);
+        customMaxHP = EditorGUILayout.IntField("Max HP", customMaxHP);
+        customCurrentHP = EditorGUILayout.IntField("Current HP", customCurrentHP);
         customAttack = EditorGUILayout.FloatField("Attack", customAttack);
         customDefense = EditorGUILayout.FloatField("Defense", customDefense);
-        customSpeed = EditorGUILayout.FloatField("Speed", customSpeed);
+        customSpeed = EditorGUILayout.FloatField("Normal Speed", customSpeed);
+        customWalkSpeed = EditorGUILayout.FloatField("Walk Speed", customSpeed);
+        customSprintSpeed = EditorGUILayout.FloatField("Sprint Speed", customSpeed);
         customMagic = EditorGUILayout.FloatField("Magic", customMagic);
         customMagicDefense = EditorGUILayout.FloatField("Magic Defense", customMagicDefense);
+        customRecovery = EditorGUILayout.FloatField("Recovery", customRecovery);
+        customSpecialRecovery = EditorGUILayout.FloatField("Special Recovery", customSpecialRecovery);
+        customaggression = EditorGUILayout.FloatField("aggression", customaggression);
+        customSpecialaggression = EditorGUILayout.FloatField("Special aggression", customSpecialaggression);
+
+        customElements = DrawAssetList("Elements", customElements);
+        customBasicSkills = DrawAssetList("Basic Skills", customBasicSkills);
+        customSkills = DrawAssetList("Skills", customSkills);
+
+        EditorGUILayout.LabelField("Combat Settings", EditorStyles.boldLabel);
+        customCombatStyle = (CombatStyle)EditorGUILayout.EnumPopup("Combat Style", customCombatStyle);
+    }
+
+    private List<T> DrawAssetList<T>(string label, List<T> items) where T : Object
+    {
+        if (items == null) items = new List<T>();
+
+        EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+        for (int i = 0; i < items.Count; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            items[i] = (T)EditorGUILayout.ObjectField(items[i], typeof(T), false);
+            if (GUILayout.Button("-", GUILayout.Width(24)))
+            {
+                items.RemoveAt(i);
+                i--;
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        if (GUILayout.Button("Add " + label)) items.Add(null);
+        return items;
     }
 
     private void LoadSpeciesDefaults()
@@ -95,13 +152,31 @@ public class RunicInjectorWindow : EditorWindow
         customModel = selectedSpecies.SpeciesModels != null && selectedSpecies.SpeciesModels.Count > 0
             ? selectedSpecies.SpeciesModels[0]
             : null;
+        customWidth = selectedSpecies.Width;
+        customHeight = selectedSpecies.Height;
         customMaxHP = selectedSpecies.BaseHP;
         customCurrentHP = selectedSpecies.BaseHP;
         customAttack = selectedSpecies.BaseAttack;
         customDefense = selectedSpecies.BaseDefense;
         customSpeed = selectedSpecies.BaseSpeed;
+        customWalkSpeed = selectedSpecies.BaseWalkSpeed;
+        customSprintSpeed = selectedSpecies.BaseSprintSpeed;
         customMagic = selectedSpecies.BaseMagic;
         customMagicDefense = selectedSpecies.BaseMagicDefense;
+        customRecovery = selectedSpecies.Recovery;
+        customSpecialRecovery = selectedSpecies.SpecialRecovery;
+        customaggression = selectedSpecies.Aggression;
+        customSpecialaggression = selectedSpecies.Specialaggression;
+        customElements = selectedSpecies.Elements != null
+            ? new List<Element>(selectedSpecies.Elements)
+            : new List<Element>();
+        customBasicSkills = selectedSpecies.BasicSkills != null
+            ? new List<Skill>(selectedSpecies.BasicSkills)
+            : new List<Skill>();
+        customSkills = selectedSpecies.Skills != null
+            ? new List<Skill>(selectedSpecies.Skills)
+            : new List<Skill>();
+        customCombatStyle = selectedSpecies.DefaultCombatStyle;
     }
 
     private void InjectRunicToSave()
@@ -143,30 +218,33 @@ public class RunicInjectorWindow : EditorWindow
 
     private RunicSaveData CreateRunicData()
     {
-        float defaultHP = selectedSpecies.BaseHP;
+        int defaultHP = selectedSpecies.BaseHP;
         List<string> elementIds = new List<string>();
         List<string> basicSkillIds = new List<string>();
         List<string> skillIds = new List<string>();
+        List<Element> elementsToSave = useCustomValues ? customElements : selectedSpecies.Elements;
+        List<Skill> basicSkillsToSave = useCustomValues ? customBasicSkills : selectedSpecies.BasicSkills;
+        List<Skill> skillsToSave = useCustomValues ? customSkills : selectedSpecies.Skills;
 
-        if (selectedSpecies.Elements != null)
+        if (elementsToSave != null)
         {
-            foreach (Element element in selectedSpecies.Elements)
+            foreach (Element element in elementsToSave)
             {
                 if (element != null) elementIds.Add(element.ElementId);
             }
         }
 
-        if (selectedSpecies.BasicSkills != null)
+        if (basicSkillsToSave != null)
         {
-            foreach (Skill skill in selectedSpecies.BasicSkills)
+            foreach (Skill skill in basicSkillsToSave)
             {
                 if (skill != null) basicSkillIds.Add(skill.SkillId);
             }
         }
 
-        if (selectedSpecies.Skills != null)
+        if (skillsToSave != null)
         {
-            foreach (Skill skill in selectedSpecies.Skills)
+            foreach (Skill skill in skillsToSave)
             {
                 if (skill != null) skillIds.Add(skill.SkillId);
             }
@@ -182,18 +260,29 @@ public class RunicInjectorWindow : EditorWindow
             modelIndex = useCustomValues && customModel != null && selectedSpecies.SpeciesModels != null
                 ? Mathf.Max(0, selectedSpecies.SpeciesModels.IndexOf(customModel))
                 : 0,
+            width  = useCustomValues ? customWidth : 1,
+            height = useCustomValues ? customHeight : 1,
             level = useCustomValues ? level : 1,
             experience = useCustomValues ? experience : 0,
             currentHP = useCustomValues ? customCurrentHP : defaultHP,
             maxHP = useCustomValues ? customMaxHP : defaultHP,
             attack = useCustomValues ? customAttack : selectedSpecies.BaseAttack,
             defense = useCustomValues ? customDefense : selectedSpecies.BaseDefense,
+            weight = useCustomValues ? customWeight : selectedSpecies.BaseWeight,
+            knockbackResistance = useCustomValues ? customKnockbackResistance : selectedSpecies.BaseKnockbackResistance,
             speed = useCustomValues ? customSpeed : selectedSpecies.BaseSpeed,
+            walkSpeed = useCustomValues ? customWalkSpeed : selectedSpecies.BaseWalkSpeed,
+            sprintSpeed = useCustomValues ? customSprintSpeed : selectedSpecies.BaseSprintSpeed,
             magic = useCustomValues ? customMagic : selectedSpecies.BaseMagic,
             magicDefense = useCustomValues ? customMagicDefense : selectedSpecies.BaseMagicDefense,
+            recovery = useCustomValues ? customRecovery : selectedSpecies.Recovery,
+            specialRecovery = useCustomValues ? customSpecialRecovery : selectedSpecies.SpecialRecovery,
+            aggression = useCustomValues ? customaggression : selectedSpecies.Aggression,
+            specialAggression = useCustomValues ? customSpecialaggression : selectedSpecies.Specialaggression,
             elementIds = elementIds,
             learnedBasicSkillIds = basicSkillIds,
-            learnedSkillIds = skillIds
+            learnedSkillIds = skillIds,
+            combatStyle = customCombatStyle
         };
     }
 

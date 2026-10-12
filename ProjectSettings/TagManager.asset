@@ -5,9 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Target
-  - FollowerTarget
   - Wild
   - Button
+  - Tamed
   layers:
   - Default
   - TransparentFX
@@ -20,7 +20,7 @@ TagManager:
   - Runic
   - Interactable
   - InteractHighlight
-  - 
+  - Hitbox
   - 
   - 
   - 
