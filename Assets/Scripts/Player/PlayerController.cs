@@ -98,6 +98,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CanvasGroup hudCanvasGroup;
     [SerializeField] private GameObject aimIndicator;
     [SerializeField] private SpellcastingCoordinator spellcastingCoordinator;
+    [SerializeField] private RunicCommands runicCommand;
 
     private bool useAimIndicator = true;
 
@@ -111,12 +112,14 @@ public class PlayerController : MonoBehaviour
     public RunicFightingCommand FightingCommand => fightingCommand;
     public RunicPointCommand PointCommand => pointCommand;
     public Runic CommandedTarget => commandedTarget;
+    public RunicCommands RunicCommand => runicCommand;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         capsule = GetComponent<CapsuleCollider>();
         animator = GetComponentInChildren<Animator>();
+        runicCommand = GetComponent<RunicCommands>();
 
         if (rb == null)
             Debug.LogError("Rigidbody missing on Player!");

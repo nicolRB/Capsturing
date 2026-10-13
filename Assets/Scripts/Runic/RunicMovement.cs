@@ -51,6 +51,8 @@ public class RunicMovement : MonoBehaviour
     private float walkSpeed = 2.5f;
     private float sprintSpeed = 9f;
 
+    public bool Leaping => leapInProgress;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

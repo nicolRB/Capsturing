@@ -4,26 +4,33 @@ using System.Linq;
 
 public class RunicCombat : MonoBehaviour
 {
+    [Header("References")]
     private Runic runic;
     private RunicMovement runicMovement;
     private CombatStyle combatStyle;
     private RunicHitboxRegistry hitboxRegistry;
 
+    [Header("Target")]
     private Runic currentTarget;
     private bool playerTarget;
 
+    [Header("Combat Timers")]
     private float recoveryTimer;
     private float specialRecoveryTimer;
     private float movementTimer;
-
     [SerializeField] private float updateInterval = 0.2f;
     private float updateTimer;
+    [SerializeField] private float skillGiveUpTime = 4f;
+    private float giveUpTimer;
 
+    [Header("Skill State")]
     private float skillDurationTimer;
     private Skill preparedSkill;
+    private Skill queuedUpSkill;
     private bool usingSkill;
     private Dictionary<Skill, float> skillCooldowns = new Dictionary<Skill, float>();
 
+    [Header("Hunting")]
     private bool hunting;
 
     void Start()
@@ -42,6 +49,12 @@ public class RunicCombat : MonoBehaviour
     {
         UpdateTimers();
         UpdateSkillCooldowns(); // Updates cooldowns every frame
+
+        if (preparedSkill && giveUpTimer >= skillGiveUpTime)
+        {
+            giveUpTimer = 0;
+            preparedSkill = null;
+        }
 
         // If there is a prepared skill, check if it has entered range to use it
         if (preparedSkill != null && GetCurrentTargetTransform() != null)
@@ -87,6 +100,12 @@ public class RunicCombat : MonoBehaviour
 
         if (currentTarget == null)
             return;
+
+        if (!IsBusy() && queuedUpSkill != null)
+        {
+            ReadySkill(queuedUpSkill);
+            queuedUpSkill = null;
+        }
 
         if (preparedSkill != null && currentTarget != null)
         {
@@ -208,6 +227,7 @@ public class RunicCombat : MonoBehaviour
     public void ReadySkill(Skill skill)
     {
         preparedSkill = skill;
+        giveUpTimer = 0f;
     }
 
     private Coroutine activeSkillCoroutine;
@@ -425,6 +445,15 @@ public class RunicCombat : MonoBehaviour
             return cd <= 0f;
         }
         return true; 
+    }
+
+    public bool IsSpecialSkillIndexReady(int index)
+    {
+        if (runic == null || runic.Skills == null || index < 0 || index >= runic.Skills.Count)
+            return false;
+
+        Skill skill = runic.Skills[index];
+        return skill != null && IsSkillReady(skill);
     }
 
     public bool HasAnyBasicSkillReady()
@@ -662,19 +691,6 @@ public class RunicCombat : MonoBehaviour
         runicMovement.FaceTarget(currentTarget.transform.position);
     }
 
-    void UpdateTimers()
-    {
-        updateTimer += Time.deltaTime;
-        
-        if (recoveryTimer > 0)
-            recoveryTimer -= Time.deltaTime;
-        
-        if (skillDurationTimer > 0)
-            skillDurationTimer -= Time.deltaTime;
-
-        if (movementTimer > 0)
-            movementTimer -= Time.deltaTime;
-    }
 
     private float GetKeyStatValue(SkillKeyStat keyStat)
     {
@@ -688,6 +704,35 @@ public class RunicCombat : MonoBehaviour
             case SkillKeyStat.Speed: return runic.Speed;
             case SkillKeyStat.None: return 100f;
             default: return 0f;
+        }
+    }
+
+    public bool IsBusy()
+    {
+        return preparedSkill != null || usingSkill || runicMovement.Leaping;
+    }
+
+    public void QueueUpSkill(Skill skill)
+    {
+        queuedUpSkill = skill;
+    }
+
+    void UpdateTimers()
+    {
+        updateTimer += Time.deltaTime;
+        
+        if (recoveryTimer > 0)
+            recoveryTimer -= Time.deltaTime;
+        
+        if (skillDurationTimer > 0)
+            skillDurationTimer -= Time.deltaTime;
+
+        if (movementTimer > 0)
+            movementTimer -= Time.deltaTime;
+            
+        if (preparedSkill)
+        {
+            giveUpTimer += Time.deltaTime;
         }
     }
 

@@ -5,9 +5,6 @@ using TMPro;
 
 public class RunicCommands : MonoBehaviour
 {
-    [SerializeField] private PlayerController player;
-    [SerializeField] private Runic summonedRunic;
-
     [Header("Skill Command")]
     [SerializeField] private Image skillCommandIcon;
     [SerializeField] private TextMeshProUGUI skillTimerText;
@@ -25,6 +22,10 @@ public class RunicCommands : MonoBehaviour
     [Header("Cooldown Visuals")]
     [SerializeField] private Color cooldownTint = new Color(0.25f, 0.25f, 0.25f, 1f);
 
+    [Header("References")]
+    [SerializeField] private PlayerController player;
+    [SerializeField] private Runic summonedRunic;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -37,23 +38,55 @@ public class RunicCommands : MonoBehaviour
         if (dodgeTimer > 0)
         {
             dodgeTimer -= Time.deltaTime;
-            dodgeCommandIcon.color = cooldownTint;
+            if (dodgeCommandIcon != null)
+                dodgeCommandIcon.color = cooldownTint;
         }
-        else
+        else if (dodgeCommandIcon != null)
             dodgeCommandIcon.color = Color.white;
 
         if (skillTimer > 0)
         {
             skillTimer -= Time.deltaTime;
-            skillCommandIcon.color = cooldownTint;
+            if (skillCommandIcon != null)
+                skillCommandIcon.color = cooldownTint;
         }
-        else    
+        else if (skillCommandIcon != null)
             skillCommandIcon.color = Color.white;
 
         if (Keyboard.current[runicDodgeKey].wasPressedThisFrame && dodgeTimer <= 0)
         {
             dodgeTimer = runicDodgeCooldown;
             CommandRunicDodge();
+        }
+
+        int skillCommand = Keyboard.current.digit1Key.wasPressedThisFrame ? 0
+            : Keyboard.current.digit2Key.wasPressedThisFrame ? 1
+            : Keyboard.current.digit3Key.wasPressedThisFrame ? 2
+            : -1;
+
+        if (skillCommand >= 0 && skillTimer <= 0 && summonedRunic != null 
+            && summonedRunic.Combat.IsSpecialSkillIndexReady(skillCommand))
+        {
+            CommandRunicSkill(skillCommand);
+        }
+    }
+
+    void CommandRunicSkill(int skillNumber)
+    {
+        Skill skill = summonedRunic.Skills[skillNumber];
+        if (skill != null)
+        {
+            skillTimer = skillCommandCooldown;
+
+            if (summonedRunic.Combat.IsBusy())
+            {
+                summonedRunic.Combat.QueueUpSkill(summonedRunic.Skills[skillNumber]);
+            }
+            else
+            {
+                summonedRunic.Movement.FaceTarget(summonedRunic.transform.position + player.transform.forward);
+                summonedRunic.Combat.ReadySkill(summonedRunic.Skills[skillNumber]);
+            }
         }
     }
 
@@ -79,14 +112,10 @@ public class RunicCommands : MonoBehaviour
     {
         Debug.Log(runic.name + " dodging in the " + direction + " direction.");
         
-        // Exemplo de como aplicar o movimento usando o RunicMovement (se acessível)
-        // Ou você pode chamar uma função pública de esquiva dentro do script Runic / RunicMovement.
         RunicMovement movement = runic.GetComponent<RunicMovement>();
         if (movement != null)
         {
-            // Força o rúnico a olhar para a direção da esquiva e aplica o impulso
-            movement.FaceTarget(runic.transform.position + direction);
-            movement.ApplyKnockback(direction * dodgeForce); // Reaproveitando a lógica de impulso que você já tem!
+            movement.ApplyKnockback(direction * dodgeForce);
         }
     }
 
@@ -130,5 +159,16 @@ public class RunicCommands : MonoBehaviour
                 return player.transform.forward;
             }
         }
+    }
+
+    public void SetSummonedRunic(Runic runic)
+    {
+        if (summonedRunic != null)
+            summonedRunic = runic; 
+    }
+
+    public void RemoveSummonedRunic()
+    {
+        summonedRunic = null; 
     }
 }

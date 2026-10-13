@@ -126,8 +126,8 @@ public class Runic : MonoBehaviour
     [SerializeField] private PlayerInteraction playerInteraction;
     [SerializeField] private RunicDatabase runicDatabase;
     [SerializeField] private RunicStorageManager runicStorageManager;
-    private RunicCombat runicCombat;
-    private RunicMovement runicMovement;
+    private RunicCombat combat;
+    private RunicMovement movement;
     private RunicWildAI runicWildAI;
     private Rigidbody runicRigidbody;
     
@@ -193,6 +193,8 @@ public class Runic : MonoBehaviour
     public List<Runic> Allies => allies;
     public List<Runic> EngagedEnemies => engagedEnemies;
     public List<Runic> Threats => threats;
+    public RunicCombat Combat => combat;
+    public RunicMovement Movement => movement;
 
     public void PruneDestroyedRelations()
     {
@@ -218,13 +220,13 @@ public class Runic : MonoBehaviour
 
         runicRigidbody = GetComponent<Rigidbody>();
 
-        runicCombat = GetComponent<RunicCombat>();
+        combat = GetComponent<RunicCombat>();
         
-        runicMovement = GetComponent<RunicMovement>();
+        movement = GetComponent<RunicMovement>();
         
         runicWildAI = GetComponent<RunicWildAI>();
 
-        runicCombat.SetCombatStyle(combatStyle);
+        combat.SetCombatStyle(combatStyle);
 
         if (tameState == RunicState.Tamed)
         {
@@ -499,7 +501,7 @@ public class Runic : MonoBehaviour
     {
         Debug.Log("Knockback");
 
-        if (attacker == null || runicMovement == null || knockbackValue <= 0f)
+        if (attacker == null || movement == null || knockbackValue <= 0f)
             return;
 
         Vector3 away = transform.position - attacker.transform.position;
@@ -524,7 +526,7 @@ public class Runic : MonoBehaviour
         Debug.Log("Knockback applied: " + impulse);
 
         if (impulse > 0f)
-            runicMovement.ApplyKnockback(direction * impulse);
+            movement.ApplyKnockback(direction * impulse);
     }
 
     public void SetBehaviorState(BehaviorState state)
