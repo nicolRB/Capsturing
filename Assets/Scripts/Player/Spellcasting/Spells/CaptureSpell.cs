@@ -52,7 +52,7 @@ public class CaptureSpell : SpellBase
                 $"| prepScore={prepScore:F2}"
             );
 
-            if (result.perfects == 0 && result.goods == 0)
+            if (prepScore <= 0f)
             {
                 Debug.LogWarning("Capture spell cancelled: preparation score was too low.");
                 spellcastingCoordinator.CancelCast();
