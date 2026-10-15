@@ -15,6 +15,8 @@ public class SpawnEnemy : MonoBehaviour
     [SerializeField] private Transform spawnPoint;
     [Tooltip("Optional holder updated with the newly spawned enemy.")]
     [SerializeField] private EnemyTargetHolder targetHolder;
+    [Tooltip("Makes enemy unable to act.")]
+    [SerializeField] private bool enemyIsFrozen;
 
     void Start()
     {
@@ -36,6 +38,15 @@ public class SpawnEnemy : MonoBehaviour
             if (targetHolder != null) targetHolder.SetTarget(newEnemy.GetComponent<Runic>());
 
             if (deletePrevious) originalEnemy = newEnemy;
+
+            if (enemyIsFrozen)
+            {
+                Runic enemyRunic = newEnemy.GetComponent<Runic>();
+                if (enemyRunic != null)
+                {
+                    enemyRunic.SetFreeze(true);
+                }
+            }
         }
         else
         {

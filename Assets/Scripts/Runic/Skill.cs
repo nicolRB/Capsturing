@@ -3,8 +3,10 @@ using UnityEngine;
 public enum SkillMovementType
 {
     None,
-    DashForward,
+    DashToTarget,
+    ChargeForward,
     LeapTowardsTarget,
+    HighLeap,
     TeleportToTarget
 }
 
@@ -52,6 +54,9 @@ public struct SkillStep
     [Tooltip("Force or speed applied by this step")]
     [SerializeField] private float force;
 
+    [Tooltip("DashToTarget: folga entre o rúnico e a superfície do alvo ao parar")]
+    [SerializeField] private float stopDistance;
+
     [Tooltip("If it is required to recalculate the direction of the target for this step")]
     [SerializeField] private bool reAimAtTarget;
     
@@ -68,6 +73,7 @@ public struct SkillStep
     public float Delay => delay;
     public SkillMovementType MovementType => movementType;
     public float Force => force;
+    public float StopDistance => stopDistance;
     public bool ReAimAtTarget => reAimAtTarget;
     public SkillHitboxType HitboxType => hitboxType;
     public float HitboxSize => hitboxSize;
@@ -80,6 +86,7 @@ public class Skill : ScriptableObject
     [Header("Basic Info")]
     [SerializeField] private string skillId;
     [SerializeField] private string skillName;
+    [SerializeField] private Sprite skillSprite;
     [SerializeField] private SkillAttackType skillType;
     [SerializeField] private Element skillElement;
 
@@ -98,6 +105,7 @@ public class Skill : ScriptableObject
 
     public string SkillId => skillId;
     public string SkillName => skillName;
+    public Sprite SkillSprite => skillSprite;
     public float Duration => duration;
     public float Cooldown => cooldown;
     public float Range => range;

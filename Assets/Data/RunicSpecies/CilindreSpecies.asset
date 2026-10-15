@@ -23,11 +23,11 @@ MonoBehaviour:
   - {fileID: 1333037246354868708, guid: 825539d259081d74ba658c882df8f0d3, type: 3}
   width: 2
   height: 1
-  baseHP: 10
-  baseAttack: 1
-  baseDefense: 1
-  baseWeight: 1
-  baseKnockbackResistance: 0
+  baseHP: 50
+  baseAttack: 15
+  baseDefense: 10
+  baseWeight: 5
+  baseKnockbackResistance: 5
   baseSpeed: 5
   baseWalkSpeed: 2
   baseSprintSpeed: 7
@@ -41,8 +41,12 @@ MonoBehaviour:
   basicSkills:
   - {fileID: 11400000, guid: f7f3d9c3517b1e949ac732ae4ddeba0b, type: 2}
   - {fileID: 11400000, guid: 98e12b22e01508440b32c2a705df44a6, type: 2}
-  skills: []
+  skills:
+  - {fileID: 11400000, guid: 26a59da33935ced4197c31d7929e2ec7, type: 2}
+  - {fileID: 11400000, guid: 5ec905040bd9eab4a91a3e518b10f67f, type: 2}
+  - {fileID: 11400000, guid: bd81e092aa7548d4c86af6eb9e098a0f, type: 2}
   defaultCombatStyle: 0
+  defaultNature: 0
   packSpecies: 0
   packSpawnChance: 0
   minPackSize: 0

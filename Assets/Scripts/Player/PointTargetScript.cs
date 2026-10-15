@@ -251,10 +251,10 @@ public class PointTargetScript : MonoBehaviour
     {
         if (Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, creatureLayer))
         {
-            Highlight newHighlight = hit.collider.gameObject.GetComponentInParent<Highlight>();
             Runic targetRunic = hit.collider.gameObject.GetComponentInParent<Runic>();
+            Highlight newHighlight = hit.collider.gameObject.GetComponentInParent<Highlight>();
 
-            if (newHighlight != null && targetRunic != null)
+            if (newHighlight != null && targetRunic != null && targetRunic.TameState == RunicState.Wild)
             {
                 if (highlightTarget != null && highlightTarget != newHighlight)
                 {

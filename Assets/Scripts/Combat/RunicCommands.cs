@@ -25,11 +25,15 @@ public class RunicCommands : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerController player;
     [SerializeField] private Runic summonedRunic;
+    [SerializeField] private RunicSkillsUI runicSkillsUI;
+
+    public Runic SummonedRunic => summonedRunic;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         player = FindFirstObjectByType<PlayerController>();    
+        runicSkillsUI = FindFirstObjectByType<RunicSkillsUI>();    
     }
 
     // Update is called once per frame
@@ -40,18 +44,36 @@ public class RunicCommands : MonoBehaviour
             dodgeTimer -= Time.deltaTime;
             if (dodgeCommandIcon != null)
                 dodgeCommandIcon.color = cooldownTint;
+
+            if (dodgeTimerText != null)
+                dodgeTimerText.text = dodgeTimer.ToString("0");
         }
-        else if (dodgeCommandIcon != null)
-            dodgeCommandIcon.color = Color.white;
+        else
+        {
+            if (dodgeCommandIcon != null)
+                dodgeCommandIcon.color = Color.white;
+            
+            if (dodgeTimerText != null)
+                dodgeTimerText.text = "";
+        }
 
         if (skillTimer > 0)
         {
             skillTimer -= Time.deltaTime;
             if (skillCommandIcon != null)
                 skillCommandIcon.color = cooldownTint;
+
+            if (skillTimerText != null)
+                skillTimerText.text = skillTimer.ToString("0");
         }
-        else if (skillCommandIcon != null)
-            skillCommandIcon.color = Color.white;
+        else 
+        {
+            if (skillCommandIcon != null)
+                skillCommandIcon.color = Color.white;
+            
+            if (skillTimerText != null)
+                skillTimerText.text = "";
+        }
 
         if (Keyboard.current[runicDodgeKey].wasPressedThisFrame && dodgeTimer <= 0)
         {
@@ -115,7 +137,7 @@ public class RunicCommands : MonoBehaviour
         RunicMovement movement = runic.GetComponent<RunicMovement>();
         if (movement != null)
         {
-            movement.ApplyKnockback(direction * dodgeForce);
+            movement.Dodge((direction + Vector3.up * 0.5f) * dodgeForce);
         }
     }
 
@@ -151,24 +173,33 @@ public class RunicCommands : MonoBehaviour
             if (mouseDelta.y > 0)
             {
                 // Up -> Away from the player
-                return -player.transform.forward;
+                return player.transform.forward;
             }
             else
             {
                 // Downw -> Towards the player (close in/cover)
-                return player.transform.forward;
+                return -player.transform.forward;
             }
         }
     }
 
     public void SetSummonedRunic(Runic runic)
     {
-        if (summonedRunic != null)
-            summonedRunic = runic; 
-    }
+        summonedRunic = runic; 
+
+        if (runicSkillsUI != null)
+            runicSkillsUI.BuildSkillIcons();
+        else
+            Debug.LogWarning("Runic Commands: Missing Runic Skills Ui");
+    }   
 
     public void RemoveSummonedRunic()
     {
         summonedRunic = null; 
+
+        if (runicSkillsUI != null)
+            runicSkillsUI.BuildSkillIcons();
+        else
+            Debug.LogWarning("Runic Commands: Missing Runic Skills Ui");
     }
 }

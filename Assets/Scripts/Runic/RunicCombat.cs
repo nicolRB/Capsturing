@@ -28,10 +28,17 @@ public class RunicCombat : MonoBehaviour
     private Skill preparedSkill;
     private Skill queuedUpSkill;
     private bool usingSkill;
+    [SerializeField, Min(0.02f)] private float landingImpactDuration = 0.2f;
+    private Skill pendingLandingImpactSkill;
+    private SkillStep pendingLandingImpactStep;
+    private bool hasPendingLandingImpact;
+    private Coroutine landingImpactResetCoroutine;
     private Dictionary<Skill, float> skillCooldowns = new Dictionary<Skill, float>();
 
     [Header("Hunting")]
     private bool hunting;
+
+    public Dictionary<Skill, float> SkillCooldowns => skillCooldowns;
 
     void Start()
     {
@@ -47,6 +54,8 @@ public class RunicCombat : MonoBehaviour
 
     void Update()
     {
+        if (runic.IsFrozen) return;
+
         UpdateTimers();
         UpdateSkillCooldowns(); // Updates cooldowns every frame
 
@@ -170,10 +179,10 @@ public class RunicCombat : MonoBehaviour
         if (preparedSkill == null && movementTimer <= 0 && currentTarget != null && !usingSkill)
         {
             runicMovement.HandleCombatMovement(currentTarget.transform, combatStyle);
-            Debug.Log(runic + " repositioning");
         }
 
-        runicMovement.FaceTarget(currentTarget.transform.position);
+        if (!runicMovement.Charging)
+            runicMovement.FaceTarget(currentTarget.transform.position);
     }
 
     bool HasAnySkillReadyInPool(List<Skill> pool)
@@ -236,6 +245,8 @@ public class RunicCombat : MonoBehaviour
     {
         Debug.Log(runic + " using Skill: " + skill.SkillName);
 
+        ClearPendingLandingImpact();
+
         recoveryTimer = runic.Recovery + skill.Duration;
         if (runic.Skills.Contains(skill))
             specialRecoveryTimer = runic.SpecialRecovery;
@@ -276,11 +287,12 @@ public class RunicCombat : MonoBehaviour
                 yield return null;
             }
 
-            // 2. Trigger the step start (single trigger, re-aim, initial impulse, etc.)
-            ExecuteStepStart(skill, currentStep);
+            // 2. Determine when this step ends (next step delay or the total skill duration)
+            float nextStepDelay = (i < sortedSteps.Length - 1) 
+                ? sortedSteps[i + 1].Delay : skill.Duration;
 
-            // 3. Determine when this step ends (next step delay or the total skill duration)
-            float nextStepDelay = (i < sortedSteps.Length - 1) ? sortedSteps[i + 1].Delay : skill.Duration;
+            // 3. Trigger the step start (single trigger, re-aim, initial impulse, etc.)
+            ExecuteStepStart(skill, currentStep, nextStepDelay - elapsedTime);
 
             // 4. Keep the step active/executing during the time window between this delay and the next one
             while (elapsedTime < nextStepDelay)
@@ -312,7 +324,7 @@ public class RunicCombat : MonoBehaviour
         usingSkill = false;
     }
 
-    private void ExecuteStepStart(Skill skill,SkillStep step)
+    private void ExecuteStepStart(Skill skill,SkillStep step, float stepDuration)
     {
         // Re-aim if necessary at the start of the step
         Transform targetTransform = GetCurrentTargetTransform();
@@ -327,22 +339,34 @@ public class RunicCombat : MonoBehaviour
         // Immediate movement execution (Dash, Leap, Teleport, etc.)
         switch (step.MovementType)
         {
-            case SkillMovementType.DashForward:
-                if (runicMovement != null)
-                {
-                    Vector3 dashTarget = transform.position + transform.forward * step.Force;
-                    runicMovement.MoveToPosition(dashTarget);
-                }
+            case SkillMovementType.DashToTarget:
+                if (targetTransform != null)
+                    runicMovement?.StartDashToTarget(targetTransform, step.Force, step.StopDistance);
                 break;
 
             case SkillMovementType.LeapTowardsTarget:
                 if (targetTransform != null && runicMovement != null)
                 {
                     Collider targetCol = targetTransform.GetComponent<Collider>();
-                    Vector3 leapTarget = targetCol != null ? targetCol.ClosestPoint(transform.position) : targetTransform.position;
+                    Vector3 leapTarget = targetCol != null ? targetCol.ClosestPoint(transform.position) 
+                        : targetTransform.position;
                     
                     // Launch the leap using Rigidbody velocity.
-                    runicMovement.Leap(leapTarget, step.Force);
+                    if (runicMovement.Leap(leapTarget, step.Force))
+                        PrepareLandingImpact(skill);
+                }
+                break;
+
+            case SkillMovementType.HighLeap:
+                if (targetTransform != null && runicMovement != null)
+                {
+                    Collider targetCol = targetTransform.GetComponent<Collider>();
+                    Vector3 leapTarget = targetCol != null ? targetCol.ClosestPoint(transform.position) 
+                        : targetTransform.position;
+                    
+                    // Launches the runic high up to land near the target.
+                    if (runicMovement.HighLeap(leapTarget, step.Force))
+                        PrepareLandingImpact(skill);
                 }
                 break;
 
@@ -354,11 +378,16 @@ public class RunicCombat : MonoBehaviour
                     transform.position = telePos;
                 }
                 break;
+
+            case SkillMovementType.ChargeForward:
+                runicMovement?.StartCharge(step.Force, step.Force * stepDuration);
+                break;
         }
 
         // Hitbox and damage
 
-        if (step.HitboxType != SkillHitboxType.None)
+        if (step.HitboxType != SkillHitboxType.None
+            && step.HitboxType != SkillHitboxType.JumpImpactAOE)
         {
             float totalPower = GetKeyStatValue(skill.KeyStat) * (skill.Power / 100f);
             hitboxRegistry.ActivateHitbox(step.HitboxType, step.HitboxSize, totalPower, skill.KnockBackValue, step.Continuous);
@@ -373,14 +402,79 @@ public class RunicCombat : MonoBehaviour
 
     private void ExecuteStepEnd(SkillStep step)
     {
-        if (step.MovementType == SkillMovementType.LeapTowardsTarget && runicMovement != null)
+        if ((step.MovementType == SkillMovementType.LeapTowardsTarget
+            || step.MovementType == SkillMovementType.HighLeap) && runicMovement != null)
             runicMovement.EndLeap();
+        if ((step.MovementType == SkillMovementType.ChargeForward
+            || step.MovementType == SkillMovementType.DashToTarget) && runicMovement != null)
+            runicMovement.EndCharge();
 
+        // Reset only the hitbox used by this step.
+        if (step.HitboxType != SkillHitboxType.None
+            && step.HitboxType != SkillHitboxType.JumpImpactAOE)
+            hitboxRegistry.ResetHitbox(step.HitboxType);
+    }
+
+    public void TriggerLeapLandingImpact()
+    {
+        if (!hasPendingLandingImpact || pendingLandingImpactSkill == null || hitboxRegistry == null)
+            return;
+
+        hasPendingLandingImpact = false;
+
+        if (landingImpactResetCoroutine != null)
+            StopCoroutine(landingImpactResetCoroutine);
+
+        // Clear any hitbox that was active during the leap.
         hitboxRegistry.ResetAllHitboxes();
+
+        float totalPower = GetKeyStatValue(pendingLandingImpactSkill.KeyStat)
+            * (pendingLandingImpactSkill.Power / 100f);
+        hitboxRegistry.ActivateHitbox(
+            pendingLandingImpactStep.HitboxType,
+            pendingLandingImpactStep.HitboxSize,
+            totalPower,
+            pendingLandingImpactSkill.KnockBackValue,
+            pendingLandingImpactStep.Continuous
+        );
+
+        landingImpactResetCoroutine = StartCoroutine(ResetLandingImpactAfterDelay());
+    }
+
+    private void PrepareLandingImpact(Skill skill)
+    {
+        ClearPendingLandingImpact();
+        if (skill.Steps == null)
+            return;
+
+        foreach (SkillStep step in skill.Steps)
+        {
+            if (step.HitboxType != SkillHitboxType.JumpImpactAOE)
+                continue;
+
+            pendingLandingImpactSkill = skill;
+            pendingLandingImpactStep = step;
+            hasPendingLandingImpact = true;
+            return;
+        }
+    }
+
+    private void ClearPendingLandingImpact()
+    {
+        hasPendingLandingImpact = false;
+        pendingLandingImpactSkill = null;
+    }
+
+    private System.Collections.IEnumerator ResetLandingImpactAfterDelay()
+    {
+        yield return new WaitForSeconds(Mathf.Max(landingImpactDuration, Time.fixedDeltaTime));
+        hitboxRegistry.ResetHitbox(SkillHitboxType.JumpImpactAOE);
+        landingImpactResetCoroutine = null;
     }
 
     public void Flinch()
     {
+        ClearPendingLandingImpact();
         usingSkill = false;
         preparedSkill = null;
         skillDurationTimer = 0;
@@ -620,7 +714,6 @@ public class RunicCombat : MonoBehaviour
         if (preparedSkill == null && movementTimer <= 0 && !usingSkill)
         {
             runicMovement.HandleCombatMovement(targetTransform, combatStyle);
-            Debug.Log(runic + " repositioning");
         }
 
         runicMovement.FaceTarget(targetTransform.position);
@@ -709,7 +802,7 @@ public class RunicCombat : MonoBehaviour
 
     public bool IsBusy()
     {
-        return preparedSkill != null || usingSkill || runicMovement.Leaping;
+        return usingSkill || runicMovement.Leaping;
     }
 
     public void QueueUpSkill(Skill skill)

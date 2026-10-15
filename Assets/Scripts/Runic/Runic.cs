@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public enum RunicState { Wild, Tamed, Fainted }
+public enum RunicState { Wild, Tamed, Dead }
 
 public enum BehaviorState { 
     Idle, 
@@ -20,6 +20,7 @@ public enum BehaviorState {
 }
 
 public enum WildNature { 
+    Neutral, 
     Fearful, 
     FearfulFriendly, 
     FearfulNeutral, 
@@ -27,7 +28,6 @@ public enum WildNature {
     FearfulNeutralProtective, 
     FearfulFriendlyProtective, 
     Friendly, 
-    Neutral, 
     Territorial, 
     Hostile 
 }
@@ -77,8 +77,6 @@ public class Runic : MonoBehaviour
     [Header("Capture Settings (Wild Only)")]
     [SerializeField] private bool capturable = true;
     [SerializeField] private TargetMapAsset captureMap;
-    [SerializeField] private float minCaptureChance = 0;
-    [SerializeField] private float maxCaptureChance = 1;
     [SerializeField] private float targetPerfectWeight = 2;
     [SerializeField] private float targetGoodWeight = 1;
     [SerializeField] private float targetMissWeight = 0;
@@ -96,7 +94,7 @@ public class Runic : MonoBehaviour
     [SerializeField] private float missMultiplier = 0;
 
     [Header("Behavior")]
-    [SerializeField] private bool frozen = false;
+    [SerializeField] private bool frozen;
     [SerializeField] private WildNature nature = WildNature.Neutral;
     [SerializeField] private BehaviorState actState = BehaviorState.Idle;
     [SerializeField] private CommandedMoveMode commandedMovementMode = CommandedMoveMode.Stand;
@@ -129,7 +127,7 @@ public class Runic : MonoBehaviour
     private RunicCombat combat;
     private RunicMovement movement;
     private RunicWildAI runicWildAI;
-    private Rigidbody runicRigidbody;
+    private Rigidbody rb;
     
     [Header("Combat Behavior")]
     [SerializeField] private CombatStyle combatStyle;
@@ -195,6 +193,7 @@ public class Runic : MonoBehaviour
     public List<Runic> Threats => threats;
     public RunicCombat Combat => combat;
     public RunicMovement Movement => movement;
+    public Rigidbody Rb => rb;
 
     public void PruneDestroyedRelations()
     {
@@ -218,7 +217,7 @@ public class Runic : MonoBehaviour
 
         if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
 
-        runicRigidbody = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
 
         combat = GetComponent<RunicCombat>();
         
@@ -234,8 +233,8 @@ public class Runic : MonoBehaviour
             actState = BehaviorState.Following;
         }
 
-        if (runicRigidbody != null)
-            runicRigidbody.mass = weight;
+        if (rb != null)
+            rb.mass = weight;
     }
 
     void Update()
@@ -300,8 +299,8 @@ public class Runic : MonoBehaviour
         
         tameState = RunicState.Tamed;
         
-        if (runicRigidbody != null)
-            runicRigidbody.mass = weight;
+        if (rb != null)
+            rb.mass = weight;
     }
 
     public RunicSaveData ExportToSaveData()
@@ -415,12 +414,22 @@ public class Runic : MonoBehaviour
         activeChains.Clear();
     }
 
-    public void TakeDamage(int damage, Runic attacker = null, bool playerAttacker = false, Transform ambientSource = null)
+    public void Dodge()
+    {
+        invencibilityTime = iframes;
+    }
+
+    public void TakeDamage(int damage, Runic attacker = null, bool playerAttacker = false, 
+        Transform ambientSource = null)
     {
         if (frozen) return;
 
         currentHP -= damage;
         Debug.Log(gameObject + " has taken " + damage + " damage.");
+
+        if (tameState == RunicState.Tamed && runicStorageManager != null)
+            runicStorageManager.UpdateRunicInBox(this);
+
         if (currentHP <= 0)
         {
             Die();
@@ -499,8 +508,12 @@ public class Runic : MonoBehaviour
 
     public void ApplyKnockback(Runic attacker, float knockbackValue)
     {
-        Debug.Log("Knockback");
-
+        if (frozen)
+        {
+            Debug.Log("Knockback negated by frozen runic.");
+            return;
+        }
+        
         if (attacker == null || movement == null || knockbackValue <= 0f)
             return;
 
@@ -561,5 +574,10 @@ public class Runic : MonoBehaviour
 
         // handle death logic (e.g., play animation, drop loot, etc.)
         Destroy(gameObject);
+    }
+
+    public void SetFreeze(bool state)
+    {
+        frozen = state;
     }
 }

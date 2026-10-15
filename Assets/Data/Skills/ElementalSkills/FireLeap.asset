@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50a250959fdf4b14d9a64067f4d0f020, type: 3}
+  m_Name: FireLeap
+  m_EditorClassIdentifier: GameCore::Skill
+  skillId: 4
+  skillName: Fire Leap
+  skillSprite: {fileID: 21300000, guid: e32802d3d03e58444aa841a315944627, type: 3}
+  skillType: 0
+  skillElement: {fileID: 11400000, guid: 88c4aa8362db76a488f5461940776b06, type: 2}
+  keyStat: 0
+  power: 80
+  knockbackValue: 12
+  duration: 1.3
+  cooldown: 18
+  range: 12
+  steps:
+  - delay: 0
+    movementType: 4
+    force: 6
+    stopDistance: 1
+    reAimAtTarget: 0
+    hitboxType: 9
+    hitboxSize: 1.5
+    continuous: 0
+  - delay: 0
+    movementType: 0
+    force: 0
+    stopDistance: 0
+    reAimAtTarget: 0
+    hitboxType: 9
+    hitboxSize: 3.5
+    continuous: 0

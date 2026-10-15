@@ -16,7 +16,7 @@ public class RunicSpeciesEditor : Editor
         // Automatically draws all other standard fields, except for the pack fields.
         SerializedProperty packSpeciesProp = serializedObject.FindProperty("packSpecies");
         
-        // Draws teh main bool
+        // Draws the main bool
         EditorGUILayout.PropertyField(packSpeciesProp);
 
         // If 'packSpecies' is checked (true), it draws the related fields below it.

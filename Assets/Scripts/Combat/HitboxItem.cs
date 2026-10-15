@@ -28,13 +28,14 @@ public class HitboxItem : MonoBehaviour
     
     private void TryApplyHit(Collider other)
     {
-        Debug.Log("Hitbox hit: " + other.gameObject.name, other.gameObject);
+        Debug.Log("Hitbox encostou em: " + other.gameObject.name);
         if (ownerRunic == null) return;
 
         PlayerController playerTarget = other.GetComponentInParent<PlayerController>();
         if (playerTarget != null)
         {
-            if (ownerRunic.TameState == RunicState.Tamed || !CanHit(playerTarget)) return;
+            if (ownerRunic.TameState == RunicState.Tamed || !CanHit(playerTarget)
+            || playerTarget.InvencibilityTime > 0) return;
 
             playerTarget.TakeDamage(Mathf.RoundToInt(storedPower));
             playerTarget.ApplyKnockback(ownerRunic.transform, storedKnockback);
@@ -42,7 +43,8 @@ public class HitboxItem : MonoBehaviour
         }
 
         Runic target = other.GetComponentInParent<Runic>();
-        if (target == null || target == ownerRunic || !CanHit(target)) return;
+        if (target == null || target == ownerRunic || !CanHit(target) 
+            || target.InvencibilityTime > 0) return;
 
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(storedPower));
         target.TakeDamage(finalDamage, ownerRunic);

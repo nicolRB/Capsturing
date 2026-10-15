@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50a250959fdf4b14d9a64067f4d0f020, type: 3}
+  m_Name: DashSlash
+  m_EditorClassIdentifier: GameCore::Skill
+  skillId: 3
+  skillName: Dash Slash
+  skillSprite: {fileID: 21300000, guid: b7cf67e77f247cd418480981c86065c1, type: 3}
+  skillType: 1
+  skillElement: {fileID: 11400000, guid: c454203395e047441a1ea9d2ff310eda, type: 2}
+  keyStat: 0
+  power: 90
+  knockbackValue: 4
+  duration: 0.8
+  cooldown: 15
+  range: 8
+  steps:
+  - delay: 0
+    movementType: 1
+    force: 20
+    stopDistance: 0.5
+    reAimAtTarget: 1
+    hitboxType: 0
+    hitboxSize: 1
+    continuous: 0
+  - delay: 0.55
+    movementType: 0
+    force: 0
+    stopDistance: 0
+    reAimAtTarget: 0
+    hitboxType: 3
+    hitboxSize: 2
+    continuous: 0

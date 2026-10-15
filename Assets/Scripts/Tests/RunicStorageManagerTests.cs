@@ -5,6 +5,7 @@ using System.Reflection;
 public class RunicStorageManagerTests
 {
     private GameObject managerGameObject;
+    private GameObject runicGameObject;
     private RunicStorageManager storageManager;
     
     [SetUp]
@@ -28,6 +29,11 @@ public class RunicStorageManagerTests
         {
             Object.DestroyImmediate(managerGameObject);
         }
+
+        if (runicGameObject != null)
+        {
+            Object.DestroyImmediate(runicGameObject);
+        }
     }
 
     [Test]
@@ -45,6 +51,30 @@ public class RunicStorageManagerTests
         
         // Como a party começa vazia, deve alocar automaticamente no primeiro slot
         Assert.AreEqual("test_id_1", storageManager.PartyIds[0]);
+    }
+
+    [Test]
+    public void UpdateRunicInBox_UpdatesSavedStatsAndPreservesInstanceId()
+    {
+        const string runicId = "test_runic_id";
+        storageManager.AddCapturedRunic(new RunicSaveData
+        {
+            runicInstanceId = runicId,
+            currentHP = 10
+        });
+
+        runicGameObject = new GameObject("Runic_TestInstance");
+        Runic runic = runicGameObject.AddComponent<Runic>();
+        typeof(Runic).GetField("runicInstanceId", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(runic, runicId);
+        typeof(Runic).GetField("currentHP", BindingFlags.NonPublic | BindingFlags.Instance)
+            .SetValue(runic, 6);
+
+        bool updated = storageManager.UpdateRunicInBox(runic);
+
+        Assert.IsTrue(updated);
+        Assert.AreEqual(6, storageManager.GetRunicById(runicId).currentHP);
+        Assert.AreEqual(runicId, storageManager.PartyIds[0]);
     }
 
     [Test]

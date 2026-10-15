@@ -32,17 +32,18 @@ MonoBehaviour:
   baseMagicDefense: 1
   recovery: 2
   specialRecovery: 10
-  aggression: 0.7
+  aggression: 0.1
   specialAggression: 0.2
   elements:
   - {fileID: 11400000, guid: c454203395e047441a1ea9d2ff310eda, type: 2}
   basicSkills:
   - {fileID: 11400000, guid: f7f3d9c3517b1e949ac732ae4ddeba0b, type: 2}
-  - {fileID: 11400000, guid: 98e12b22e01508440b32c2a705df44a6, type: 2}
-  skills: []
+  skills:
+  - {fileID: 11400000, guid: bd81e092aa7548d4c86af6eb9e098a0f, type: 2}
   defaultCombatStyle: 2
+  defaultNature: 8
   packSpecies: 0
   packSpawnChance: 0
   minPackSize: 0
   maxPackSize: 0
-  sameSpeciesRelation: 0
+  sameSpeciesRelation: 2

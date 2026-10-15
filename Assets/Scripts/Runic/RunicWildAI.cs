@@ -108,6 +108,8 @@ public class RunicWildAI : MonoBehaviour
 
     void Update()
     {
+        if (runic.IsFrozen) return;
+
         UpdateTimers();
 
         if (runic.ActState == BehaviorState.Fleeing)
@@ -225,7 +227,7 @@ public class RunicWildAI : MonoBehaviour
                 {
                     runic.SetBehaviorState(BehaviorState.Wandering);
                 }
-                else if (curiosityTransform == null)
+                else if (curiosityTransform != null)
                 {
                     runicMovement.MoveToCuriosity(curiosityTransform.position);
                 }
@@ -454,7 +456,7 @@ public class RunicWildAI : MonoBehaviour
     void UpdateTimers()
     {
         actTimer += Time.deltaTime;
-        hungerTickInterval += Time.deltaTime;
+        hungerTickTimer += Time.deltaTime;
         if (idleTimer > 0)
             idleTimer -= Time.deltaTime;
         if (challengeTimer > 0)

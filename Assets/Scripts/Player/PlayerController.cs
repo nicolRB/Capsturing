@@ -48,11 +48,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashForce = 6f;
     [SerializeField] private float dashDuration = 0.2f;
     [SerializeField] private float dashCooldown = 1f;
+    [SerializeField] private float iframes = 0.2f;
+    [SerializeField] private float invencibilityTime;
 
     private float dashTimer = 0f;
     private float cooldownTimer = 0f;
     private bool isDashing = false;
     private Vector3 dashDirection;
+
+    public float InvencibilityTime => invencibilityTime;
 
     [Header("Dash Input")]
     [SerializeField] private float tapThreshold = 0.2f;
@@ -186,6 +190,9 @@ public class PlayerController : MonoBehaviour
             AimIndicatorAnimation();
         }
         else if (aimIndicator.activeSelf) aimIndicator.SetActive(false);
+
+        if (invencibilityTime > 0)
+            invencibilityTime -= Time.deltaTime;
     }
 
     private void FixedUpdate()
@@ -278,6 +285,8 @@ public class PlayerController : MonoBehaviour
                 isDashing = true;
                 dashTimer = dashDuration;
                 cooldownTimer = dashCooldown;
+
+                invencibilityTime = iframes;
 
                 Vector3 velocity = rb.linearVelocity;
                 velocity.x = 0f;
