@@ -14,3 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: GameCore::Element
   elementId: 0
   elementName: Neutral
+  elementColor: {r: 1, g: 1, b: 1, a: 1}
+  elementVulnerabilities: []
+  vulnerabilityMultiplier: 2
+  elementResistances: []
+  resistanceMultiplier: 0.5

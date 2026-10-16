@@ -6,14 +6,37 @@ public class RunicTestInjector : MonoBehaviour
 {
     [Header("Debug Settings")]
     [Tooltip("Enables test injection in the Unity Editor and development builds.")]
-    [SerializeField]
-    private bool devMode = true;
+    [SerializeField] private bool devMode = true;
+
     [Tooltip("Species used when creating the test runic.")]
-    [SerializeField]
-    private RunicSpecies defaultTestSpecies;
+    [SerializeField] private RunicSpecies defaultTestSpecies;
+
     [Tooltip("Shortcut displayed in debug messages for the injection action.")]
-    [SerializeField]
-    private Key injectShortcutKey = Key.F12;
+    [SerializeField] private Key injectShortcutKey = Key.F12;
+    
+    [Tooltip("Pick the specific stats for the runic instead of using the species base stats.")]
+    [SerializeField] private bool useCustomStats;
+
+    [Header("Custom Basic Stats")]
+    [SerializeField] private string nickname;
+    [SerializeField] private int level;
+    [SerializeField] private int hp;
+    [SerializeField] private int attack;
+    [SerializeField] private int defense;
+    [SerializeField] private int magic;
+    [SerializeField] private int magicDefense;
+    [SerializeField] private float weight;
+    [SerializeField] private float knockbackResistance;
+    [SerializeField] private float speed;
+    [SerializeField] private float walkSpeed;
+    [SerializeField] private float sprintSpeed;
+    [SerializeField] private List<Element> elements;
+
+    [Header("Custom Skills")]
+    [SerializeField] private List<Skill> basicSkills;
+    [SerializeField] private List<Skill> skills;
+    
+    [Header("Custom Behavior")]
 
     [Header("References")]
     [SerializeField] private SaveManager saveManager;

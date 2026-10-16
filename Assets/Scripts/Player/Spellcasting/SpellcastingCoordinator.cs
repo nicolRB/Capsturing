@@ -82,7 +82,8 @@ public class SpellcastingCoordinator : MonoBehaviour
 
     void HandleSpellSelection()
     { 
-        if (player.CastingState != PlayerController.CastState.Idle || player.MenuManager.IsPaused) return;
+        if (player.CastingState != PlayerController.CastState.Idle || player.MenuManager.IsPaused
+        || player.MenuManager.CurrentMenu != null) return;
 
         // Select spells with the mouse wheel.
         float scrollValue = -Mouse.current.scroll.ReadValue().y;
@@ -103,7 +104,8 @@ public class SpellcastingCoordinator : MonoBehaviour
 
     void HandleCastInput()
     {
-        if (Keyboard.current.eKey.wasPressedThisFrame && player.MenuManager.IsPaused == false)
+        if (Keyboard.current.eKey.wasPressedThisFrame && player.MenuManager.IsPaused == false
+        && player.MenuManager.CurrentMenu == null)
         {
             if (player.CastingState == PlayerController.CastState.Idle)
             {
