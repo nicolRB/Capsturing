@@ -57,13 +57,13 @@ public class RunicInspectionMenu : MonoBehaviour
             menuManager = FindFirstObjectByType<MenuManager>();
 
         if (runicStorageManager == null)
-            Debug.LogWarning("Runic Inspection Menu: Missing Storage Manage");
+            Debug.LogWarning("Runic Inspection Menu: Storage Manager missing / not referenced");
 
         if (menuManager == null)
-            Debug.LogWarning("Runic Inspection Menu: Missing Menu Manager");
+            Debug.LogWarning("Runic Inspection Menu: Menu Manager missing / not referenced");
 
         if (database == null)
-            Debug.LogWarning("Runic Inspection Menu: Missing Runic Database");
+            Debug.LogWarning("Runic Inspection Menu: Runic Database missing / not referenced");
     }
 
     public void SetupPage(RunicSaveData data)

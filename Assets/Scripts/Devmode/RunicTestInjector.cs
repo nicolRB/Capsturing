@@ -94,6 +94,7 @@ public class RunicTestInjector : MonoBehaviour
 
         List<string> basicSkillIds = GetRegisteredSkillIds(species.BasicSkills);
         List<string> skillIds = GetRegisteredSkillIds(species.Skills);
+        List<string> elementIds = GetRegisteredElementIds(species.Elements);
 
         RunicSaveData debugRunic = new RunicSaveData
         {
@@ -125,6 +126,7 @@ public class RunicTestInjector : MonoBehaviour
             specialAggression = species.Specialaggression,
             learnedBasicSkillIds = basicSkillIds,
             learnedSkillIds = skillIds,
+            elementIds = elementIds,
             combatStyle = species.DefaultCombatStyle
         };
 
@@ -153,5 +155,27 @@ public class RunicTestInjector : MonoBehaviour
         }
 
         return skillIds;
+    }
+
+    private List<string> GetRegisteredElementIds(List<Element> speciesElements)
+    {
+        List<string> elementIds = new List<string>();
+        if (speciesElements == null) return elementIds;
+
+        foreach (Element element in speciesElements)
+        {
+            if (element == null) continue;
+
+            Element registeredElement = runicDatabase.GetElementById(element.ElementId);
+            if (registeredElement == null)
+            {
+                Debug.LogWarning($"RunicTestInjector: Element '{element.ElementId}' is not registered in the Runic Database.");
+                continue;
+            }
+
+            elementIds.Add(registeredElement.ElementId);
+        }
+
+        return elementIds;
     }
 }

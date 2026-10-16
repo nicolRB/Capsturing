@@ -10,12 +10,14 @@ public class RunicsMenu : MonoBehaviour
     [SerializeField] private int boxPageIndex = 0;
     [SerializeField] private int boxRows = 3;
     [SerializeField] private int boxColumns = 7;
+    [SerializeField] private TextMeshProUGUI pageCounter;
+    [SerializeField] private GameObject pageFlipButtonPrevious;
+    [SerializeField] private GameObject pageFlipButtonNext;
     private int page = 0;
 
     private int BoxSlotsPerPage => boxRows * boxColumns;
-    private int BoxTotalPages => runicStorageManager == null
-        ? 0
-        : Mathf.CeilToInt((float)runicStorageManager.BoxStorage.Count / BoxSlotsPerPage);
+    private int BoxTotalPages => runicStorageManager == null ? 1
+        : Mathf.Max(1, Mathf.CeilToInt((float)runicStorageManager.BoxStorage.Count / BoxSlotsPerPage));
 
     [Header("Slot Sizes")]
     [SerializeField] private float boxSlotSize = 1f;
@@ -123,6 +125,7 @@ public class RunicsMenu : MonoBehaviour
         
         // Use instant positioning only when the menu opens.
         OpenMenuRefresh();
+        UpdatePagination();
     }
     
     void Update()
@@ -161,9 +164,11 @@ public class RunicsMenu : MonoBehaviour
     // Runs after storage changes during gameplay and preserves smooth animation.
     public void RefreshAllSlots()
     {
+        page = Mathf.Clamp(page, 0, BoxTotalPages - 1);
         UpdatePartySlotsData(false);
         UpdateBoxSlotsData(false);
         UpdateCounterpartHighlights();
+        UpdatePagination();
     }
 
     void UpdateBoxSlotsData(bool instant)
@@ -421,7 +426,7 @@ public class RunicsMenu : MonoBehaviour
                 nameField.text = speciesName;
             }
             else 
-                Debug.LogWarning("Runics Menu: Missing Runic Database.");
+                Debug.LogWarning("Runics Menu: Runic Database missing / not referenced.");
         }
 
         if (hpField != null)
@@ -474,10 +479,52 @@ public class RunicsMenu : MonoBehaviour
 
     public void ChangePage(int newPage)
     {
-        if (newPage < 0 || newPage >= BoxTotalPages) return;
+        if (newPage < 0 || newPage >= BoxTotalPages) 
+            return;
+
         page = newPage;
         selectedSlot = null;
         RefreshAllSlots();
+    }
+
+    public void FlipPage(int pageAmount)
+    {
+        page = (page + pageAmount) % BoxTotalPages;
+        if (page < 0)
+            page += BoxTotalPages;
+        
+        selectedSlot = null;
+        RefreshAllSlots();
+    }
+
+    void UpdatePagination()
+    {
+        bool canFlipPages = BoxTotalPages > 1;
+
+        if (pageCounter != null)
+            pageCounter.text = $"{page + 1}/{BoxTotalPages}";
+        else
+            Debug.LogWarning("Runics Menu: Page Counter missing / Not Referenced");
+
+        SetPageFlipButtonState(pageFlipButtonPrevious, canFlipPages, "Previous");
+        SetPageFlipButtonState(pageFlipButtonNext, canFlipPages, "Next");
+    }
+
+    private void SetPageFlipButtonState(GameObject buttonObject, bool canFlipPages, string buttonName)
+    {
+        if (buttonObject == null)
+        {
+            Debug.LogWarning($"Runics Menu: Page Flip Button {buttonName} missing / not referenced.");
+            return;
+        }
+
+        if (buttonObject.TryGetComponent(out Button button))
+            button.interactable = canFlipPages;
+        else
+            Debug.LogWarning($"Runics Menu: Page Flip Button {buttonName} is missing a Button component.", buttonObject);
+
+        if (buttonObject.TryGetComponent(out ButtonHoverScale hoverScale))
+            hoverScale.SetOn(canFlipPages);
     }
 
     public void SetHoveredSlot(GameObject slot)

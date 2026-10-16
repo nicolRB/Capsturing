@@ -1,43 +1,25 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-public class ReturnArrow : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class ButtonHoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Visuals")]
     [SerializeField] private float originalScale = 1;
     [SerializeField] private float hoverScale = 1.25f;
+    [SerializeField] private bool on = true;
     private float targetScale;
 
-    [Header("References")]
-    [SerializeField] private MenuManager menuManager;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
-        if (menuManager == null)
-            menuManager = FindFirstObjectByType<MenuManager>();
-
         originalScale = transform.localScale.x;
-
-        targetScale = originalScale;
-    }
-
-    void OnEnable()
-    {
-        transform.localScale = new Vector3(originalScale, originalScale, originalScale);
         targetScale = originalScale;
     }
 
     // Update is called once per frame
     void Update()
     {
-        ScaleUpdate();
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        menuManager.Escape();
+        if (on)
+            ScaleUpdate();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -54,5 +36,16 @@ public class ReturnArrow : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
     {
         float scale = Mathf.Lerp(transform.localScale.x, targetScale, Time.deltaTime * 5f);
         transform.localScale = new Vector3(scale, scale, scale);
+    }
+
+    public void SetOn(bool enable)
+    {
+        on = enable;
+
+        if (!on)
+        {
+            targetScale = originalScale;
+            transform.localScale = new Vector3(originalScale, originalScale, originalScale);
+        }
     }
 }
