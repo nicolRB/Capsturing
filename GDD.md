@@ -225,7 +225,7 @@ de comportamentos cresça, a FSM pode ser evoluída para Behavior Trees.
 Com a evolução do protótipo, os scripts que antes representavam separadamente o 
 comportamento de inimigo (EnemyScript) e o de entidade seguidora (TargetFollowerBehavior) 
 foram unificados em um único componente, Runic, controlado por uma enum de estado 
-(RunicState: Wild, Tamed, Fainted). Essa unificação reflete a natureza do próprio 
+(RunicState: Wild, Tamed, Dead). Essa unificação reflete a natureza do próprio 
 sistema: um rúnico selvagem e um rúnico aliado são a mesma entidade em estágios 
 diferentes de uma mesma relação com o jogador, então não fazia sentido mantê-los 
 como classes separadas que duplicavam lógica de captura, corrente e dano. A 

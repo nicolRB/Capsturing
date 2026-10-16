@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: GameCore::Skill
   skillId: 1
   skillName: Leap Attack
+  skillSprite: {fileID: 0}
   skillType: 1
   skillElement: {fileID: 11400000, guid: c454203395e047441a1ea9d2ff310eda, type: 2}
   keyStat: 0
@@ -24,8 +25,9 @@ MonoBehaviour:
   range: 3.5
   steps:
   - delay: 0
-    movementType: 2
-    force: 5
+    movementType: 3
+    force: 6
+    stopDistance: 0
     reAimAtTarget: 0
     hitboxType: 0
     hitboxSize: 0
@@ -33,6 +35,7 @@ MonoBehaviour:
   - delay: 0.8
     movementType: 0
     force: 0
+    stopDistance: 0
     reAimAtTarget: 0
     hitboxType: 1
     hitboxSize: 1

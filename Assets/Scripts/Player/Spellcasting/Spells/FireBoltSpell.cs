@@ -29,7 +29,15 @@ public class FireBoltSpell : SpellBase
 
     public override void OnChannelComplete(ChannelingGameCoordinator.ChannelingResult result)
     {
-        finalPower = potency * ComputeChannelScore(result);
+        float calculatedResult = ComputeChannelScore(result);
+
+        if (calculatedResult <= 0f)
+        {
+            spellcastingCoordinator.CancelCast();
+            return;
+        }
+
+        finalPower = potency * calculatedResult;
     }
 
     public override void OnSpellCast()
@@ -84,6 +92,6 @@ public class FireBoltSpell : SpellBase
 
     public override void Cancel()
     {
-        
+        finalPower = 0f;
     }
 }

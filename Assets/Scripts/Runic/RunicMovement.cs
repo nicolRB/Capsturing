@@ -46,14 +46,27 @@ public class RunicMovement : MonoBehaviour
     private bool agentWasEnabledBeforeLeap;
     private float leapStartedAt;
     private readonly HashSet<Collider> leapGroundContacts = new HashSet<Collider>();
+    private Rigidbody rb;
+    private bool charging;
+    private float prevSpeed, prevAcceleration, prevStoppingDistance;
+    private bool prevAutoBraking;
+    private Transform dashTarget;
+    private float dashGap;
+    private bool dashing;
 
     private float speed = 5f;
     private float walkSpeed = 2.5f;
     private float sprintSpeed = 9f;
 
+    public bool Leaping => leapInProgress;
+    public bool Charging => charging;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        rb = GetComponent<Rigidbody>();
+        if (rb != null) rb.isKinematic = true;
+
         runic = GetComponent<Runic>();
         runicCombat = GetComponent<RunicCombat>();
         agent = GetComponent<NavMeshAgent>();
@@ -68,6 +81,18 @@ public class RunicMovement : MonoBehaviour
 
     void Update()
     {
+        if (charging && agent != null && agent.enabled && agent.isOnNavMesh)
+        {
+            if (dashing)
+            {
+                if (dashTarget == null) EndCharge();   // alvo destruído
+                else agent.SetDestination(ComputeDashGoal());
+            }
+
+            if (charging && !agent.pathPending && agent.remainingDistance <= 0.1f)
+                EndCharge();
+        }
+
         UpdateFacing();
 
         if (Keyboard.current.qKey.wasPressedThisFrame)
@@ -124,7 +149,6 @@ public class RunicMovement : MonoBehaviour
         if (!leapInProgress || (leapRequiresAscent && !leapHasAscended))
             return;
 
-        Rigidbody rb = GetComponent<Rigidbody>();
         if (rb == null || rb.linearVelocity.y > 0.1f)
             return;
 
@@ -141,6 +165,7 @@ public class RunicMovement : MonoBehaviour
 
     public void TameMovement()
     {
+        if (charging) return;
         agent.updateRotation = true;
         hasFaceTarget = false;
         Vector3 targetPosition;
@@ -239,7 +264,6 @@ public class RunicMovement : MonoBehaviour
     private void TeleportToTarget(Vector3 targetPosition)
     {
         transform.position = targetPosition;
-        Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.linearVelocity = Vector3.zero;
@@ -248,7 +272,7 @@ public class RunicMovement : MonoBehaviour
 
     private bool TrySetDestination(Vector3 targetPosition, float sampleRadius = 1.5f)
     {
-        if (agent == null || !agent.enabled || !agent.isOnNavMesh)
+        if (charging || agent == null || !agent.enabled || !agent.isOnNavMesh)
             return false;
 
         float searchRadius = Mathf.Max(sampleRadius, 0.01f);
@@ -270,27 +294,64 @@ public class RunicMovement : MonoBehaviour
         TrySetDestination(targetPosition);
     }
 
-    public void Leap(Vector3 targetPosition, float force)
+    public bool Leap(Vector3 targetPosition, float force)
     {
+        // Searches for the point in NavMesh closest to the intended target.
+        if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, 3.0f, agent.areaMask))
+        {
+            targetPosition = hit.position; // Ensures that the landing is on a valid NavMesh server.
+        }
+
         Rigidbody rb = GetComponent<Rigidbody>();
         if (!BeginPhysicsMotion(rb, true))
-            return;
+            return false;
 
-        // Calculate the horizontal direction to the target.
-        Vector3 direction = (targetPosition - transform.position);
+        Vector3 direction = targetPosition - transform.position;
         direction.y = 0;
-        direction.Normalize();
 
-        // Combine forward movement and vertical lift into the jump velocity.
-        Vector3 jumpVelocity = (direction * force) + (Vector3.up * (force * 0.8f));
+        rb.linearVelocity = ComputeLeapVelocity(targetPosition, force * 0.8f);
+        return true;
+    }
 
-        // Apply velocity using the Unity 6 API.
-        rb.linearVelocity = jumpVelocity;
+    public bool HighLeap(Vector3 targetPosition, float force)
+    {
+        // Searches for the point in NavMesh closest to the intended target.
+        if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, 3.0f, agent.areaMask))
+        {
+            targetPosition = hit.position; // Ensures that the landing is on a valid NavMesh server.
+        }
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (!BeginPhysicsMotion(rb, true))
+            return false;
+
+        Vector3 direction = targetPosition - transform.position;
+        direction.y = 0;
+
+        Vector3 jumpVelocity = (direction * force) + (Vector3.up * (force * 2f));
+        rb.linearVelocity = ComputeLeapVelocity(targetPosition, force * 2f);
+        return true;
+    }
+
+    private Vector3 ComputeLeapVelocity(Vector3 targetPosition, float verticalSpeed)
+    {
+        Vector3 flat = targetPosition - transform.position;
+        float dy = flat.y;          // height difference to the target
+        flat.y = 0f;
+
+        float g = Mathf.Abs(Physics.gravity.y);
+
+        // Flight time until reaching the target altitude: vy*t - g*t²/2 = dy
+        float disc = Mathf.Max(0f, verticalSpeed * verticalSpeed - 2f * g * dy);
+        float flightTime = (verticalSpeed + Mathf.Sqrt(disc)) / g;
+
+        Vector3 v = flat / flightTime;   // exact horizontal speed
+        v.y = verticalSpeed;
+        return v;
     }
 
     public void ApplyKnockback(Vector3 impulse)
     {
-        Rigidbody rb = GetComponent<Rigidbody>();
         if (rb == null || impulse.sqrMagnitude <= 0f)
             return;
 
@@ -318,6 +379,8 @@ public class RunicMovement : MonoBehaviour
         if (rb == null || leapInProgress)
             return false;
 
+        EndCharge();
+
         wasKinematicBeforeLeap = rb.isKinematic;
         agentWasEnabledBeforeLeap = agent != null && agent.enabled;
 
@@ -334,6 +397,8 @@ public class RunicMovement : MonoBehaviour
         leapStartedAt = Time.time;
         leapGroundContacts.Clear();
         rb.isKinematic = false;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
         return true;
     }
 
@@ -353,24 +418,38 @@ public class RunicMovement : MonoBehaviour
             || leapGroundContacts.Count == 0 || Time.time - leapStartedAt < 0.08f)
             return;
 
-        NavMeshHit landingHit = default;
-        bool hasNavMeshLanding = agent != null && agentWasEnabledBeforeLeap
-            && NavMesh.SamplePosition(transform.position, out landingHit, Mathf.Max(agent.height, 0.5f), agent.areaMask);
+        if (runicCombat != null)
+        {
+            runicCombat.TriggerLeapLandingImpact();
+        }
 
-        if (agentWasEnabledBeforeLeap && !hasNavMeshLanding)
-            return;
+        // Try to find NavMesh below or near where it landed.
+        NavMeshHit landingHit;
+        bool hasNavMeshLanding = NavMesh.SamplePosition(
+            transform.position, 
+            out landingHit, 
+            1.5f, // Search radius
+            agent != null ? agent.areaMask : NavMesh.AllAreas
+        );
 
-        Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.linearVelocity = Vector3.zero;
             rb.isKinematic = wasKinematicBeforeLeap;
         }
 
-        if (agent != null && agentWasEnabledBeforeLeap)
+        if (hasNavMeshLanding)
         {
-            agent.enabled = true;
-            agent.Warp(landingHit.position);
+            if (agent != null && agentWasEnabledBeforeLeap)
+            {
+                agent.enabled = true;
+                agent.Warp(landingHit.position);
+            }
+        }
+        else
+        {
+            // Rune is stuck. Teleport to a safe location.
+            RecoverStuckRunic();
         }
 
         leapInProgress = false;
@@ -378,6 +457,33 @@ public class RunicMovement : MonoBehaviour
         leapHasAscended = false;
         leapRequiresAscent = false;
         leapGroundContacts.Clear();
+    }
+
+    private void RecoverStuckRunic()
+    {
+        Debug.LogWarning($"{gameObject.name} ficou preso fora da NavMesh! Resgatando...", this);
+
+        Vector3 safePosition = transform.position;
+
+        // If there is a player, rescue it near the player.
+        if (runic != null && runic.Player != null)
+        {
+            safePosition = runic.Player.transform.position;
+        }
+
+        // Validates the secure position in NavMesh.
+        if (NavMesh.SamplePosition(safePosition, out NavMeshHit hit, 5.0f, NavMesh.AllAreas))
+        {
+            safePosition = hit.position;
+        }
+
+        transform.position = safePosition;
+
+        if (agent != null && agentWasEnabledBeforeLeap)
+        {
+            agent.enabled = true;
+            agent.Warp(safePosition);
+        }
     }
 
     public void HandleCombatMovement(Transform targetTransform, CombatStyle style)
@@ -491,6 +597,8 @@ public class RunicMovement : MonoBehaviour
 
     public void FaceTarget(Vector3 targetPosition)
     {
+        if (charging) return;
+
         Vector3 lookDirection = targetPosition - transform.position;
         lookDirection.y = 0f;
         if (lookDirection.sqrMagnitude < 0.001f)
@@ -520,6 +628,133 @@ public class RunicMovement : MonoBehaviour
 
         if (Quaternion.Angle(transform.rotation, targetRotation) < 0.1f)
             hasFaceTarget = false;
+    }
+
+    public void StartCharge(float chargeSpeed, float maxDistance)
+    {
+        if (agent == null || !agent.enabled || !agent.isOnNavMesh || leapInProgress)
+            return;
+
+        if (charging) EndCharge();
+
+        Debug.Log("Beginning charge");
+
+        Vector3 dir = transform.forward;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.001f) return;
+        dir.Normalize();
+
+        // Limit the destination to the edge of the NavMesh, so the thrust doesn't fail at SamplePosition.
+        Vector3 goal = transform.position + dir * maxDistance;
+        if (NavMesh.Raycast(transform.position, goal, out NavMeshHit edge, agent.areaMask))
+            goal = edge.position;
+
+        prevSpeed = agent.speed;
+        prevAcceleration = agent.acceleration;
+        prevAutoBraking = agent.autoBraking;
+        prevStoppingDistance = agent.stoppingDistance;
+
+        agent.speed = chargeSpeed;
+        agent.acceleration = chargeSpeed * 10f;   // reaches speed almost instantly.
+        agent.autoBraking = false;
+        agent.stoppingDistance = 0f;
+        agent.updateRotation = false;             // locks the steering during the charge.
+        hasFaceTarget = false;
+
+        charging = true;
+        agent.SetDestination(goal);
+    }
+
+    public void EndCharge()
+    {
+        if (!charging) return;
+
+        charging = false;
+        dashing = false;
+        dashTarget = null;
+
+        if (agent == null) return;
+
+        Debug.Log("Ending charge");
+
+        agent.speed = prevSpeed;
+        agent.acceleration = prevAcceleration;
+        agent.autoBraking = prevAutoBraking;
+        agent.stoppingDistance = prevStoppingDistance;
+
+        if (agent.enabled && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+            agent.velocity = Vector3.zero;
+        }
+    }
+
+    private bool BeginBurst(Vector3 goal, float burstSpeed)
+    {
+        if (agent == null || !agent.enabled || !agent.isOnNavMesh || leapInProgress)
+            return false;
+
+        if (charging) EndCharge();
+
+        if (NavMesh.SamplePosition(goal, out NavMeshHit snapped, 2f, agent.areaMask))
+            goal = snapped.position;
+
+        prevSpeed = agent.speed;
+        prevAcceleration = agent.acceleration;
+        prevAutoBraking = agent.autoBraking;
+        prevStoppingDistance = agent.stoppingDistance;
+
+        agent.speed = burstSpeed;
+        agent.acceleration = burstSpeed * 10f;
+        agent.autoBraking = false;
+        agent.stoppingDistance = 0f;
+        agent.updateRotation = false;
+        hasFaceTarget = false;
+
+        charging = true;
+        agent.SetDestination(goal);
+        return true;
+    }
+
+    public void StartDashToTarget(Transform target, float dashSpeed, float gap)
+    {
+        if (target == null || agent == null) return;
+
+        dashTarget = target;
+        dashGap = gap;
+
+        // Already close enough; no dash is needed.
+        Vector3 surface = GetDashSurfacePoint();
+        Vector3 flat = surface - transform.position;
+        flat.y = 0f;
+        if (flat.magnitude <= agent.radius + dashGap)
+        {
+            dashTarget = null;
+            return;
+        }
+
+        dashing = BeginBurst(ComputeDashGoal(), dashSpeed);
+        if (!dashing) dashTarget = null;
+    }
+
+    private Vector3 GetDashSurfacePoint()
+    {
+        Collider col = dashTarget.GetComponent<Collider>();
+        return col != null ? col.ClosestPoint(transform.position) : dashTarget.position;
+    }
+
+    // Point on the target's side facing the Runic, offset from its surface.
+    private Vector3 ComputeDashGoal()
+    {
+        Vector3 surface = GetDashSurfacePoint();
+        Vector3 back = transform.position - surface;
+        back.y = 0f;
+        if (back.sqrMagnitude < 0.001f) back = -transform.forward;
+        back.Normalize();
+
+        Vector3 goal = surface + back * (agent.radius + dashGap);
+        goal.y = transform.position.y;
+        return goal;
     }
 
     public void HandleCommandedMovement(Vector3 PointedPos)
@@ -666,8 +901,15 @@ public class RunicMovement : MonoBehaviour
         MoveToPosition(targetPosition);
     }
 
+    public void Dodge(Vector3 DodgeImpulse)
+    {
+        ApplyKnockback(DodgeImpulse);
+        runic.Dodge();
+    }
+
     public void SetMovementSpeed(float speed)
     {
+        if (charging) return;
         if (agent != null)
             agent.speed = speed;
     }
