@@ -22,7 +22,7 @@ public class Loader : MonoBehaviour
     IEnumerator LoadSceneAsync()
     {
         // Starts loading asynchronously.
-        AsyncOperation operation = SceneManager.LoadSceneAsync(LoadSceneByIndex.TargetSceneIndex);
+        AsyncOperation operation = SceneManager.LoadSceneAsync(SceneChanger.TargetSceneIndex);
         
         // Prevents the scene from automatically activating as soon as loading is complete 
         // (optional, good for allowing time to show 100%).
@@ -31,7 +31,9 @@ public class Loader : MonoBehaviour
         float elapsed = 0f;
 
         while (!operation.isDone)
-        {
+        {   
+            elapsed += Time.deltaTime;
+
             // Progress goes from 0 to 0.9 when allowSceneActivation is false.
             float progress = Mathf.Clamp01(operation.progress / 0.9f);
 

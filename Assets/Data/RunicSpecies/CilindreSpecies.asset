@@ -39,6 +39,7 @@ MonoBehaviour:
   specialAggression: 0.2
   elements:
   - {fileID: 11400000, guid: c454203395e047441a1ea9d2ff310eda, type: 2}
+  - {fileID: 11400000, guid: 88c4aa8362db76a488f5461940776b06, type: 2}
   basicSkills:
   - {fileID: 11400000, guid: f7f3d9c3517b1e949ac732ae4ddeba0b, type: 2}
   - {fileID: 11400000, guid: 98e12b22e01508440b32c2a705df44a6, type: 2}

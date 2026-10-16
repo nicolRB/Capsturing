@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.Serialization;
 using TMPro;
 
 public class RunicCommands : MonoBehaviour
@@ -15,7 +16,8 @@ public class RunicCommands : MonoBehaviour
     [SerializeField] private Image dodgeCommandIcon;
     [SerializeField] private TextMeshProUGUI dodgeTimerText;
     [SerializeField] private Key runicDodgeKey = Key.T;
-    [SerializeField] private float dodgeForce = 5f;
+    [FormerlySerializedAs("dodgeForce")]
+    [SerializeField] private float dodgeSpeed = 5f;
     [SerializeField] private float runicDodgeCooldown;
     [SerializeField] private float dodgeTimer;
 
@@ -137,7 +139,8 @@ public class RunicCommands : MonoBehaviour
         RunicMovement movement = runic.GetComponent<RunicMovement>();
         if (movement != null)
         {
-            movement.Dodge((direction + Vector3.up * 0.5f) * dodgeForce);
+            Vector3 dodgeVelocity = (direction + Vector3.up * 0.5f).normalized * dodgeSpeed;
+            movement.Dodge(dodgeVelocity);
         }
     }
 

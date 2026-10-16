@@ -126,7 +126,8 @@ public class MenuManager : MonoBehaviour
 
         currentMenu = pauseMenu;
 
-        player.PlayerHUD.SetActive(false);
+        if (player != null && player.PlayerHUD != null)
+            player.PlayerHUD.SetActive(false);
 
         pauseMenu.SetActive(true);
 
