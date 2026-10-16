@@ -14,7 +14,7 @@ public class RunicInspectionMenu : MonoBehaviour
     [SerializeField] private Sprite runicSprite;
     [SerializeField] private Sprite runeSprite;
 
-    [Header("Fields")]
+    [Header("Stat/Info Fields")]
     [SerializeField] private Image runicIcon;
     [SerializeField] private Image runeIcon;
     [SerializeField] private TextMeshProUGUI nameField;
@@ -30,6 +30,13 @@ public class RunicInspectionMenu : MonoBehaviour
     [SerializeField] private TextMeshProUGUI speedsField;
     [SerializeField] private TextMeshProUGUI weightField;
     [SerializeField] private TextMeshProUGUI combatStyleField;
+
+    [Header("Other Stats Fields")]
+    [SerializeField] private TextMeshProUGUI knockbackResField;
+    [SerializeField] private TextMeshProUGUI recoveryField;
+    [SerializeField] private TextMeshProUGUI specialRecoveryField;
+    [SerializeField] private TextMeshProUGUI aggressionField;
+    [SerializeField] private TextMeshProUGUI specialAggressionField;
 
     [Header("SkillFields")]
     [SerializeField] private List<Skill> skills = new List<Skill>();
@@ -103,6 +110,13 @@ public class RunicInspectionMenu : MonoBehaviour
                 + data.sprintSpeed.ToString();
             weightField.text = data.weight.ToString("0.00") + " Kg";
             combatStyleField.text = data.combatStyle.ToString();
+
+            // More Stats
+            knockbackResField.text = data.knockbackResistance.ToString("0.0");
+            recoveryField.text = data.recovery.ToString("0.0") + "s";
+            specialRecoveryField.text = data.specialRecovery.ToString("0.0") + "s";
+            aggressionField.text = (data.aggression * 100).ToString("0");
+            specialAggressionField.text = (data.specialAggression * 100).ToString("0");
 
             SetUpBasicSkills();
 
