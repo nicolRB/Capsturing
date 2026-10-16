@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50a250959fdf4b14d9a64067f4d0f020, type: 3}
+  m_Name: Charge
+  m_EditorClassIdentifier: GameCore::Skill
+  skillId: 2
+  skillName: Charge
+  skillSprite: {fileID: 21300000, guid: cdc7cf7f60257334eaae6c165d153604, type: 3}
+  skillType: 1
+  skillElement: {fileID: 11400000, guid: c454203395e047441a1ea9d2ff310eda, type: 2}
+  keyStat: 0
+  power: 80
+  knockbackValue: 10
+  duration: 3
+  cooldown: 16
+  range: 8
+  steps:
+  - delay: 0
+    movementType: 2
+    force: 15
+    stopDistance: 0
+    reAimAtTarget: 0
+    hitboxType: 8
+    hitboxSize: 1
+    continuous: 0

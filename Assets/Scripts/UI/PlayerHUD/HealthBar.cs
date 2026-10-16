@@ -9,14 +9,22 @@ public class HealthBar : MonoBehaviour
     void Start()
     {
         player = FindFirstObjectByType<PlayerController>();
-        healthBar = GetComponentInChildren<Image>();
+        if (healthBar == null)
+        {
+            foreach (Transform child in transform)
+            {
+                healthBar = child.GetComponentInChildren<Image>();
+                if (healthBar != null)
+                    break;
+            }
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
         if (healthBar != null && player != null)
-            healthBar.fillAmount = player.CurrentHP / player.MaxHP;
+            healthBar.fillAmount = (float)player.CurrentHP / (float)player.MaxHP;
         else    
             Debug.LogError("Healthbar: player or healthbar missing / not referenced");
     }

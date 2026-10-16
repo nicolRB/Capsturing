@@ -7,7 +7,7 @@ public class SummonRunicSpell : SpellBase
 
     [Header("State Tracking")]
     private RunicSaveData selectedRunicFromWheel;
-    private Runic activeSummonedRunic = null;
+    [SerializeField] private Runic activeSummonedRunic = null;
 
     [Header("Other References")]
     [SerializeField] private GameObject summonLightPrefab;
@@ -222,9 +222,17 @@ public class SummonRunicSpell : SpellBase
 
         if (activeSummonedRunic != null)
         {
+            activeSummonedRunic.tag = "Tamed";
+            
+            Rigidbody summonedRigidbody = spawnedObj.GetComponent<Rigidbody>();
+            if (summonedRigidbody != null)
+                summonedRigidbody.excludeLayers |= LayerMask.GetMask("Player");
+
             activeSummonedRunic.SetRunicDatabase(runicDatabase);
             activeSummonedRunic.InitializeFromData(selectedRunicFromWheel);
             Debug.Log($"Successfully summoned {activeSummonedRunic.name}");
+            if (player != null && player.RunicCommand != null)
+                player.RunicCommand.SetSummonedRunic(activeSummonedRunic);
         }
 
         selectedRunicFromWheel = null;
@@ -239,6 +247,8 @@ public class SummonRunicSpell : SpellBase
             Debug.Log($"Unsummoning {activeSummonedRunic.name}");
             StartCoroutine(UnsummonSequence(activeSummonedRunic));
             activeSummonedRunic = null;
+            if (player != null && player.RunicCommand != null)
+                player.RunicCommand.RemoveSummonedRunic();
         }
     }
 

@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class SpellSelectUI : MonoBehaviour
 {
@@ -53,7 +54,7 @@ public class SpellSelectUI : MonoBehaviour
             foreach (var spell in spellcastingCoordinator.Spells)
             {
                 GameObject spellSelectIcon = Instantiate(spellIconPrefab, transform);
-                var spellIconImage = spellSelectIcon.transform.Find("SpellIcon").GetComponent<UnityEngine.UI.Image>();
+                Image spellIconImage = spellSelectIcon.transform.Find("SpellIcon").GetComponent<Image>();
                 if (spellIconImage != null)
                 {
                     spellIconImage.sprite = spell.SpellIcon;
@@ -103,7 +104,7 @@ public class SpellSelectUI : MonoBehaviour
         for (int i = 0; i < spellCount; i++)
         {
             TextMeshProUGUI coolDownTime = transform.GetChild(i).transform.Find("CoolDownTime").GetComponent<TextMeshProUGUI>();
-            UnityEngine.UI.Image icon = transform.GetChild(i).transform.Find("SpellIcon").GetComponent<UnityEngine.UI.Image>();
+            Image icon = transform.GetChild(i).transform.Find("SpellIcon").GetComponent<UnityEngine.UI.Image>();
             if (spellcastingCoordinator.SpellCooldowns[i] <= 0)
             {
                 icon.color = Color.white;

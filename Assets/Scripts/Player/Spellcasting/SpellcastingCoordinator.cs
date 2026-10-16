@@ -211,6 +211,12 @@ public class SpellcastingCoordinator : MonoBehaviour
             PlayerController.CastState.Channeling)
             return;
 
+        CurrentSpell?.OnChannelComplete(result);
+
+        // The spell may cancel the cast while handling this result.
+        if (player.CastingState != PlayerController.CastState.Channeling)
+            return;
+
         if (currentSpellType ==
                 SpellBase.SpellType.Projectile ||
             currentSpellType ==
@@ -222,8 +228,6 @@ public class SpellcastingCoordinator : MonoBehaviour
 
             player.PlayerHUD.SetActive(true);
         }
-
-        CurrentSpell?.OnChannelComplete(result);
 
         percentageCounter?.RecalculatePercentage(result);
 

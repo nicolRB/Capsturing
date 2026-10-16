@@ -243,6 +243,23 @@ public class RunicStorageManager : MonoBehaviour
         NotifyStorageChanged();
     }
 
+    public bool UpdateRunicInBox(Runic runic)
+    {
+        if (runic == null || string.IsNullOrEmpty(runic.RunicInstanceId))
+            return false;
+
+        int index = boxStorage.FindIndex(data =>
+            data != null && data.runicInstanceId == runic.RunicInstanceId);
+        if (index < 0)
+            return false;
+
+        RunicSaveData updatedData = runic.ExportToSaveData();
+        updatedData.runicInstanceId = runic.RunicInstanceId;
+        boxStorage[index] = updatedData;
+        NotifyStorageChanged();
+        return true;
+    }
+
     // ============================================================
     // REMOVAL
     // ============================================================

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: GameCore::RunicDatabase
   allSpecies:
   - {fileID: 11400000, guid: c014a50325299d54ebd86558c955ba3f, type: 2}
+  - {fileID: 11400000, guid: 49f099674a14a6e42b6662991e8acedf, type: 2}
   speciesRelations:
   - speciesA: {fileID: 11400000, guid: c014a50325299d54ebd86558c955ba3f, type: 2}
     speciesB: {fileID: 11400000, guid: 49f099674a14a6e42b6662991e8acedf, type: 2}
@@ -23,3 +24,6 @@ MonoBehaviour:
   allSkills:
   - {fileID: 11400000, guid: f7f3d9c3517b1e949ac732ae4ddeba0b, type: 2}
   - {fileID: 11400000, guid: 98e12b22e01508440b32c2a705df44a6, type: 2}
+  - {fileID: 11400000, guid: bd81e092aa7548d4c86af6eb9e098a0f, type: 2}
+  - {fileID: 11400000, guid: 26a59da33935ced4197c31d7929e2ec7, type: 2}
+  - {fileID: 11400000, guid: 5ec905040bd9eab4a91a3e518b10f67f, type: 2}
