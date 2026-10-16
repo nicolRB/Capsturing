@@ -901,9 +901,21 @@ public class RunicMovement : MonoBehaviour
         MoveToPosition(targetPosition);
     }
 
-    public void Dodge(Vector3 DodgeImpulse)
+    public void Dodge(Vector3 dodgeVelocity)
     {
-        ApplyKnockback(DodgeImpulse);
+        if (rb == null || dodgeVelocity.sqrMagnitude <= 0f)
+            return;
+
+        if (!leapInProgress)
+        {
+            if (!BeginPhysicsMotion(rb, false))
+                return;
+
+            leapEndRequested = true;
+            leapHasAscended = true;
+        }
+
+        rb.linearVelocity = dodgeVelocity;
         runic.Dodge();
     }
 

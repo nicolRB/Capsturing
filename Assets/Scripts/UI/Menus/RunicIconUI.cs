@@ -162,11 +162,13 @@ public class RunicIconUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
     {
         transform.localScale = new Vector3(originalScale, originalScale, originalScale);
         targetScale = originalScale * hoverScale;
+        runicsMenuScript.SetHoveredSlot(gameObject);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         targetScale = isSelected ? originalScale * selectedScale : originalScale;
+        runicsMenuScript.SetHoveredSlot(null);
     }
 
     public void OnPointerClick(PointerEventData eventData)

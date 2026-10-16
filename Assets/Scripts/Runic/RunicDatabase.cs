@@ -174,4 +174,38 @@ public class RunicDatabase : ScriptableObject
 
         return result;
     }
+
+    public Element GetElementById(string elementId)
+    {
+        if (lookupElement == null)
+        {
+            lookupElement = new Dictionary<string, Element>();
+
+            foreach (Element element in allElements)
+            {
+                if (element != null && !string.IsNullOrEmpty(element.ElementId))
+                    lookupElement[element.ElementId] = element;
+            }
+        }
+
+        lookupElement.TryGetValue(elementId, out Element result);
+        return result;
+    }
+
+    public List<Element> GetElementsByIds(List<string> elementIds)
+    {
+        List<Element> result = new List<Element>();
+
+        if (elementIds == null) return result;
+
+        foreach (string elementId in elementIds)
+        {
+            Element element = GetElementById(elementId);
+
+            if (element != null)
+                result.Add(element);
+        }
+
+        return result;
+    }
 }

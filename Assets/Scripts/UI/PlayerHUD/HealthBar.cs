@@ -26,6 +26,6 @@ public class HealthBar : MonoBehaviour
         if (healthBar != null && player != null)
             healthBar.fillAmount = (float)player.CurrentHP / (float)player.MaxHP;
         else    
-            Debug.LogError("Healthbar: player or healthbar missing");
+            Debug.LogError("Healthbar: player or healthbar missing / not referenced");
     }
 }

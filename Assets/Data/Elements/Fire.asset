@@ -14,3 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: GameCore::Element
   elementId: 1
   elementName: Fire
+  elementColor: {r: 1, g: 0.17723747, b: 0, a: 1}
+  elementVulnerabilities: []
+  vulnerabilityMultiplier: 2
+  elementResistances: []
+  resistanceMultiplier: 0.5

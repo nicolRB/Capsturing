@@ -1,6 +1,8 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
+using TMPro;
+using System.Collections.Generic;
 
 public class RunicsMenu : MonoBehaviour
 {
@@ -8,36 +10,45 @@ public class RunicsMenu : MonoBehaviour
     [SerializeField] private int boxPageIndex = 0;
     [SerializeField] private int boxRows = 3;
     [SerializeField] private int boxColumns = 7;
+    [SerializeField] private TextMeshProUGUI pageCounter;
+    [SerializeField] private GameObject pageFlipButtonPrevious;
+    [SerializeField] private GameObject pageFlipButtonNext;
     private int page = 0;
 
     private int BoxSlotsPerPage => boxRows * boxColumns;
-    private int BoxTotalPages => runicStorageManager == null
-        ? 0
-        : Mathf.CeilToInt((float)runicStorageManager.BoxStorage.Count / BoxSlotsPerPage);
+    private int BoxTotalPages => runicStorageManager == null ? 1
+        : Mathf.Max(1, Mathf.CeilToInt((float)runicStorageManager.BoxStorage.Count / BoxSlotsPerPage));
 
     [Header("Slot Sizes")]
     [SerializeField] private float boxSlotSize = 1f;
     [SerializeField] private float partySlotSize = 1.2f;
+
+    [Header("Inspector")]
+    [SerializeField] private Image miniInspectorRunicIcon;
+    [SerializeField] private TextMeshProUGUI nameField;
+    [SerializeField] private GameObject statsFields;
+    [SerializeField] private TextMeshProUGUI hpField;
+    [SerializeField] private TextMeshProUGUI attackField;
+    [SerializeField] private TextMeshProUGUI defenseField;
+    [SerializeField] private TextMeshProUGUI magicField;
+    [SerializeField] private TextMeshProUGUI magicDefenseField;
+
+    [SerializeField] private Key inspectorKey = Key.E;
 
     [Header("References")]
     [SerializeField] private GameObject runicBox;
     [SerializeField] private GameObject runicParty;
     [SerializeField] private GameObject runicSlotPrefab;
     [SerializeField] private RunicStorageManager runicStorageManager;
+    [SerializeField] private RunicDatabase runicDatabase;
+    [SerializeField] private MenuManager menuManager;
+
     private GameObject selectedSlot;
+    private GameObject hoveredSlot;
     private GridLayoutGroup boxGridLayout;
 
     public GameObject SelectedSlot => selectedSlot;
     public RunicStorageManager StorageManager => runicStorageManager;
-
-    public void ClearSelection(GameObject slot)
-    {
-        if (selectedSlot != slot) return;
-
-        selectedSlot = null;
-        slot.GetComponent<RunicIconUI>()?.SetSelected(false);
-        UpdateCounterpartHighlights();
-    }
 
     // Persistent slot lists avoid destroying and recreating UI objects.
     private List<RunicIconUI> boxSlotScripts = new List<RunicIconUI>();
@@ -46,6 +57,8 @@ public class RunicsMenu : MonoBehaviour
     void OnEnable()
     {
         if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
+        
+        if (menuManager == null) menuManager = FindFirstObjectByType<MenuManager>();
 
         if (runicBox == null)
         {
@@ -65,6 +78,38 @@ public class RunicsMenu : MonoBehaviour
             return;
         }
 
+        if (miniInspectorRunicIcon == null)
+            miniInspectorRunicIcon = transform.Find("MiniInspector/SelectedRunicIcon/IconMask/RunicSprite")
+                .GetComponent<Image>();
+
+        if (nameField == null)
+            nameField = transform.Find("MiniInspector/RunicName").GetComponent<TextMeshProUGUI>();
+
+        if (statsFields == null)
+            statsFields = transform.Find("MiniInspector/RunicStats").gameObject;
+
+        if (hpField == null && statsFields != null)
+            hpField = statsFields.transform.Find("HPField/FieldValue")
+                .GetComponent<TextMeshProUGUI>();
+            
+        if (attackField == null && statsFields != null)
+            attackField = statsFields.transform.Find("AttackField/FieldValue")
+                .GetComponent<TextMeshProUGUI>();
+            
+        if (defenseField == null && statsFields != null)
+            defenseField = statsFields.transform.Find("DefenseField/FieldValue")
+                .GetComponent<TextMeshProUGUI>();
+            
+        if (magicField == null && statsFields != null)
+            magicField = statsFields.transform.Find("MagicField/FieldValue")
+                .GetComponent<TextMeshProUGUI>();
+            
+        if (magicDefenseField == null && statsFields != null)
+            magicDefenseField = statsFields.transform.Find("MagicDefenseField/FieldValue")
+                .GetComponent<TextMeshProUGUI>();
+
+        UpdateMiniInspector();
+
         boxGridLayout = runicBox.GetComponent<GridLayoutGroup>();
         if (boxGridLayout != null)
         {
@@ -80,6 +125,33 @@ public class RunicsMenu : MonoBehaviour
         
         // Use instant positioning only when the menu opens.
         OpenMenuRefresh();
+        UpdatePagination();
+    }
+    
+    void Update()
+    {
+        if (Keyboard.current[inspectorKey].wasPressedThisFrame && (selectedSlot != null
+        || hoveredSlot != null))
+        {
+            RunicIconUI slotScript = hoveredSlot != null ? hoveredSlot.GetComponent<RunicIconUI>() 
+                : selectedSlot.GetComponent<RunicIconUI>();
+
+            RunicSaveData data = slotScript.IsPartySlot
+                ? StorageManager.GetPartyRunicBySlot(slotScript.SlotNumber)
+                : StorageManager.GetBoxRunicBySlot(slotScript.SlotNumber);
+
+            if (data != null)
+                menuManager.OpenRunicInspectionMenu(data);
+        }
+    }
+
+    public void ClearSelection(GameObject slot)
+    {
+        if (selectedSlot != slot) return;
+
+        selectedSlot = null;
+        slot.GetComponent<RunicIconUI>()?.SetSelected(false);
+        UpdateCounterpartHighlights();
     }
 
     // Runs only during initial menu setup.
@@ -92,9 +164,11 @@ public class RunicsMenu : MonoBehaviour
     // Runs after storage changes during gameplay and preserves smooth animation.
     public void RefreshAllSlots()
     {
+        page = Mathf.Clamp(page, 0, BoxTotalPages - 1);
         UpdatePartySlotsData(false);
         UpdateBoxSlotsData(false);
         UpdateCounterpartHighlights();
+        UpdatePagination();
     }
 
     void UpdateBoxSlotsData(bool instant)
@@ -190,6 +264,7 @@ public class RunicsMenu : MonoBehaviour
             if (!clickedSlotScript.IsPartySlot
                 && runicStorageManager.GetBoxRunicBySlot(clickedSlotScript.SlotNumber) == null)
             {
+                UpdateMiniInspector();
                 return;
             }
 
@@ -197,6 +272,7 @@ public class RunicsMenu : MonoBehaviour
             selectedSlotScript = selectedSlot.GetComponent<RunicIconUI>();
             selectedSlotScript.SetSelected(true);
             UpdateCounterpartHighlights();
+            UpdateMiniInspector();
             return;
         }
 
@@ -218,6 +294,7 @@ public class RunicsMenu : MonoBehaviour
             {
                 // If the box slot is empty, clear the selection.
                 selectedSlotScript.SetSelected(false);
+                UpdateMiniInspector();
                 return;
             }
             if (runicStorageManager.IsRunicInParty(
@@ -284,6 +361,84 @@ public class RunicsMenu : MonoBehaviour
         clickedSlotScript.ResetTargetScale();
         UpdateCounterpartHighlights();
         RefreshAllSlots();
+        UpdateMiniInspector();
+    }
+
+    void UpdateMiniInspector()
+    {
+        if (selectedSlot == null)
+        {
+            if (miniInspectorRunicIcon != null)
+            miniInspectorRunicIcon.color = new Color(0, 0, 0, 0);
+
+            if (nameField != null)
+                nameField.gameObject.SetActive(false);
+
+            if (statsFields != null)
+                statsFields.SetActive(false);
+
+            return;
+        }
+        else if (statsFields != null)
+            statsFields.SetActive(true);
+
+        RunicIconUI iconScript = selectedSlot.GetComponent<RunicIconUI>();
+
+        RunicSaveData runicData;
+
+        if (iconScript != null)
+            runicData = iconScript.IsPartySlot
+                ? runicStorageManager.GetPartyRunicBySlot(iconScript.SlotNumber)
+                : runicStorageManager.GetBoxRunicBySlot(iconScript.SlotNumber);
+        else 
+        {
+            if (miniInspectorRunicIcon != null)
+                miniInspectorRunicIcon.color = new Color(0, 0, 0, 0);
+
+            return;
+        }
+        
+
+        if (runicData == null)
+        {
+            if (miniInspectorRunicIcon != null)
+                miniInspectorRunicIcon.color = new Color(0, 0, 0, 0);
+            return;
+        }
+
+        if (miniInspectorRunicIcon != null)
+        {
+            miniInspectorRunicIcon.color = Color.white;
+            Sprite runicSprite = runicStorageManager != null ? runicStorageManager.GetRunicIcon(runicData) : null;
+            miniInspectorRunicIcon.sprite = runicSprite;
+        }
+
+        if (nameField != null)
+        {
+            nameField.gameObject.SetActive(true);
+
+            if (runicData.nickname != null)
+                nameField.text = runicData.nickname;
+            else if (runicDatabase != null) 
+            {
+                string speciesName = runicData.speciesId != null ? 
+                    runicDatabase.GetSpeciesById(runicData.speciesId).SpeciesName : "?";
+                nameField.text = speciesName;
+            }
+            else 
+                Debug.LogWarning("Runics Menu: Runic Database missing / not referenced.");
+        }
+
+        if (hpField != null)
+            hpField.text = runicData.currentHP.ToString() + " / " + runicData.maxHP .ToString();
+        if (attackField != null)
+            attackField.text = runicData.attack.ToString();
+        if (defenseField != null)
+            defenseField.text = runicData.defense.ToString();
+        if (magicField != null)
+            magicField.text = runicData.magic.ToString();
+        if (magicDefenseField != null)
+            magicDefenseField.text = runicData.magicDefense.ToString();
     }
 
     private void ClearCounterpartHighlights()
@@ -324,9 +479,56 @@ public class RunicsMenu : MonoBehaviour
 
     public void ChangePage(int newPage)
     {
-        if (newPage < 0 || newPage >= BoxTotalPages) return;
+        if (newPage < 0 || newPage >= BoxTotalPages) 
+            return;
+
         page = newPage;
         selectedSlot = null;
         RefreshAllSlots();
+    }
+
+    public void FlipPage(int pageAmount)
+    {
+        page = (page + pageAmount) % BoxTotalPages;
+        if (page < 0)
+            page += BoxTotalPages;
+        
+        selectedSlot = null;
+        RefreshAllSlots();
+    }
+
+    void UpdatePagination()
+    {
+        bool canFlipPages = BoxTotalPages > 1;
+
+        if (pageCounter != null)
+            pageCounter.text = $"{page + 1}/{BoxTotalPages}";
+        else
+            Debug.LogWarning("Runics Menu: Page Counter missing / Not Referenced");
+
+        SetPageFlipButtonState(pageFlipButtonPrevious, canFlipPages, "Previous");
+        SetPageFlipButtonState(pageFlipButtonNext, canFlipPages, "Next");
+    }
+
+    private void SetPageFlipButtonState(GameObject buttonObject, bool canFlipPages, string buttonName)
+    {
+        if (buttonObject == null)
+        {
+            Debug.LogWarning($"Runics Menu: Page Flip Button {buttonName} missing / not referenced.");
+            return;
+        }
+
+        if (buttonObject.TryGetComponent(out Button button))
+            button.interactable = canFlipPages;
+        else
+            Debug.LogWarning($"Runics Menu: Page Flip Button {buttonName} is missing a Button component.", buttonObject);
+
+        if (buttonObject.TryGetComponent(out ButtonHoverScale hoverScale))
+            hoverScale.SetOn(canFlipPages);
+    }
+
+    public void SetHoveredSlot(GameObject slot)
+    {
+        hoveredSlot = slot;
     }
 }

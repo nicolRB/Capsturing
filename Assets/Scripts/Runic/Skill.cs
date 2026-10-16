@@ -42,6 +42,45 @@ public enum SkillAttackType
     Ranged
 }
 
+public static class SkillDisplay
+{
+    public static string GetShortKeyStatName(SkillKeyStat keyStat)
+    {
+        return keyStat switch
+        {
+            SkillKeyStat.Attack => "atk",
+            SkillKeyStat.Magic => "mag",
+            SkillKeyStat.Defense => "def",
+            SkillKeyStat.MagicDefense => "mdef",
+            SkillKeyStat.Hp => "hp",
+            SkillKeyStat.Speed => "spd",
+            SkillKeyStat.None => "var",
+            _ => "var"
+        };
+    }
+
+    public static string GetSkillTypeLabel(Skill skill)
+    {
+        if (skill == null)
+            return "Unknown";
+
+        string typeName = skill.SkillType switch
+        {
+            SkillAttackType.Melee => "Melee",
+            SkillAttackType.Ranged => "Ranged",
+            SkillAttackType.Movement => "Movement",
+            _ => skill.SkillType.ToString()
+        };
+
+        string keyStatName = GetShortKeyStatName(skill.KeyStat);
+
+        if (skill.KeyStat == SkillKeyStat.None)
+            return typeName;
+
+        return $"{typeName}({keyStatName})";
+    }
+}
+
 [System.Serializable]
 public struct SkillStep
 {

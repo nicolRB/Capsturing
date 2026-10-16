@@ -15,6 +15,7 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject saveLoadMenu;
     [SerializeField] private GameObject runicStorageMenu;
     [SerializeField] private GameObject settingsMenu;
+    [SerializeField] private GameObject runicInspectionMenu;
     private GameObject currentMenu;
     private readonly List<GameObject> previousMenus = new List<GameObject>();
 
@@ -55,6 +56,8 @@ public class MenuManager : MonoBehaviour
         if (saveLoadMenu != null) saveLoadMenu.SetActive(false);
 
         if (runicStorageMenu != null) runicStorageMenu.SetActive(false);
+
+        if (runicInspectionMenu != null) runicInspectionMenu.SetActive(false);
 
         if (settingsMenu != null) settingsMenu.SetActive(false);
     }
@@ -110,6 +113,12 @@ public class MenuManager : MonoBehaviour
     public void OpenSaveLoadMenu() => Open(saveLoadMenu);
     public void OpenSettingsMenu() => Open(settingsMenu);
     public void OpenRunicStorageMenu() => Open(runicStorageMenu);
+    public void OpenRunicInspectionMenu(RunicSaveData data)
+    {
+        Open(runicInspectionMenu);
+        RunicInspectionMenu inspectionMenu = runicInspectionMenu.GetComponent<RunicInspectionMenu>();
+        inspectionMenu.SetupPage(data);
+    }
 
     public void Pause()
     {
@@ -117,7 +126,8 @@ public class MenuManager : MonoBehaviour
 
         currentMenu = pauseMenu;
 
-        player.PlayerHUD.SetActive(false);
+        if (player != null && player.PlayerHUD != null)
+            player.PlayerHUD.SetActive(false);
 
         pauseMenu.SetActive(true);
 
