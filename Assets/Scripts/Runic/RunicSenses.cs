@@ -30,6 +30,8 @@ public class RunicSenses : MonoBehaviour
 
     void Update()
     {
+        if (runic.IsPaused) return;
+
         checkTimer += Time.deltaTime;
         if (checkTimer >= checkInterval)
         {

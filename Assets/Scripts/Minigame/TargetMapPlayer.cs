@@ -107,7 +107,7 @@ public class TargetMapPlayer : MonoBehaviour
     {
         if (castingGameScript == null ||
             castingGameScript.Player == null ||
-            castingGameScript.Player.CastingState != PlayerController.CastState.Channeling)
+            castingGameScript.Player.CastingState != CastState.Channeling)
         {
             return;
         }

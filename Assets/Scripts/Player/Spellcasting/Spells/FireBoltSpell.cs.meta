@@ -1,2 +1,20 @@
 fileFormatVersion: 2
 guid: 3791b545dcc62024ebda69bae72d5580
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - spellMap: {fileID: 11400000, guid: 5a6c446f9ce48dc45a979c5d35efd140, type: 2}
+  - spellIcon: {fileID: 21300000, guid: 98036876f5e23184bbe3cfc1dc0393ac, type: 3}
+  - spellcastingCoordinator: {instanceID: 0}
+  - player: {instanceID: 0}
+  - pointTarget: {instanceID: 0}
+  - percentageCounter: {instanceID: 0}
+  - element: {fileID: 11400000, guid: 88c4aa8362db76a488f5461940776b06, type: 2}
+  - fireBoltPrefab: {fileID: 8287215299309075829, guid: 7143076d649fa0346ab08e5fad764763, type: 3}
+  - firePoint: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -108,7 +108,7 @@ public class RunicWildAI : MonoBehaviour
 
     void Update()
     {
-        if (runic.IsFrozen) return;
+        if (runic.IsPaused) return;
 
         UpdateTimers();
 

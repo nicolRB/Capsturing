@@ -36,7 +36,7 @@ public class PlayerInteraction : MonoBehaviour
         Point();
 
         if (Keyboard.current[interactKey].wasPressedThisFrame
-            && player.CastingState == PlayerController.CastState.Idle
+            && player.CastingState == CastState.Idle
             && interactableComponent != null)
         {
             interactableComponent.Interact();
@@ -48,7 +48,7 @@ public class PlayerInteraction : MonoBehaviour
         ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x,
             playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
 
-        bool canTargetInteractable = player.CastingState == PlayerController.CastState.Idle;
+        bool canTargetInteractable = player.CastingState == CastState.Idle;
 
         if (canTargetInteractable
             && Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, interactableLayer))

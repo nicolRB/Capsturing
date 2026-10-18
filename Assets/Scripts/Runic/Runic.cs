@@ -111,6 +111,9 @@ public class Runic : MonoBehaviour
     [SerializeField] private int maxChainNumber = 8;
     [SerializeField] private float chainSpawnInterval = 0f;
 
+    [Header("Other VFX")]
+    [SerializeField] private GameObject damagePopupPrefab;
+
     [Header("Sizes")]
     [SerializeField] private float width = 1f;
     [SerializeField] private float height = 1f;
@@ -124,6 +127,7 @@ public class Runic : MonoBehaviour
     [SerializeField] private PlayerInteraction playerInteraction;
     [SerializeField] private RunicDatabase runicDatabase;
     [SerializeField] private RunicStorageManager runicStorageManager;
+    [SerializeField] private HPBar hpBar;
     private RunicCombat combat;
     private RunicMovement movement;
     private RunicWildAI runicWildAI;
@@ -143,6 +147,14 @@ public class Runic : MonoBehaviour
     [SerializeField] private List<Runic> engagedEnemies = new List<Runic>();
     [SerializeField] private List<Runic> threats = new List<Runic>();
 
+    private bool chained;
+
+    private bool movementPauseApplied;
+
+    public bool PlayerChanneling => player != null && player.CastingState == CastState.Channeling;
+    public bool Chained => chained;
+    public bool IsPaused => frozen || PlayerChanneling || chained;
+
     public RunicState TameState => tameState;
     public WildNature Nature => nature;
     public BehaviorState ActState => actState;
@@ -152,6 +164,7 @@ public class Runic : MonoBehaviour
     public string RunicInstanceId => runicInstanceId;
     public Sprite RunicIcon => runicIcon;
     public GameObject RunicModel => runicModel;
+    public HPBar HealthBar => hpBar;
     public float CurrentHP => currentHP;
     public float MaxHP => maxHP;
     public float Attack => attack;
@@ -218,6 +231,8 @@ public class Runic : MonoBehaviour
 
         if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
 
+        if (hpBar == null) hpBar = GetComponentInChildren<HPBar>();
+ 
         rb = GetComponent<Rigidbody>();
 
         combat = GetComponent<RunicCombat>();
@@ -236,10 +251,16 @@ public class Runic : MonoBehaviour
 
         if (rb != null)
             rb.mass = weight;
+
+        RefreshMovementPause();
     }
 
     void Update()
     {
+        RefreshMovementPause();
+        if (IsPaused)
+            return;
+
         if (invencibilityTime > 0)
             invencibilityTime -= Time.deltaTime;
 
@@ -251,6 +272,18 @@ public class Runic : MonoBehaviour
                 actState = BehaviorState.CommandedMove;
             else actState = BehaviorState.Following;
         }
+
+    }
+
+    private void RefreshMovementPause()
+    {
+        bool shouldPauseMovement = IsPaused;
+        if (movementPauseApplied == shouldPauseMovement)
+            return;
+
+        movementPauseApplied = shouldPauseMovement;
+        movement?.SetPaused(shouldPauseMovement);
+        combat?.SetPaused(shouldPauseMovement);
     }
 
     // Initializes creature state from a save file entry
@@ -386,7 +419,8 @@ public class Runic : MonoBehaviour
 
     public void Chain()
     {
-        frozen = true;
+        chained = true;
+        RefreshMovementPause();
         int instances = Random.Range(minChainNumber, maxChainNumber+1);
         float YAxis = Random.Range(transform.rotation.eulerAngles.y + chainYAngleMinVariance,
                                     transform.rotation.eulerAngles.y + chainYAngleMaxVariance);
@@ -405,7 +439,8 @@ public class Runic : MonoBehaviour
 
     public void Unchain()
     {
-        frozen = false;
+        chained = false;
+        RefreshMovementPause();
 
         foreach (GameObject chain in activeChains)
         {
@@ -422,12 +457,18 @@ public class Runic : MonoBehaviour
     }
 
     public void TakeDamage(int damage, Runic attacker = null, bool playerAttacker = false, 
-        Transform ambientSource = null)
+        Transform ambientSource = null, Color damageColor = default(Color), float damageScale = 1)
     {
         if (frozen) return;
 
         currentHP -= damage;
         Debug.Log(gameObject + " has taken " + damage + " damage.");
+
+        // damage popup
+        GameObject popup = Instantiate(damagePopupPrefab, 
+            transform.position + Vector3.up * 2f, Quaternion.identity);
+        Color popupColor = damageColor.a > 0f ? damageColor : Color.white;
+        popup.GetComponent<DamagePopup>().Setup(damage, popupColor, damageScale);
 
         if (tameState == RunicState.Tamed && runicStorageManager != null)
             runicStorageManager.UpdateRunicInBox(this);
@@ -447,6 +488,8 @@ public class Runic : MonoBehaviour
             actState = BehaviorState.Fleeing;
             if (runicWildAI != null)
                 runicWildAI.SetEnvironmentalThreat(ambientSource);
+
+            hpBar.UpdateBarColor();
             return;
         }
 
@@ -455,6 +498,7 @@ public class Runic : MonoBehaviour
         {
             actState = BehaviorState.Fighting;
             runicWildAI.SetFightPlayer(true);
+            hpBar.UpdateBarColor();
             return;
         }
 
@@ -469,6 +513,7 @@ public class Runic : MonoBehaviour
                 
             if (attacker.TameState == RunicState.Tamed)
                 runicWildAI.SetFightPlayer(true);
+            hpBar.UpdateBarColor();
         }
         else 
         {
@@ -479,31 +524,12 @@ public class Runic : MonoBehaviour
 
     public int CalculateDamage(Skill skill, Runic attacker, float totalPower)
     {
-        float A = attacker.GetKeyStatValue(skill.KeyStat);
-        float D = skill.DamageType switch
-        {
-            SkillDamageType.Magical => magicDefense,
-            SkillDamageType.True    => 0f,      // ignores defense (zero mitigation)
-            _                       => defense
-        };
+        return CalculateDamage(totalPower, DamageProfile.FromSkill(skill, attacker));
+    }
 
-        float mitigation = D / Mathf.Max(D + A, 0.01f);
-        float damage = totalPower * 2f * (1f - mitigation);
-
-        // Element: multiplies by the effect on each of the defender's elements.
-        float elementMult = 1f;
-        if (elements != null)
-            foreach (Element e in elements)
-                if (e != null) elementMult *= e.GetIncomingMultiplier(skill.SkillElement);
-        damage *= elementMult;
-
-        // STAB
-        if (attacker.Elements != null && attacker.Elements.Contains(skill.SkillElement))
-            damage *= 1.25f;
-
-        damage *= Random.Range(0.85f, 1.15f);
-
-        return Mathf.Max(Mathf.RoundToInt(damage), Mathf.CeilToInt(totalPower * 0.1f));
+    public int CalculateDamage(float totalPower, DamageProfile profile)
+    {
+        return DamageCalculator.Calculate(totalPower, profile, defense, magicDefense, elements);
     }
 
     public float GetKeyStatValue(SkillKeyStat keyStat) => keyStat switch
@@ -590,6 +616,7 @@ public class Runic : MonoBehaviour
     public void SetBehaviorState(BehaviorState state)
     {
         actState = state;
+        hpBar.UpdateBarColor();
     }
 
     public void AddThreat(Runic threat){
@@ -617,6 +644,10 @@ public class Runic : MonoBehaviour
         if (player.CommandedTarget == this)
             player.SetCommandedTarget(null);
 
+        if (player != null && player.RunicUI != null && tameState == RunicState.Tamed)
+            player.RunicUI.SetRunic(null);
+            player.RunicUI.gameObject.SetActive(false);
+
         // handle death logic (e.g., play animation, drop loot, etc.)
         Destroy(gameObject);
     }
@@ -624,6 +655,7 @@ public class Runic : MonoBehaviour
     public void SetFreeze(bool state)
     {
         frozen = state;
+        RefreshMovementPause();
     }
 
     public void ResetSkillCooldowns()

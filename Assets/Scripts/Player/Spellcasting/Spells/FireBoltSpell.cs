@@ -6,6 +6,7 @@ public class FireBoltSpell : SpellBase
     [SerializeField] private float potency;
     [SerializeField] private float range;
     [SerializeField] private float projectileSpeed;
+    [SerializeField] private Element element;
 
     private float finalPower;
 
@@ -37,7 +38,7 @@ public class FireBoltSpell : SpellBase
             return;
         }
 
-        finalPower = potency * calculatedResult;
+        finalPower = potency * calculatedResult * player.Magic;
     }
 
     public override void OnSpellCast()
@@ -83,7 +84,8 @@ public class FireBoltSpell : SpellBase
             if (fireBoltScript != null)
             {
                 fireBoltScript.Setup(finalPower, 0, projectileSpeed, ProjectileLimiter.Range, 
-                1, false, aimLayerMask, range, player:true);
+                1, false, aimLayerMask, range, player:true,
+                projectileDamageType: SkillDamageType.Magical, element: element, attackStat: player.Magic);
             }
         }
 

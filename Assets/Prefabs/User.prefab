@@ -434,13 +434,14 @@ MonoBehaviour:
   perfectWeight: 1
   goodWeight: 0.5
   missWeight: 0
-  spellcastingCoordinator: {fileID: 0}
-  player: {fileID: 0}
-  pointTarget: {fileID: 0}
-  percentageCounter: {fileID: 0}
+  spellcastingCoordinator: {fileID: 681781891520420819}
+  player: {fileID: 1871395203445187512}
+  pointTarget: {fileID: 8490703710057350451}
+  percentageCounter: {fileID: 8585592567725906491}
   potency: 3
   range: 10
   projectileSpeed: 15
+  element: {fileID: 11400000, guid: 88c4aa8362db76a488f5461940776b06, type: 2}
   fireBoltPrefab: {fileID: 8287215299309075829, guid: 7143076d649fa0346ab08e5fad764763, type: 3}
   firePoint: {fileID: 7989448320648309219}
   maxAimDistance: 100
@@ -2244,7 +2245,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &701182057090133446
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2878,7 +2879,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6531111601740476688
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3629,7 +3630,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &1871395203445187512
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3645,7 +3646,12 @@ MonoBehaviour:
   maxHP: 100
   currentHP: 100
   defense: 5
+  magicDefense: 5
   knockbackResistance: 0
+  magic: 5
+  resonantDefense: 0
+  resonantMagicDefense: 0
+  resonantMagic: 0
   walkSpeed: 1.75
   jogSpeed: 5
   sprintSpeed: 10
@@ -3664,6 +3670,7 @@ MonoBehaviour:
   tapThreshold: 0.2
   cameraSensitivity: 0
   moving: 1
+  castingState: 0
   maxPartySize: 3
   fightingCommand: 1
   pointCommand: 0
@@ -3677,6 +3684,7 @@ MonoBehaviour:
   aimIndicator: {fileID: 4548805008447103458}
   spellcastingCoordinator: {fileID: 681781891520420819}
   runicCommand: {fileID: 0}
+  summonedRunicUI: {fileID: 0}
 --- !u!114 &8490703710057350451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3692,6 +3700,7 @@ MonoBehaviour:
   player: {fileID: 1871395203445187512}
   playerCamera: {fileID: 906033822823644925}
   spellcastingCoordinator: {fileID: 681781891520420819}
+  playerInteraction: {fileID: 0}
   groundIndicator: {fileID: 0}
   rayEmissionColor: {r: 0.075, g: 0.47, b: 0.75, a: 1}
   sphereRadius: 0.5
@@ -3744,7 +3753,7 @@ MonoBehaviour:
   dodgeCommandIcon: {fileID: 1113398408537092478}
   dodgeTimerText: {fileID: 5346584554102532389}
   runicDodgeKey: 34
-  dodgeForce: 4
+  dodgeSpeed: 4
   runicDodgeCooldown: 6
   dodgeTimer: 0
   cooldownTint: {r: 0.25, g: 0.25, b: 0.25, a: 1}
@@ -4018,7 +4027,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7077811576030251366
 RectTransform:
   m_ObjectHideFlags: 0

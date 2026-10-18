@@ -7,6 +7,7 @@ public class PointTargetScript : MonoBehaviour
     [SerializeField] private PlayerController player;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private SpellcastingCoordinator spellcastingCoordinator;
+    [SerializeField] private PlayerInteraction playerInteraction;
 
     [Header("Point Indicator")]
     [SerializeField] private GameObject groundIndicator;
@@ -35,10 +36,11 @@ public class PointTargetScript : MonoBehaviour
     private float timer = 0f;
     private bool selected = false;
     private bool selecting = false;
+    private bool castClickConsumed;
     private MaterialPropertyBlock emissionPropertyBlock;
     private static readonly int EmissionColorProperty = Shader.PropertyToID("_EmissionColor");
 
-    private PlayerController.CastState stateOnMousePressed;
+    private CastState stateOnMousePressed;
 
     public bool FollowPoint => followPoint;
 
@@ -54,9 +56,13 @@ public class PointTargetScript : MonoBehaviour
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
         if (playerCamera == null) playerCamera = FindFirstObjectByType<Camera>();
-        if (spellcastingCoordinator == null) spellcastingCoordinator = FindFirstObjectByType<SpellcastingCoordinator>();
+        if (spellcastingCoordinator == null) spellcastingCoordinator 
+            = FindFirstObjectByType<SpellcastingCoordinator>();
+        if (playerInteraction == null)
+            playerInteraction = FindFirstObjectByType<PlayerInteraction>();
 
-        if (player == null || playerCamera == null || spellcastingCoordinator == null || groundIndicator == null)
+        if (player == null || playerCamera == null || spellcastingCoordinator == null 
+            || groundIndicator == null)
         {
             Debug.LogError(
                 "PointTargetScript requires PlayerController, Camera, SpellcastingCoordinator, and ground indicator references.",
@@ -91,21 +97,21 @@ public class PointTargetScript : MonoBehaviour
         if (Mouse.current == null || Keyboard.current == null)
             return;
 
-        if (Mouse.current.leftButton.wasPressedThisFrame && 
-            stateOnMousePressed != PlayerController.CastState.Casting)
-            stateOnMousePressed = player.CastingState;
-
         if (Mouse.current.leftButton.wasReleasedThisFrame)
-            stateOnMousePressed = PlayerController.CastState.Idle;
+        {
+            castClickConsumed = false;
+            stateOnMousePressed = player.CastingState;
+        }
+
+        if (Mouse.current.leftButton.wasPressedThisFrame && !castClickConsumed)
+            stateOnMousePressed = player.CastingState;
 
         selecting = Mouse.current.leftButton.isPressed
             && player.MenuManager.CurrentMenu == null 
-            && stateOnMousePressed == PlayerController.CastState.Idle;
+            && stateOnMousePressed == CastState.Idle;
 
         Point();
 
-
-        // Se foi selecionado, começa a contar o tempo do fade independentemente de o selecting atualizar depois
         if (selected)
         {
             timer += Time.deltaTime;
@@ -127,11 +133,18 @@ public class PointTargetScript : MonoBehaviour
             SetIndicatorIntensity(fadeStartValue);
         }
 
-        if (Keyboard.current.fKey.wasPressedThisFrame && player.CastingState != PlayerController.CastState.Casting)
+        if (Keyboard.current.fKey.wasPressedThisFrame && player.CastingState 
+            != CastState.Casting)
         {
             groundIndicator.tag = "Untagged";
             followPoint = false;
-            player.SetCommandedTarget(null);
+
+            bool interactableActive = playerInteraction != null 
+                && playerInteraction.InteractableTarget != null;
+
+            if (!(interactableActive = playerInteraction != null 
+                && playerInteraction.InteractableTarget != null))
+                player.SetCommandedTarget(null);
         }
     }
     void Point()
@@ -139,8 +152,8 @@ public class PointTargetScript : MonoBehaviour
         if (player == null)
             return;
 
-        if (player.CastingState == PlayerController.CastState.Casting ||
-            player.CastingState == PlayerController.CastState.Channeling)
+        if (player.CastingState == CastState.Casting ||
+            player.CastingState == CastState.Channeling)
         {
             ClearPoint();
             return;
@@ -149,13 +162,13 @@ public class PointTargetScript : MonoBehaviour
         ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x, 
         playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
 
-        if (Mouse.current.leftButton.wasPressedThisFrame && stateOnMousePressed == PlayerController.CastState.Idle)
+        if (Mouse.current.leftButton.wasPressedThisFrame && stateOnMousePressed == CastState.Idle)
         {
             selected = false;
             timer = 0f;
         }
 
-        bool isAimingSpell = player.CastingState == PlayerController.CastState.Aiming;
+        bool isAimingSpell = player.CastingState == CastState.Aiming;
         bool isPointTargetedSpell = isAimingSpell
             && spellcastingCoordinator.CurrentSpellType == SpellBase.SpellType.PointTargeted;
         bool isCreatureTargetedSpell = isAimingSpell
@@ -169,13 +182,13 @@ public class PointTargetScript : MonoBehaviour
                         && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0;
 
         // Keeps visible while the button is pressed, when in fade-out after releasing or when a point-targeted spells is being aimed
-        bool canShowGroundIndicator = player.CastingState != PlayerController.CastState.Channeling &&
-            player.CastingState != PlayerController.CastState.Casting &&
+        bool canShowGroundIndicator = player.CastingState != CastState.Channeling &&
+            player.CastingState != CastState.Casting &&
             (selecting || selected || isPointTargetedSpell);
 
         // If the mouse button is released on this frame, activate selected immediately
         if (terrainHit && groundIndicator.activeSelf && Mouse.current.leftButton.wasReleasedThisFrame 
-            && player.MenuManager.CurrentMenu == null && stateOnMousePressed == PlayerController.CastState.Idle
+            && player.MenuManager.CurrentMenu == null && stateOnMousePressed == CastState.Idle
             && player.PointCommand != RunicPointCommand.Ignore)
         {
             followPoint = true;
@@ -183,7 +196,7 @@ public class PointTargetScript : MonoBehaviour
             selected = true; // Ativa o fade imediatamente aqui
         }
 
-        if (Mouse.current.leftButton.wasReleasedThisFrame && player.CastingState == PlayerController.CastState.Idle)
+        if (Mouse.current.leftButton.wasReleasedThisFrame && player.CastingState == CastState.Idle)
         {
             if (hoveredRunic != null)
             {
@@ -196,7 +209,7 @@ public class PointTargetScript : MonoBehaviour
             groundIndicator.SetActive(true);
             
             // Se não estiver selecionado (ou seja, arrastando o mouse), atualiza a posição livremente
-            if (!selected)
+            if (!selected || isPointTargetedSpell)
             {
                 groundIndicator.transform.position = hit.point + Vector3.up * 0.01f;
                 groundIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
@@ -305,8 +318,9 @@ public class PointTargetScript : MonoBehaviour
         Gizmos.DrawWireSphere(ray.origin, sphereRadius);
     }
 
-    public void SetStateOnMousePressed(PlayerController.CastState castState)
+    public void ConsumeCurrentMousePress()
     {
-        stateOnMousePressed = castState;
+        castClickConsumed = true;
+        stateOnMousePressed = CastState.Casting;
     }
 }

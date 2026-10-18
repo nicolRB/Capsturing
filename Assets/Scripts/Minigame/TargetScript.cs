@@ -97,40 +97,65 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (clicked || missed) return;
-
-        if (cast == null || cast.CurrentTargetIndex != targetIndex)
-            return;
-
+        
         RectTransform rect = transform as RectTransform;
+        Vector2 localPoint = Vector2.zero;
+        bool hasRect = rect != null;
+        if (hasRect)
+        {
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                rect,
+                eventData.position,
+                eventData.pressEventCamera,
+                out localPoint
+            );
+        }
 
-        Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            rect,
-            eventData.position,
-            eventData.pressEventCamera,
-            out localPoint
+        float timeSinceSpawn = Time.time - spawnTime;
+        float timeAfterActivation = timeSinceSpawn - activationTime;
+        float diff = Mathf.Abs(timeAfterActivation - lifetime);
+        float radius = hasRect ? rect.rect.width * 0.5f : 0f;
+        bool insideRect = hasRect && RectTransformUtility.RectangleContainsScreenPoint(
+            rect, eventData.position, eventData.pressEventCamera);
+        bool insideCircle = hasRect && localPoint.magnitude <= radius;
+        
+        /*
+        bool isCurrentTarget = IsCurrentTarget;
+        string disposition = clicked || missed ? "already consumed"
+            : cast == null ? "no coordinator"
+            : !isCurrentTarget ? "not current target"
+            : !insideRect ? "outside rectangle"
+            : !insideCircle ? "outside circle; current code marks clicked but registers no result"
+            : timeAfterActivation < 0f || diff > hitWindow ? "will register miss"
+            : diff <= perfectWindow ? "will register perfect"
+            : "will register good";
+            
+        Debug.Log(
+            $"Target click | target={name} index={targetIndex} disposition={disposition} " +
+            $"time={Time.time:F3} spawnTime={spawnTime:F3} sinceSpawn={timeSinceSpawn:F3} " +
+            $"activation={activationTime:F3} sinceActivation={timeAfterActivation:F3} " +
+            $"lifetime={lifetime:F3} diff={diff:F3} perfectWindow={perfectWindow:F3} " +
+            $"hitWindow={hitWindow:F3} missDuration={missDuration:F3} " +
+            $"screen={eventData.position} local={localPoint} world={transform.position} " +
+            $"insideRect={insideRect} insideCircle={insideCircle} radius={radius:F2} " +
+            $"clicked={clicked} missed={missed} activeSelf={gameObject.activeSelf} " +
+            $"activeInHierarchy={gameObject.activeInHierarchy} currentTarget={isCurrentTarget} " +
+            $"raycastTarget={(rootImage != null && rootImage.raycastTarget)} " +
+            $"castIndex={(cast != null ? cast.CurrentTargetIndex : -1)} " +
+            $"totalTargets={(cast != null ? cast.TotalTargets : -1)} " +
+            $"hits={(cast != null ? cast.Hits : -1)} perfects={(cast != null ? cast.Perfects : -1)} " +
+            $"misses={(cast != null ? cast.Misses : -1)}",
+            this
         );
+        */
 
-        // First ensure the click is inside the UI rectangle.
-        if (!RectTransformUtility.RectangleContainsScreenPoint(
-            rect, eventData.position, eventData.pressEventCamera))
+        if (clicked || missed || cast == null || cast.CurrentTargetIndex != targetIndex 
+            || !insideRect || !insideCircle)
             return;
         
         clicked = true;
 
-        // Then filter the click against the circular target shape.
-        float radius = rect.rect.width * 0.5f;
-
-        if (localPoint.magnitude > radius)
-            return;
-
-        float timeSinceSpawn = Time.time - spawnTime;
-        float timeAfterActivation = timeSinceSpawn - activationTime;
-
         HitResult result;
-
-        float diff = Mathf.Abs(timeAfterActivation - lifetime);
 
         if (timeAfterActivation < 0f || diff > hitWindow)
         {

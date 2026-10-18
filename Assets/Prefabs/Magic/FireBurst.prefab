@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7170463295908543424}
   - component: {fileID: 4400692463083811382}
   - component: {fileID: 4935856921037445123}
+  - component: {fileID: 6294401221993892371}
   m_Layer: 0
   m_Name: FireBurst
   m_TagString: Untagged
@@ -4905,6 +4906,19 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &6294401221993892371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3886171164878603816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af8eab6cf255f7445b82e01624fc0162, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  time: 1
 --- !u!1 &5086977260199084282
 GameObject:
   m_ObjectHideFlags: 0

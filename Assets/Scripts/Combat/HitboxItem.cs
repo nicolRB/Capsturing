@@ -39,8 +39,8 @@ public class HitboxItem : MonoBehaviour
                 || playerTarget.InvencibilityTime > 0
                 || !CanHit(playerTarget)) return;
 
-            // TODO: aplicar defesa do jogador quando ele tiver stats
-            playerTarget.TakeDamage(Mathf.RoundToInt(storedPower));
+            int playerDamage = playerTarget.CalculateDamage(skill, ownerRunic, storedPower);
+            playerTarget.TakeDamage(playerDamage);
             playerTarget.ApplyKnockback(ownerRunic.transform, knockback);
             return;
         }
@@ -50,8 +50,11 @@ public class HitboxItem : MonoBehaviour
             || target.InvencibilityTime > 0
             || !CanHit(target)) return;
 
-        int finalDamage = target.CalculateDamage(skill, ownerRunic, storedPower);
-        target.TakeDamage(finalDamage, ownerRunic);
+        DamageProfile profile = DamageProfile.FromSkill(skill, ownerRunic);
+        int finalDamage = target.CalculateDamage(storedPower, profile);
+        Color damageColor = profile.Element != null ? profile.Element.ElementColor : Color.white;
+        float damageScale = DamageCalculator.GetDamageMultiplier(profile, target.Elements);
+        target.TakeDamage(finalDamage, ownerRunic, damageColor: damageColor, damageScale: damageScale);
 
         if (knockedBackTargets.Add(target))
             target.ApplyKnockback(ownerRunic, knockback);
