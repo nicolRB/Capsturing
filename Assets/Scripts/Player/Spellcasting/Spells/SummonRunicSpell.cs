@@ -70,7 +70,7 @@ public class SummonRunicSpell : SpellBase
 
         Debug.Log("Summon spell: Opening Party Wheel.");
         isWheelOpen = true;
-        player.SetCastingState(PlayerController.CastState.Channeling);
+        player.SetCastingState(CastState.Channeling);
         runicWheel.SetActive(true);
     }
 
@@ -84,7 +84,7 @@ public class SummonRunicSpell : SpellBase
         pointTarget?.ClearPoint();
         selectedRunicFromWheel = null;
         player.ToggleAimIndicator(true);
-        player.SetCastingState(PlayerController.CastState.Idle);
+        player.SetCastingState(CastState.Idle);
         
         RaiseSpellResolved();
     }
@@ -126,7 +126,7 @@ public class SummonRunicSpell : SpellBase
         }
 
         pointTarget.GroundIndicator.SetActive(true);
-        player.SetCastingState(PlayerController.CastState.Aiming);
+        player.SetCastingState(CastState.Aiming);
 
         RunicSpecies species = runicDatabase != null
             ? runicDatabase.GetSpeciesById(chosenRunic.speciesId)

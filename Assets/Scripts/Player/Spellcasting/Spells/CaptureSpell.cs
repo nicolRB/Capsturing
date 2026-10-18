@@ -168,7 +168,7 @@ public class CaptureSpell : SpellBase
 
         spellcastingCoordinator.ChannelingGame.OnChannelingResolved += HandleCaptureChannelResolved;
 
-        player.SetCastingState(PlayerController.CastState.Channeling);
+        player.SetCastingState(CastState.Channeling);
     }
 
     private void HandleCaptureChannelResolved(ChannelingGameCoordinator.ChannelingResult result)

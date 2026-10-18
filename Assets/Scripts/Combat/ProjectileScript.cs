@@ -18,6 +18,9 @@ public class ProjectileScript : MonoBehaviour
     [SerializeField] private LayerMask hitLayerMask;
     [SerializeField] private GameObject hitEffectPrefab;
     [SerializeField] private Collider hitbox;
+    [SerializeField] private Element element;
+    [SerializeField] private SkillDamageType damageType;
+    private float sourceAttackStat;
     private Rigidbody rb;
 
     void Start()
@@ -39,7 +42,8 @@ public class ProjectileScript : MonoBehaviour
     }
 
     public void Setup(float pwr, float kb, float speed, ProjectileLimiter limit, 
-    float mass, bool gravity, LayerMask layerMask, float rng = 0, float lifeTime = 0, Runic own = null, bool player = false)
+    float mass, bool gravity, LayerMask layerMask, float rng = 0, float lifeTime = 0, Runic own = null, 
+    bool player = false, SkillDamageType? projectileDamageType = null, Element element = null, float attackStat = 0f)
     {
         if (rb == null)
         {
@@ -52,6 +56,11 @@ public class ProjectileScript : MonoBehaviour
         limiter = limit;
         owner = own;
         playerProjectile = player;
+        if (projectileDamageType.HasValue)
+            damageType = projectileDamageType.Value;
+        if (element != null)
+            this.element = element;
+        sourceAttackStat = attackStat;
         if (layerMask != 0)
         {
             hitLayerMask = layerMask;
@@ -93,14 +102,39 @@ public class ProjectileScript : MonoBehaviour
         {
             if (owner != null)
             {
-                targetRunic.TakeDamage((int)power, owner);
+                float attackStat = sourceAttackStat > 0f
+                    ? sourceAttackStat
+                    : owner.GetKeyStatValue(damageType == SkillDamageType.Magical
+                        ? SkillKeyStat.Magic
+                        : SkillKeyStat.Attack);
+                bool hasStab = owner.Elements != null && owner.Elements.Contains(element);
+                DamageProfile profile = new DamageProfile(damageType, element, attackStat, hasStab);
+                int damage = targetRunic.CalculateDamage(power, profile);
+                Color damageColor = profile.Element != null ? profile.Element.ElementColor : Color.white;
+                float damageScale = DamageCalculator.GetDamageMultiplier(profile, targetRunic.Elements);
+                targetRunic.TakeDamage(damage, owner, damageColor: damageColor, damageScale: damageScale);
             }
             else if (playerProjectile)
-                targetRunic.TakeDamage((int)power, playerAttacker:true);
+            {
+                DamageProfile profile = new DamageProfile(damageType, element, sourceAttackStat);
+                int damage = targetRunic.CalculateDamage(power, profile);
+                Color damageColor = profile.Element != null ? profile.Element.ElementColor : Color.white;
+                float damageScale = DamageCalculator.GetDamageMultiplier(profile, targetRunic.Elements);
+                targetRunic.TakeDamage(damage, playerAttacker: true,
+                    damageColor: damageColor, damageScale: damageScale);
+            }
         }
-        else if (targetPlayer != null && !(playerProjectile || owner.TameState == RunicState.Tamed))
+        else if (targetPlayer != null && !(playerProjectile
+            || (owner != null && owner.TameState == RunicState.Tamed)))
         {
-            targetPlayer.TakeDamage((int)power);
+            float attackStat = sourceAttackStat;
+            if (attackStat <= 0f && owner != null)
+                attackStat = owner.GetKeyStatValue(damageType == SkillDamageType.Magical
+                    ? SkillKeyStat.Magic
+                    : SkillKeyStat.Attack);
+            bool hasStab = owner != null && owner.Elements != null && owner.Elements.Contains(element);
+            DamageProfile profile = new DamageProfile(damageType, element, attackStat, hasStab);
+            targetPlayer.TakeDamage(targetPlayer.CalculateDamage(power, profile));
         }
 
         Destroy(gameObject);

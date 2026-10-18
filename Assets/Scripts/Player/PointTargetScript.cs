@@ -40,7 +40,7 @@ public class PointTargetScript : MonoBehaviour
     private MaterialPropertyBlock emissionPropertyBlock;
     private static readonly int EmissionColorProperty = Shader.PropertyToID("_EmissionColor");
 
-    private PlayerController.CastState stateOnMousePressed;
+    private CastState stateOnMousePressed;
 
     public bool FollowPoint => followPoint;
 
@@ -108,7 +108,7 @@ public class PointTargetScript : MonoBehaviour
 
         selecting = Mouse.current.leftButton.isPressed
             && player.MenuManager.CurrentMenu == null 
-            && stateOnMousePressed == PlayerController.CastState.Idle;
+            && stateOnMousePressed == CastState.Idle;
 
         Point();
 
@@ -134,7 +134,7 @@ public class PointTargetScript : MonoBehaviour
         }
 
         if (Keyboard.current.fKey.wasPressedThisFrame && player.CastingState 
-            != PlayerController.CastState.Casting)
+            != CastState.Casting)
         {
             groundIndicator.tag = "Untagged";
             followPoint = false;
@@ -152,8 +152,8 @@ public class PointTargetScript : MonoBehaviour
         if (player == null)
             return;
 
-        if (player.CastingState == PlayerController.CastState.Casting ||
-            player.CastingState == PlayerController.CastState.Channeling)
+        if (player.CastingState == CastState.Casting ||
+            player.CastingState == CastState.Channeling)
         {
             ClearPoint();
             return;
@@ -162,13 +162,13 @@ public class PointTargetScript : MonoBehaviour
         ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x, 
         playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
 
-        if (Mouse.current.leftButton.wasPressedThisFrame && stateOnMousePressed == PlayerController.CastState.Idle)
+        if (Mouse.current.leftButton.wasPressedThisFrame && stateOnMousePressed == CastState.Idle)
         {
             selected = false;
             timer = 0f;
         }
 
-        bool isAimingSpell = player.CastingState == PlayerController.CastState.Aiming;
+        bool isAimingSpell = player.CastingState == CastState.Aiming;
         bool isPointTargetedSpell = isAimingSpell
             && spellcastingCoordinator.CurrentSpellType == SpellBase.SpellType.PointTargeted;
         bool isCreatureTargetedSpell = isAimingSpell
@@ -182,13 +182,13 @@ public class PointTargetScript : MonoBehaviour
                         && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0;
 
         // Keeps visible while the button is pressed, when in fade-out after releasing or when a point-targeted spells is being aimed
-        bool canShowGroundIndicator = player.CastingState != PlayerController.CastState.Channeling &&
-            player.CastingState != PlayerController.CastState.Casting &&
+        bool canShowGroundIndicator = player.CastingState != CastState.Channeling &&
+            player.CastingState != CastState.Casting &&
             (selecting || selected || isPointTargetedSpell);
 
         // If the mouse button is released on this frame, activate selected immediately
         if (terrainHit && groundIndicator.activeSelf && Mouse.current.leftButton.wasReleasedThisFrame 
-            && player.MenuManager.CurrentMenu == null && stateOnMousePressed == PlayerController.CastState.Idle
+            && player.MenuManager.CurrentMenu == null && stateOnMousePressed == CastState.Idle
             && player.PointCommand != RunicPointCommand.Ignore)
         {
             followPoint = true;
@@ -196,7 +196,7 @@ public class PointTargetScript : MonoBehaviour
             selected = true; // Ativa o fade imediatamente aqui
         }
 
-        if (Mouse.current.leftButton.wasReleasedThisFrame && player.CastingState == PlayerController.CastState.Idle)
+        if (Mouse.current.leftButton.wasReleasedThisFrame && player.CastingState == CastState.Idle)
         {
             if (hoveredRunic != null)
             {
@@ -321,6 +321,6 @@ public class PointTargetScript : MonoBehaviour
     public void ConsumeCurrentMousePress()
     {
         castClickConsumed = true;
-        stateOnMousePressed = PlayerController.CastState.Casting;
+        stateOnMousePressed = CastState.Casting;
     }
 }

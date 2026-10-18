@@ -114,8 +114,8 @@ public class RunicMovement : MonoBehaviour
         
         bool interactableActive = runic.PlayerInteraction != null && runic.PlayerInteraction.InteractableTarget != null;
 
-        bool isNotCastingOrChanneling = runic.Player.CastingState != PlayerController.CastState.Channeling 
-                                && runic.Player.CastingState != PlayerController.CastState.Casting;
+        bool isNotCastingOrChanneling = runic.Player.CastingState != CastState.Channeling 
+                                && runic.Player.CastingState != CastState.Casting;
 
         if (!interactableActive && Keyboard.current.fKey.wasPressedThisFrame 
             && !runic.Pointer.FollowPoint && isNotCastingOrChanneling)

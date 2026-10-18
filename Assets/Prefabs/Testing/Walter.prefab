@@ -341,6 +341,7 @@ MonoBehaviour:
   minChainNumber: 6
   maxChainNumber: 8
   chainSpawnInterval: 0
+  damagePopupPrefab: {fileID: 2547908779233274687, guid: b3eee0c3179e16c47be287c8f4b92c2b, type: 3}
   width: 1.5
   height: 1.5
   player: {fileID: 0}
@@ -348,7 +349,7 @@ MonoBehaviour:
   playerInteraction: {fileID: 0}
   runicDatabase: {fileID: 11400000, guid: 77fcf40784b31b84b9e46c9cdd3c1ad1, type: 2}
   runicStorageManager: {fileID: 0}
-  hPBar: {fileID: 0}
+  hpBar: {fileID: 0}
   combatStyle: 0
   recovery: 2
   specialRecovery: 10
@@ -404,6 +405,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 075c721249a7bdc48be5605d5fd3476e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameCore::RunicCombat
+  playerTarget: 0
   updateInterval: 0.2
   skillGiveUpTime: 4
   landingImpactDuration: 0.2

@@ -65,6 +65,7 @@ MonoBehaviour:
   potency: 3
   range: 10
   projectileSpeed: 15
+  element: {fileID: 11400000, guid: 88c4aa8362db76a488f5461940776b06, type: 2}
   fireBoltPrefab: {fileID: 8287215299309075829, guid: 7143076d649fa0346ab08e5fad764763, type: 3}
   firePoint: {fileID: 0}
   maxAimDistance: 100

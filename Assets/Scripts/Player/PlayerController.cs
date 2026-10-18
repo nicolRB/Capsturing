@@ -6,6 +6,11 @@ using UnityEngine.InputSystem;
 public enum RunicFightingCommand { Pacific, Escort, Aggressive }
 public enum RunicPointCommand { Stand, Scout, Patrol, Ignore }
 
+// Idle - no active action; Channeling - playing the spell minigame;
+// Aiming - the spell is charged and ready to launch;
+// Casting - lançando feitiço
+public enum CastState { Idle, Channeling, Aiming, Casting } 
+
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
 public class PlayerController : MonoBehaviour
@@ -88,10 +93,6 @@ public class PlayerController : MonoBehaviour
 
     public bool Moving => moving;
 
-    // Idle - no active action; Channeling - playing the spell minigame;
-    // Aiming - the spell is charged and ready to launch;
-    // Casting - lançando feitiço
-    public enum CastState { Idle, Channeling, Aiming, Casting } 
     [SerializeField] private CastState castingState = CastState.Idle;
 
     public CastState CastingState => castingState;
@@ -480,24 +481,12 @@ public class PlayerController : MonoBehaviour
 
     public int CalculateDamage(Skill skill, Runic attacker, float totalPower)
     {
-        float A = attacker.GetKeyStatValue(skill.KeyStat);
-        float D = skill.DamageType switch
-        {
-            SkillDamageType.Magical => magicDefense,
-            SkillDamageType.True    => 0f,      // ignores defense (zero mitigation)
-            _                       => defense
-        };
+        return CalculateDamage(totalPower, DamageProfile.FromSkill(skill, attacker));
+    }
 
-        float mitigation = D / Mathf.Max(D + A, 0.01f);
-        float damage = totalPower * 2f * (1f - mitigation);
-
-        // STAB
-        if (attacker.Elements != null && attacker.Elements.Contains(skill.SkillElement))
-            damage *= 1.25f;
-
-        damage *= Random.Range(0.85f, 1.15f);
-
-        return Mathf.Max(Mathf.RoundToInt(damage), Mathf.CeilToInt(totalPower * 0.1f));
+    public int CalculateDamage(float totalPower, DamageProfile profile)
+    {
+        return DamageCalculator.Calculate(totalPower, profile, Defense, MagicDefense);
     }
 
     public void ApplyKnockback(Transform knockbackOrigin, float knockback)

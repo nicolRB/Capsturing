@@ -66,7 +66,7 @@ public class SpellcastingCoordinator : MonoBehaviour
     void OnEnable()
     {
         // If the game recompiles during channeling, resets the player
-        if (player != null && (player.CastingState == PlayerController.CastState.Channeling || player.CastingState == PlayerController.CastState.Casting || player.CastingState == PlayerController.CastState.Aiming))
+        if (player != null && (player.CastingState == CastState.Channeling || player.CastingState == CastState.Casting || player.CastingState == CastState.Aiming))
         {
             Debug.LogWarning("SpellcastingCoordinator: Recompilação detectada durante conjuração. Resetando estado para Idle.");
             CancelCast();
@@ -82,7 +82,7 @@ public class SpellcastingCoordinator : MonoBehaviour
 
     void HandleSpellSelection()
     { 
-        if (player.CastingState != PlayerController.CastState.Idle || player.MenuManager.IsPaused
+        if (player.CastingState != CastState.Idle || player.MenuManager.IsPaused
         || player.MenuManager.CurrentMenu != null) return;
 
         // Select spells with the mouse wheel.
@@ -107,7 +107,7 @@ public class SpellcastingCoordinator : MonoBehaviour
         if (Keyboard.current.eKey.wasPressedThisFrame && player.MenuManager.IsPaused == false
         && player.MenuManager.CurrentMenu == null)
         {
-            if (player.CastingState == PlayerController.CastState.Idle)
+            if (player.CastingState == CastState.Idle)
             {
                 if (spellCooldowns[spellIndex] <= 0)
                 {
@@ -121,11 +121,11 @@ public class SpellcastingCoordinator : MonoBehaviour
                     Debug.Log("Spell currently in cooldown. Time left: " + spellCooldowns[spellIndex]);
                 }
             }
-            else if (player.CastingState == PlayerController.CastState.Channeling
-                   || player.CastingState == PlayerController.CastState.Aiming) CancelCast();
+            else if (player.CastingState == CastState.Channeling
+                   || player.CastingState == CastState.Aiming) CancelCast();
         }
 
-        if (player.CastingState == PlayerController.CastState.Aiming 
+        if (player.CastingState == CastState.Aiming 
         && Mouse.current.leftButton.wasPressedThisFrame)
         {
             CastSpell();
@@ -162,7 +162,7 @@ public class SpellcastingCoordinator : MonoBehaviour
             
             spell.OnSpellResolved += HandleSpellResolved;
             
-            player.SetCastingState(PlayerController.CastState.Casting);
+            player.SetCastingState(CastState.Casting);
 
             spell.OnCastStart();
             return; 
@@ -189,7 +189,7 @@ public class SpellcastingCoordinator : MonoBehaviour
             0f, 0f, 0f,
             1f);
 
-        player.SetCastingState(PlayerController.CastState.Channeling);
+        player.SetCastingState(CastState.Channeling);
 
         spell.OnCastStart();
     }
@@ -201,7 +201,7 @@ public class SpellcastingCoordinator : MonoBehaviour
         if (CurrentSpell.Type != SpellBase.SpellType.PointTargeted)
             pointTarget?.ClearPoint();
 
-        player.SetCastingState(PlayerController.CastState.Casting);
+        player.SetCastingState(CastState.Casting);
         CurrentSpell.OnSpellResolved += HandleSpellResolved;
         CurrentSpell.OnSpellCast();
     }
@@ -213,23 +213,23 @@ public class SpellcastingCoordinator : MonoBehaviour
 
         // Ignore delayed events from a previous cast.
         if (player.CastingState !=
-            PlayerController.CastState.Channeling)
+            CastState.Channeling)
             return;
 
         CurrentSpell?.OnChannelComplete(result);
 
         // The spell may cancel the cast while handling this result.
-        if (player.CastingState != PlayerController.CastState.Channeling)
+        if (player.CastingState != CastState.Channeling)
             return;
 
         if (currentSpellType ==
                 SpellBase.SpellType.Projectile ||
             currentSpellType ==
                 SpellBase.SpellType.Targeted)
-            player.SetCastingState(PlayerController.CastState.Aiming);
+            player.SetCastingState(CastState.Aiming);
         else
         {
-            player.SetCastingState(PlayerController.CastState.Casting);
+            player.SetCastingState(CastState.Casting);
 
             player.PlayerHUD.SetActive(true);
         }
@@ -257,7 +257,7 @@ public class SpellcastingCoordinator : MonoBehaviour
     {
         CurrentSpell.OnSpellResolved -= HandleSpellResolved;
         spellCooldowns[spellIndex] = CurrentSpell.CooldownTime;
-        player.SetCastingState(PlayerController.CastState.Idle);
+        player.SetCastingState(CastState.Idle);
         if (castingUI != null) castingUI.SetActive(false);
         if (player.PlayerHUD != null)
             player.PlayerHUD.SetActive(true);
@@ -269,7 +269,7 @@ public class SpellcastingCoordinator : MonoBehaviour
         CurrentSpell?.Cancel();
         spellCooldowns[spellIndex] = CurrentSpell.CooldownTime;
         if (castingUI != null) castingUI.SetActive(false);
-        player.SetCastingState(PlayerController.CastState.Idle);
+        player.SetCastingState(CastState.Idle);
         player.PlayerHUD.SetActive(true);
         Debug.Log("Cast cancelled.");
     }

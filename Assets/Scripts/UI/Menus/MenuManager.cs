@@ -142,7 +142,7 @@ public class MenuManager : MonoBehaviour
 
         pauseMenu.SetActive(false);
 
-        if (player.CastingState != PlayerController.CastState.Channeling) player.PlayerHUD.SetActive(true);
+        if (player.CastingState != CastState.Channeling) player.PlayerHUD.SetActive(true);
 
         Time.timeScale = 1f;
         

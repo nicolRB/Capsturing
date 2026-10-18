@@ -111,6 +111,9 @@ public class Runic : MonoBehaviour
     [SerializeField] private int maxChainNumber = 8;
     [SerializeField] private float chainSpawnInterval = 0f;
 
+    [Header("Other VFX")]
+    [SerializeField] private GameObject damagePopupPrefab;
+
     [Header("Sizes")]
     [SerializeField] private float width = 1f;
     [SerializeField] private float height = 1f;
@@ -148,7 +151,7 @@ public class Runic : MonoBehaviour
 
     private bool movementPauseApplied;
 
-    public bool PlayerChanneling => player != null && player.CastingState == PlayerController.CastState.Channeling;
+    public bool PlayerChanneling => player != null && player.CastingState == CastState.Channeling;
     public bool Chained => chained;
     public bool IsPaused => frozen || PlayerChanneling || chained;
 
@@ -454,12 +457,18 @@ public class Runic : MonoBehaviour
     }
 
     public void TakeDamage(int damage, Runic attacker = null, bool playerAttacker = false, 
-        Transform ambientSource = null)
+        Transform ambientSource = null, Color damageColor = default(Color), float damageScale = 1)
     {
         if (frozen) return;
 
         currentHP -= damage;
         Debug.Log(gameObject + " has taken " + damage + " damage.");
+
+        // damage popup
+        GameObject popup = Instantiate(damagePopupPrefab, 
+            transform.position + Vector3.up * 2f, Quaternion.identity);
+        Color popupColor = damageColor.a > 0f ? damageColor : Color.white;
+        popup.GetComponent<DamagePopup>().Setup(damage, popupColor, damageScale);
 
         if (tameState == RunicState.Tamed && runicStorageManager != null)
             runicStorageManager.UpdateRunicInBox(this);
@@ -515,31 +524,12 @@ public class Runic : MonoBehaviour
 
     public int CalculateDamage(Skill skill, Runic attacker, float totalPower)
     {
-        float A = attacker.GetKeyStatValue(skill.KeyStat);
-        float D = skill.DamageType switch
-        {
-            SkillDamageType.Magical => magicDefense,
-            SkillDamageType.True    => 0f,      // ignores defense (zero mitigation)
-            _                       => defense
-        };
+        return CalculateDamage(totalPower, DamageProfile.FromSkill(skill, attacker));
+    }
 
-        float mitigation = D / Mathf.Max(D + A, 0.01f);
-        float damage = totalPower * 2f * (1f - mitigation);
-
-        // Element: multiplies by the effect on each of the defender's elements.
-        float elementMult = 1f;
-        if (elements != null)
-            foreach (Element e in elements)
-                if (e != null) elementMult *= e.GetIncomingMultiplier(skill.SkillElement);
-        damage *= elementMult;
-
-        // STAB
-        if (attacker.Elements != null && attacker.Elements.Contains(skill.SkillElement))
-            damage *= 1.25f;
-
-        damage *= Random.Range(0.85f, 1.15f);
-
-        return Mathf.Max(Mathf.RoundToInt(damage), Mathf.CeilToInt(totalPower * 0.1f));
+    public int CalculateDamage(float totalPower, DamageProfile profile)
+    {
+        return DamageCalculator.Calculate(totalPower, profile, defense, magicDefense, elements);
     }
 
     public float GetKeyStatValue(SkillKeyStat keyStat) => keyStat switch
