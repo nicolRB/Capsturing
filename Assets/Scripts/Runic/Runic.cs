@@ -124,6 +124,7 @@ public class Runic : MonoBehaviour
     [SerializeField] private PlayerInteraction playerInteraction;
     [SerializeField] private RunicDatabase runicDatabase;
     [SerializeField] private RunicStorageManager runicStorageManager;
+    [SerializeField] private HPBar hpBar;
     private RunicCombat combat;
     private RunicMovement movement;
     private RunicWildAI runicWildAI;
@@ -143,6 +144,14 @@ public class Runic : MonoBehaviour
     [SerializeField] private List<Runic> engagedEnemies = new List<Runic>();
     [SerializeField] private List<Runic> threats = new List<Runic>();
 
+    private bool chained;
+
+    private bool movementPauseApplied;
+
+    public bool PlayerChanneling => player != null && player.CastingState == PlayerController.CastState.Channeling;
+    public bool Chained => chained;
+    public bool IsPaused => frozen || PlayerChanneling || chained;
+
     public RunicState TameState => tameState;
     public WildNature Nature => nature;
     public BehaviorState ActState => actState;
@@ -152,6 +161,7 @@ public class Runic : MonoBehaviour
     public string RunicInstanceId => runicInstanceId;
     public Sprite RunicIcon => runicIcon;
     public GameObject RunicModel => runicModel;
+    public HPBar HealthBar => hpBar;
     public float CurrentHP => currentHP;
     public float MaxHP => maxHP;
     public float Attack => attack;
@@ -218,6 +228,8 @@ public class Runic : MonoBehaviour
 
         if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
 
+        if (hpBar == null) hpBar = GetComponentInChildren<HPBar>();
+ 
         rb = GetComponent<Rigidbody>();
 
         combat = GetComponent<RunicCombat>();
@@ -236,10 +248,16 @@ public class Runic : MonoBehaviour
 
         if (rb != null)
             rb.mass = weight;
+
+        RefreshMovementPause();
     }
 
     void Update()
     {
+        RefreshMovementPause();
+        if (IsPaused)
+            return;
+
         if (invencibilityTime > 0)
             invencibilityTime -= Time.deltaTime;
 
@@ -251,6 +269,18 @@ public class Runic : MonoBehaviour
                 actState = BehaviorState.CommandedMove;
             else actState = BehaviorState.Following;
         }
+
+    }
+
+    private void RefreshMovementPause()
+    {
+        bool shouldPauseMovement = IsPaused;
+        if (movementPauseApplied == shouldPauseMovement)
+            return;
+
+        movementPauseApplied = shouldPauseMovement;
+        movement?.SetPaused(shouldPauseMovement);
+        combat?.SetPaused(shouldPauseMovement);
     }
 
     // Initializes creature state from a save file entry
@@ -386,7 +416,8 @@ public class Runic : MonoBehaviour
 
     public void Chain()
     {
-        frozen = true;
+        chained = true;
+        RefreshMovementPause();
         int instances = Random.Range(minChainNumber, maxChainNumber+1);
         float YAxis = Random.Range(transform.rotation.eulerAngles.y + chainYAngleMinVariance,
                                     transform.rotation.eulerAngles.y + chainYAngleMaxVariance);
@@ -405,7 +436,8 @@ public class Runic : MonoBehaviour
 
     public void Unchain()
     {
-        frozen = false;
+        chained = false;
+        RefreshMovementPause();
 
         foreach (GameObject chain in activeChains)
         {
@@ -447,6 +479,8 @@ public class Runic : MonoBehaviour
             actState = BehaviorState.Fleeing;
             if (runicWildAI != null)
                 runicWildAI.SetEnvironmentalThreat(ambientSource);
+
+            hpBar.UpdateBarColor();
             return;
         }
 
@@ -455,6 +489,7 @@ public class Runic : MonoBehaviour
         {
             actState = BehaviorState.Fighting;
             runicWildAI.SetFightPlayer(true);
+            hpBar.UpdateBarColor();
             return;
         }
 
@@ -469,6 +504,7 @@ public class Runic : MonoBehaviour
                 
             if (attacker.TameState == RunicState.Tamed)
                 runicWildAI.SetFightPlayer(true);
+            hpBar.UpdateBarColor();
         }
         else 
         {
@@ -590,6 +626,7 @@ public class Runic : MonoBehaviour
     public void SetBehaviorState(BehaviorState state)
     {
         actState = state;
+        hpBar.UpdateBarColor();
     }
 
     public void AddThreat(Runic threat){
@@ -617,6 +654,10 @@ public class Runic : MonoBehaviour
         if (player.CommandedTarget == this)
             player.SetCommandedTarget(null);
 
+        if (player != null && player.RunicUI != null && tameState == RunicState.Tamed)
+            player.RunicUI.SetRunic(null);
+            player.RunicUI.gameObject.SetActive(false);
+
         // handle death logic (e.g., play animation, drop loot, etc.)
         Destroy(gameObject);
     }
@@ -624,6 +665,7 @@ public class Runic : MonoBehaviour
     public void SetFreeze(bool state)
     {
         frozen = state;
+        RefreshMovementPause();
     }
 
     public void ResetSkillCooldowns()

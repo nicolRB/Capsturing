@@ -231,8 +231,11 @@ public class SummonRunicSpell : SpellBase
             activeSummonedRunic.SetRunicDatabase(runicDatabase);
             activeSummonedRunic.InitializeFromData(selectedRunicFromWheel);
             Debug.Log($"Successfully summoned {activeSummonedRunic.name}");
-            if (player != null && player.RunicCommand != null)
-                player.RunicCommand.SetSummonedRunic(activeSummonedRunic);
+            if (player != null && player.RunicUI != null)
+            {
+                player.RunicUI.gameObject.SetActive(true);
+                player.RunicUI.SetRunic(activeSummonedRunic);
+            }
         }
 
         selectedRunicFromWheel = null;
@@ -247,8 +250,11 @@ public class SummonRunicSpell : SpellBase
             Debug.Log($"Unsummoning {activeSummonedRunic.name}");
             StartCoroutine(UnsummonSequence(activeSummonedRunic));
             activeSummonedRunic = null;
-            if (player != null && player.RunicCommand != null)
-                player.RunicCommand.RemoveSummonedRunic();
+            if (player != null && player.RunicUI != null)
+            {
+                player.RunicUI.SetRunic(null);
+                player.RunicUI.gameObject.SetActive(false);
+            }
         }
     }
 

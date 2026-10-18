@@ -210,6 +210,7 @@ public class RunicCommands : MonoBehaviour
     {
         dodgeTimer = 0;
         skillTimer = 0;
-        summonedRunic.ResetSkillCooldowns();
+        if (summonedRunic != null)
+            summonedRunic.ResetSkillCooldowns();
     }
 }

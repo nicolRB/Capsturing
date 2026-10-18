@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FireBoltSpellMap
   m_EditorClassIdentifier: GameCore::TargetMapAsset
   mapSettings:
-    hitWindow: 0.2
+    hitWindow: 0.12
     perfectWindow: 0.08
     name: FireBolt
   events:

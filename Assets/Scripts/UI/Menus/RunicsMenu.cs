@@ -54,12 +54,15 @@ public class RunicsMenu : MonoBehaviour
     private List<RunicIconUI> boxSlotScripts = new List<RunicIconUI>();
     private List<RunicIconUI> partySlotScripts = new List<RunicIconUI>();
 
-    void OnEnable()
+    void Awake()
     {
         if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
         
         if (menuManager == null) menuManager = FindFirstObjectByType<MenuManager>();
+    }
 
+    void OnEnable()
+    {
         if (runicBox == null)
         {
             Transform boxTransform = transform.Find("Box");

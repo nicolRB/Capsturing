@@ -2244,7 +2244,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &701182057090133446
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2878,7 +2878,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6531111601740476688
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3629,7 +3629,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &1871395203445187512
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3645,7 +3645,12 @@ MonoBehaviour:
   maxHP: 100
   currentHP: 100
   defense: 5
+  magicDefense: 5
   knockbackResistance: 0
+  magic: 5
+  resonantDefense: 0
+  resonantMagicDefense: 0
+  resonantMagic: 0
   walkSpeed: 1.75
   jogSpeed: 5
   sprintSpeed: 10
@@ -3664,6 +3669,7 @@ MonoBehaviour:
   tapThreshold: 0.2
   cameraSensitivity: 0
   moving: 1
+  castingState: 0
   maxPartySize: 3
   fightingCommand: 1
   pointCommand: 0
@@ -3744,7 +3750,7 @@ MonoBehaviour:
   dodgeCommandIcon: {fileID: 1113398408537092478}
   dodgeTimerText: {fileID: 5346584554102532389}
   runicDodgeKey: 34
-  dodgeForce: 4
+  dodgeSpeed: 4
   runicDodgeCooldown: 6
   dodgeTimer: 0
   cooldownTint: {r: 0.25, g: 0.25, b: 0.25, a: 1}
@@ -4018,7 +4024,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7077811576030251366
 RectTransform:
   m_ObjectHideFlags: 0

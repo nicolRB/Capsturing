@@ -12,7 +12,7 @@ public class RunicCombat : MonoBehaviour
 
     [Header("Target")]
     private Runic currentTarget;
-    private bool playerTarget;
+    [SerializeField] private bool playerTarget;
 
     [Header("Combat Timers")]
     private float recoveryTimer;
@@ -39,6 +39,12 @@ public class RunicCombat : MonoBehaviour
     private bool hunting;
 
     public Dictionary<Skill, float> SkillCooldowns => skillCooldowns;
+    public bool AttackingPlayer => playerTarget;
+
+    public void SetPaused(bool paused)
+    {
+        hitboxRegistry?.SetPaused(paused);
+    }
 
     void Start()
     {
@@ -54,7 +60,8 @@ public class RunicCombat : MonoBehaviour
 
     void Update()
     {
-        if (runic.IsFrozen) return;
+        if (runic.IsPaused) return;
+
 
         UpdateTimers();
         UpdateSkillCooldowns(); // Updates cooldowns every frame
@@ -283,6 +290,11 @@ public class RunicCombat : MonoBehaviour
             while (elapsedTime < currentStep.Delay)
             {
                 if (!usingSkill) yield break; // Interrupted by Flinch
+                if (runic.IsPaused)
+                {
+                    yield return null;
+                    continue;
+                }
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
@@ -303,6 +315,12 @@ public class RunicCombat : MonoBehaviour
                     yield break;
                 }
 
+                if (runic.IsPaused)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 // If continuous logic is needed during the step window (e.g., keep hitbox active or read input)
                 ExecuteStepUpdate(currentStep);
 
@@ -317,6 +335,11 @@ public class RunicCombat : MonoBehaviour
         while (elapsedTime < skill.Duration)
         {
             if (!usingSkill) yield break;
+            if (runic.IsPaused)
+            {
+                yield return null;
+                continue;
+            }
             elapsedTime += Time.deltaTime;
             yield return null;
         }
@@ -473,7 +496,15 @@ public class RunicCombat : MonoBehaviour
 
     private System.Collections.IEnumerator ResetLandingImpactAfterDelay()
     {
-        yield return new WaitForSeconds(Mathf.Max(landingImpactDuration, Time.fixedDeltaTime));
+        float duration = Mathf.Max(landingImpactDuration, Time.fixedDeltaTime);
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            if (!runic.IsPaused)
+                elapsed += Time.deltaTime;
+            yield return null;
+        }
+
         hitboxRegistry.ResetHitbox(SkillHitboxType.JumpImpactAOE);
         landingImpactResetCoroutine = null;
     }
@@ -649,6 +680,7 @@ public class RunicCombat : MonoBehaviour
             playerTarget = false;
             currentTarget = targetPrey;
         }
+        runic.HealthBar.UpdateBarColor();
     }
 
     public void GiveUpHunt()
@@ -656,6 +688,7 @@ public class RunicCombat : MonoBehaviour
         hunting = false;
         playerTarget = false;
         currentTarget = null;
+        runic.HealthBar.UpdateBarColor();
     }
 
     public void WildCombat()
@@ -826,11 +859,13 @@ public class RunicCombat : MonoBehaviour
     public void SetTarget(Runic target){
         currentTarget = target;
         playerTarget = false;
+        runic.HealthBar.UpdateBarColor();
     }
 
     public void SetPlayerTarget(){
         currentTarget = null;
         playerTarget = true;
+        runic.HealthBar.UpdateBarColor();
     }
 
     public void ResetSkillCooldowns()

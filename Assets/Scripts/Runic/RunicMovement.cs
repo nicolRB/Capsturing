@@ -53,6 +53,12 @@ public class RunicMovement : MonoBehaviour
     private Transform dashTarget;
     private float dashGap;
     private bool dashing;
+    private bool paused;
+    private bool wasKinematicBeforePause;
+    private bool wasAgentStoppedBeforePause;
+    private Vector3 linearVelocityBeforePause;
+    private Vector3 angularVelocityBeforePause;
+    private float pauseStartedAt;
 
     private float speed = 5f;
     private float walkSpeed = 2.5f;
@@ -61,8 +67,7 @@ public class RunicMovement : MonoBehaviour
     public bool Leaping => leapInProgress;
     public bool Charging => charging;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         if (rb != null) rb.isKinematic = true;
@@ -70,7 +75,10 @@ public class RunicMovement : MonoBehaviour
         runic = GetComponent<Runic>();
         runicCombat = GetComponent<RunicCombat>();
         agent = GetComponent<NavMeshAgent>();
+    }
 
+    void Start()
+    {
         speed = runic.Speed;
         walkSpeed = runic.WalkSpeed;
         sprintSpeed = runic.SprintSpeed;
@@ -81,6 +89,12 @@ public class RunicMovement : MonoBehaviour
 
     void Update()
     {
+        if (paused != runic.IsPaused)
+            SetPaused(runic.IsPaused);
+
+        if (paused) return;
+
+
         if (charging && agent != null && agent.enabled && agent.isOnNavMesh)
         {
             if (dashing)
@@ -125,6 +139,8 @@ public class RunicMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (paused) return;
+
         if (leapInProgress && GetComponent<Rigidbody>().linearVelocity.y > 0.1f)
             leapHasAscended = true;
     }
@@ -141,12 +157,13 @@ public class RunicMovement : MonoBehaviour
 
     void OnCollisionExit(Collision collision)
     {
+        if (paused) return;
         leapGroundContacts.Remove(collision.collider);
     }
 
     private void TrackLeapGroundContact(Collision collision)
     {
-        if (!leapInProgress || (leapRequiresAscent && !leapHasAscended))
+        if (paused || !leapInProgress || (leapRequiresAscent && !leapHasAscended))
             return;
 
         if (rb == null || rb.linearVelocity.y > 0.1f)
@@ -272,7 +289,7 @@ public class RunicMovement : MonoBehaviour
 
     private bool TrySetDestination(Vector3 targetPosition, float sampleRadius = 1.5f)
     {
-        if (charging || agent == null || !agent.enabled || !agent.isOnNavMesh)
+        if (paused || charging || agent == null || !agent.enabled || !agent.isOnNavMesh)
             return false;
 
         float searchRadius = Mathf.Max(sampleRadius, 0.01f);
@@ -376,7 +393,7 @@ public class RunicMovement : MonoBehaviour
 
     private bool BeginPhysicsMotion(Rigidbody rb, bool requiresAscent)
     {
-        if (rb == null || leapInProgress)
+        if (paused || rb == null || leapInProgress)
             return false;
 
         EndCharge();
@@ -414,7 +431,7 @@ public class RunicMovement : MonoBehaviour
 
     private void TryCompleteLeap()
     {
-        if (!leapInProgress || !leapEndRequested || (leapRequiresAscent && !leapHasAscended)
+        if (paused || !leapInProgress || !leapEndRequested || (leapRequiresAscent && !leapHasAscended)
             || leapGroundContacts.Count == 0 || Time.time - leapStartedAt < 0.08f)
             return;
 
@@ -632,7 +649,7 @@ public class RunicMovement : MonoBehaviour
 
     public void StartCharge(float chargeSpeed, float maxDistance)
     {
-        if (agent == null || !agent.enabled || !agent.isOnNavMesh || leapInProgress)
+        if (paused || agent == null || !agent.enabled || !agent.isOnNavMesh || leapInProgress)
             return;
 
         if (charging) EndCharge();
@@ -718,7 +735,7 @@ public class RunicMovement : MonoBehaviour
 
     public void StartDashToTarget(Transform target, float dashSpeed, float gap)
     {
-        if (target == null || agent == null) return;
+        if (paused || target == null || agent == null) return;
 
         dashTarget = target;
         dashGap = gap;
@@ -903,7 +920,7 @@ public class RunicMovement : MonoBehaviour
 
     public void Dodge(Vector3 dodgeVelocity)
     {
-        if (rb == null || dodgeVelocity.sqrMagnitude <= 0f)
+        if (paused || rb == null || dodgeVelocity.sqrMagnitude <= 0f)
             return;
 
         if (!leapInProgress)
@@ -921,8 +938,64 @@ public class RunicMovement : MonoBehaviour
 
     public void SetMovementSpeed(float speed)
     {
-        if (charging) return;
+        if (paused || charging) return;
         if (agent != null)
             agent.speed = speed;
+    }
+
+    public void SetPaused(bool state)
+    {
+        if (paused == state)
+            return;
+
+        paused = state;
+
+        if (state)
+        {
+            pauseStartedAt = Time.time;
+
+            if (agent != null && agent.enabled && agent.isOnNavMesh)
+            {
+                wasAgentStoppedBeforePause = agent.isStopped;
+                agent.isStopped = true;
+                agent.velocity = Vector3.zero;
+            }
+
+            if (rb != null)
+            {
+                wasKinematicBeforePause = rb.isKinematic;
+                linearVelocityBeforePause = rb.linearVelocity;
+                angularVelocityBeforePause = rb.angularVelocity;
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                rb.isKinematic = true;
+            }
+
+            return;
+        }
+
+        float pausedDuration = Time.time - pauseStartedAt;
+        if (leapInProgress)
+            leapStartedAt += pausedDuration;
+        if (teleportTimerStarted)
+            teleportTimer += pausedDuration;
+
+        if (rb != null)
+        {
+            rb.isKinematic = wasKinematicBeforePause;
+            if (!rb.isKinematic)
+            {
+                rb.linearVelocity = linearVelocityBeforePause;
+                rb.angularVelocity = angularVelocityBeforePause;
+            }
+        }
+
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
+            agent.isStopped = wasAgentStoppedBeforePause;
+    }
+
+    public void Stop()
+    {
+        agent.ResetPath();
     }
 }

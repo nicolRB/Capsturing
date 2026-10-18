@@ -15,6 +15,8 @@ public class RunicHitboxRegistry : MonoBehaviour
     private HashSet<Collider> hurtboxSet;
 
     private Dictionary<SkillHitboxType, Collider> hitboxDict;
+    private readonly Dictionary<Collider, bool> hitboxEnabledBeforePause = new Dictionary<Collider, bool>();
+    private bool paused;
 
     private void Awake()
     {
@@ -45,12 +47,54 @@ public class RunicHitboxRegistry : MonoBehaviour
         return col != null && hurtboxSet.Contains(col);
     }
 
+    public void SetPaused(bool state)
+    {
+        if (paused == state)
+            return;
+
+        paused = state;
+        if (paused)
+        {
+            hitboxEnabledBeforePause.Clear();
+            foreach (Collider hitbox in hitboxDict.Values)
+            {
+                if (hitbox == null) continue;
+                hitboxEnabledBeforePause[hitbox] = hitbox.enabled;
+                hitbox.enabled = false;
+            }
+            return;
+        }
+
+        foreach (KeyValuePair<Collider, bool> entry in hitboxEnabledBeforePause)
+        {
+            if (entry.Key != null)
+                entry.Key.enabled = entry.Value;
+        }
+        hitboxEnabledBeforePause.Clear();
+    }
+
+    private void SetHitboxEnabled(Collider hitbox, bool state)
+    {
+        if (hitbox == null)
+            return;
+
+        if (paused)
+        {
+            hitboxEnabledBeforePause[hitbox] = state;
+            hitbox.enabled = false;
+        }
+        else
+        {
+            hitbox.enabled = state;
+        }
+    }
+
     public void ActivateHitbox(SkillHitboxType type)
     {
         Collider col = GetCollider(type);
         if (col != null)
         {
-            col.enabled = true;
+            SetHitboxEnabled(col, true);
         }
     }
 
@@ -59,7 +103,7 @@ public class RunicHitboxRegistry : MonoBehaviour
         Collider col = GetCollider(type);
         if (col == null) return;
 
-        col.enabled = true;
+        SetHitboxEnabled(col, true);
         col.transform.localScale = Vector3.one * sizeMultiplier;
 
         HitboxItem hitboxItem = col.GetComponent<HitboxItem>();
@@ -72,7 +116,7 @@ public class RunicHitboxRegistry : MonoBehaviour
         Collider col = GetCollider(type);
         if (col != null)
         {
-            col.enabled = false;
+            SetHitboxEnabled(col, false);
         }
     }
 
@@ -82,7 +126,7 @@ public class RunicHitboxRegistry : MonoBehaviour
         {
             if (mapping.targetCollider != null)
             {
-                mapping.targetCollider.enabled = false;
+                SetHitboxEnabled(mapping.targetCollider, false);
             }
         }
     }
@@ -92,7 +136,7 @@ public class RunicHitboxRegistry : MonoBehaviour
         Collider col = GetCollider(type);
         if (col != null)
         {
-            col.enabled = false;
+            SetHitboxEnabled(col, false);
             col.transform.localScale = new Vector3(1, 1, 1);
         }
     }
@@ -103,7 +147,7 @@ public class RunicHitboxRegistry : MonoBehaviour
         {
             if (mapping.targetCollider != null)
             {
-                mapping.targetCollider.enabled = false;
+                SetHitboxEnabled(mapping.targetCollider, false);
                 mapping.targetCollider.transform.localScale = new Vector3(1, 1, 1);
             }
         }

@@ -114,6 +114,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject aimIndicator;
     [SerializeField] private SpellcastingCoordinator spellcastingCoordinator;
     [SerializeField] private RunicCommands runicCommand;
+    [SerializeField] private SummonedRunicUI summonedRunicUI;
 
     private bool useAimIndicator = true;
 
@@ -128,6 +129,7 @@ public class PlayerController : MonoBehaviour
     public RunicPointCommand PointCommand => pointCommand;
     public Runic CommandedTarget => commandedTarget;
     public RunicCommands RunicCommand => runicCommand;
+    public SummonedRunicUI RunicUI => summonedRunicUI;
 
     private void Awake()
     {
@@ -169,6 +171,12 @@ public class PlayerController : MonoBehaviour
 
         if (spellcastingCoordinator == null) 
             spellcastingCoordinator = FindFirstObjectByType<SpellcastingCoordinator>();
+
+        if (summonedRunicUI == null)
+        {
+            summonedRunicUI = FindFirstObjectByType<SummonedRunicUI>();
+            summonedRunicUI.gameObject.SetActive(false);
+        }
     }
 
     public void SetCastingState(CastState newState)
