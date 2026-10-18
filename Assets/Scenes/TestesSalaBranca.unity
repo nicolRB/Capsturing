@@ -3075,6 +3075,10 @@ PrefabInstance:
       propertyPath: runicCommand
       value: 
       objectReference: {fileID: 403397942}
+    - target: {fileID: 1871395203445187512, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+      propertyPath: knockbackResistance
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2021442283357212590, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
       propertyPath: m_SizeDelta.x
       value: 650
@@ -3748,8 +3752,20 @@ MonoBehaviour:
   onInteract:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SpellcastingScript, Assembly-CSharp
+      - m_Target: {fileID: 1926513243}
+        m_TargetAssemblyTypeName: SpellcastingCoordinator, GameCore
+        m_MethodName: ResetCooldowns
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 10
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 403397942}
+        m_TargetAssemblyTypeName: RunicCommands, GameCore
         m_MethodName: ResetCooldowns
         m_Mode: 1
         m_Arguments:
@@ -4461,6 +4477,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4deca21c08396ae4abee522db92287a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveManager
+--- !u!114 &1926513243 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 681781891520420819, guid: 896f682e147b68d449d471dd80e8aa78, type: 3}
+  m_PrefabInstance: {fileID: 1113468949}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d84c3cbb4e7b196419b7fec780e5b83e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpellcastingScript
 --- !u!1 &2053869464
 GameObject:
   m_ObjectHideFlags: 0
@@ -8100,7 +8127,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5788828682581938301, guid: a6a670e3ce8ccfb4aa3106610b84f7e8, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -97.49911
+      value: -97.499886
       objectReference: {fileID: 0}
     - target: {fileID: 5832680342409213998, guid: a6a670e3ce8ccfb4aa3106610b84f7e8, type: 3}
       propertyPath: m_AnchorMax.y
@@ -9717,7 +9744,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1594998805417901839, guid: f406c4ab3cb33be4facb752bd62ef44b, type: 3}
       propertyPath: enemyIsFrozen
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1594998805417901839, guid: f406c4ab3cb33be4facb752bd62ef44b, type: 3}
       propertyPath: originalEnemy

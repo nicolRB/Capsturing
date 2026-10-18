@@ -91,10 +91,12 @@ public class PointTargetScript : MonoBehaviour
         if (Mouse.current == null || Keyboard.current == null)
             return;
 
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
+        if (Mouse.current.leftButton.wasPressedThisFrame && 
+            stateOnMousePressed != PlayerController.CastState.Casting)
             stateOnMousePressed = player.CastingState;
-        }
+
+        if (Mouse.current.leftButton.wasReleasedThisFrame)
+            stateOnMousePressed = PlayerController.CastState.Idle;
 
         selecting = Mouse.current.leftButton.isPressed
             && player.MenuManager.CurrentMenu == null 
@@ -134,6 +136,16 @@ public class PointTargetScript : MonoBehaviour
     }
     void Point()
     {
+        if (player == null)
+            return;
+
+        if (player.CastingState == PlayerController.CastState.Casting ||
+            player.CastingState == PlayerController.CastState.Channeling)
+        {
+            ClearPoint();
+            return;
+        }
+
         ray = new Ray(playerCamera.transform.position, Quaternion.Euler(playerCamera.transform.eulerAngles.x, 
         playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
 
@@ -157,7 +169,9 @@ public class PointTargetScript : MonoBehaviour
                         && (hitLayers.value & (1 << hit.collider.gameObject.layer)) != 0;
 
         // Keeps visible while the button is pressed, when in fade-out after releasing or when a point-targeted spells is being aimed
-        bool canShowGroundIndicator = selecting || selected || isPointTargetedSpell;
+        bool canShowGroundIndicator = player.CastingState != PlayerController.CastState.Channeling &&
+            player.CastingState != PlayerController.CastState.Casting &&
+            (selecting || selected || isPointTargetedSpell);
 
         // If the mouse button is released on this frame, activate selected immediately
         if (terrainHit && groundIndicator.activeSelf && Mouse.current.leftButton.wasReleasedThisFrame 
@@ -289,5 +303,10 @@ public class PointTargetScript : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(ray.origin + ray.direction * maxDistance, sphereRadius);
         Gizmos.DrawWireSphere(ray.origin, sphereRadius);
+    }
+
+    public void SetStateOnMousePressed(PlayerController.CastState castState)
+    {
+        stateOnMousePressed = castState;
     }
 }

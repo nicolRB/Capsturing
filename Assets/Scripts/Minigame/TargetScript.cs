@@ -99,8 +99,6 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
     {
         if (clicked || missed) return;
 
-        clicked = true;
-
         if (cast == null || cast.CurrentTargetIndex != targetIndex)
             return;
 
@@ -118,6 +116,8 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
         if (!RectTransformUtility.RectangleContainsScreenPoint(
             rect, eventData.position, eventData.pressEventCamera))
             return;
+        
+        clicked = true;
 
         // Then filter the click against the circular target shape.
         float radius = rect.rect.width * 0.5f;
@@ -130,16 +130,18 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
 
         HitResult result;
 
-        if (timeAfterActivation < 0f)
+        float diff = Mathf.Abs(timeAfterActivation - lifetime);
+
+        if (timeAfterActivation < 0f || diff > hitWindow)
         {
+            missed = true;
+            missStartTime = Time.time;
             result = HitResult.Miss;
             StartCoroutine(MissEffect());
             if (cast != null) cast.RegisterMiss();
         }
         else
         {
-            float diff = Mathf.Abs(timeAfterActivation - lifetime);
-
             if (diff <= perfectWindow)
             {
                 result = HitResult.Perfect;
@@ -155,6 +157,7 @@ public class TargetScript : MonoBehaviour, IPointerClickHandler
             else
             {
                 result = HitResult.Miss;
+                missStartTime = Time.time;
                 StartCoroutine(MissEffect());
                 if (cast != null) cast.RegisterMiss();
             }
