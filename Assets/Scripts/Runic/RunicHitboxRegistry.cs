@@ -54,19 +54,17 @@ public class RunicHitboxRegistry : MonoBehaviour
         }
     }
 
-    public void ActivateHitbox(SkillHitboxType type, float sizeMultiplier, float power, float knockback, bool continuous)
+    public void ActivateHitbox(SkillHitboxType type, float sizeMultiplier, Skill skill, float power, bool continuous)
     {
         Collider col = GetCollider(type);
-        if (col != null)
-        {
-            col.enabled = true;
-            col.transform.localScale = new Vector3(sizeMultiplier, sizeMultiplier, sizeMultiplier);
+        if (col == null) return;
 
-            HitboxItem hitboxItem = col.GetComponent<HitboxItem>();
-            
-            if (hitboxItem != null)
-                hitboxItem.Setup(GetComponent<Runic>(), power, knockback, continuous);
-        }
+        col.enabled = true;
+        col.transform.localScale = Vector3.one * sizeMultiplier;
+
+        HitboxItem hitboxItem = col.GetComponent<HitboxItem>();
+        if (hitboxItem != null)
+            hitboxItem.Setup(GetComponent<Runic>(), skill, power, continuous);
     }
 
     public void DeactivateHitbox(SkillHitboxType type)

@@ -1,4 +1,5 @@
-using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,10 +14,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int maxHP = 100;
     [SerializeField] private int currentHP = 100;
     [SerializeField] private int defense = 5;
+    [SerializeField] private int magicDefense = 5;
     [SerializeField] private int knockbackResistance = 0;
+    [SerializeField] private int magic = 5;
+
+    [Header("Resonance")]
+    [SerializeField] private int resonantDefense;
+    [SerializeField] private int resonantMagicDefense;
+    [SerializeField] private int resonantMagic;
 
     public int MaxHP => maxHP;
     public int CurrentHP => currentHP;
+    public int Defense => defense + resonantDefense;
+    public int MagicDefense => magicDefense + resonantMagicDefense;
+    public int Magic => magic + resonantMagicDefense;
 
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 1.25f;
@@ -81,7 +92,7 @@ public class PlayerController : MonoBehaviour
     // Aiming - the spell is charged and ready to launch;
     // Casting - lançando feitiço
     public enum CastState { Idle, Channeling, Aiming, Casting } 
-    private CastState castingState = CastState.Idle;
+    [SerializeField] private CastState castingState = CastState.Idle;
 
     public CastState CastingState => castingState;
 
@@ -459,6 +470,28 @@ public class PlayerController : MonoBehaviour
             Die();
     }
 
+    public int CalculateDamage(Skill skill, Runic attacker, float totalPower)
+    {
+        float A = attacker.GetKeyStatValue(skill.KeyStat);
+        float D = skill.DamageType switch
+        {
+            SkillDamageType.Magical => magicDefense,
+            SkillDamageType.True    => 0f,      // ignores defense (zero mitigation)
+            _                       => defense
+        };
+
+        float mitigation = D / Mathf.Max(D + A, 0.01f);
+        float damage = totalPower * 2f * (1f - mitigation);
+
+        // STAB
+        if (attacker.Elements != null && attacker.Elements.Contains(skill.SkillElement))
+            damage *= 1.25f;
+
+        damage *= Random.Range(0.85f, 1.15f);
+
+        return Mathf.Max(Mathf.RoundToInt(damage), Mathf.CeilToInt(totalPower * 0.1f));
+    }
+
     public void ApplyKnockback(Transform knockbackOrigin, float knockback)
     {
         if (knockback == 0 || knockbackOrigin == null)
@@ -503,14 +536,14 @@ public class PlayerController : MonoBehaviour
         if (healing > 0)
         {
             currentHP += healing;
-            currentHP = Math.Min(currentHP, maxHP);
+            currentHP = Mathf.Min(currentHP, maxHP);
         }
     }
 
     public void SetHP(int amount)
     {
         currentHP = amount;
-        currentHP = Math.Min(currentHP, maxHP);
+        currentHP = Mathf.Min(currentHP, maxHP);
 
         if (amount < 0)
             Die();
@@ -538,6 +571,26 @@ public class PlayerController : MonoBehaviour
 
         if (target == null)
             Debug.Log("Alvo do Rúnico limpo.");
+    }
+
+    public void ApplyRunicResonance(List<RunicSaveData> party)
+    {
+        if (party == null || party.Count == 0)
+        {
+            resonantDefense = 0;
+            resonantMagic = 0;
+            resonantMagicDefense = 0;
+            return;
+        }
+
+        resonantDefense = Mathf.RoundToInt(
+            party.Sum(r => r.defense) + party.Max(r => r.defense));
+
+        resonantMagic = Mathf.RoundToInt(
+            party.Sum(r => r.magic) + party.Max(r => r.magic));
+
+        resonantMagicDefense = Mathf.RoundToInt(
+            party.Sum(r => r.magicDefense) + party.Max(r => r.magicDefense));
     }
 
     // ---------------- Settings ---------------- 

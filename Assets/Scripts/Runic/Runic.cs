@@ -194,6 +194,7 @@ public class Runic : MonoBehaviour
     public RunicCombat Combat => combat;
     public RunicMovement Movement => movement;
     public Rigidbody Rb => rb;
+    public List<Element> Elements => elements;
 
     public void PruneDestroyedRelations()
     {
@@ -295,6 +296,7 @@ public class Runic : MonoBehaviour
         specialAggression = data.specialAggression;
         basicSkills = runicDatabase.GetSkillsByIds(data.learnedBasicSkillIds);
         skills = runicDatabase.GetSkillsByIds(data.learnedSkillIds);
+        elements = runicDatabase.GetElementsByIds(data.elementIds);
         combatStyle = data.combatStyle;
         
         tameState = RunicState.Tamed;
@@ -432,6 +434,9 @@ public class Runic : MonoBehaviour
 
         if (currentHP <= 0)
         {
+            if (currentHP < 0)
+                currentHP = 0;
+
             Die();
             return;
         }
@@ -471,6 +476,46 @@ public class Runic : MonoBehaviour
             threats.Add(attacker);
         }
     }
+
+    public int CalculateDamage(Skill skill, Runic attacker, float totalPower)
+    {
+        float A = attacker.GetKeyStatValue(skill.KeyStat);
+        float D = skill.DamageType switch
+        {
+            SkillDamageType.Magical => magicDefense,
+            SkillDamageType.True    => 0f,      // ignores defense (zero mitigation)
+            _                       => defense
+        };
+
+        float mitigation = D / Mathf.Max(D + A, 0.01f);
+        float damage = totalPower * 2f * (1f - mitigation);
+
+        // Element: multiplies by the effect on each of the defender's elements.
+        float elementMult = 1f;
+        if (elements != null)
+            foreach (Element e in elements)
+                if (e != null) elementMult *= e.GetIncomingMultiplier(skill.SkillElement);
+        damage *= elementMult;
+
+        // STAB
+        if (attacker.Elements != null && attacker.Elements.Contains(skill.SkillElement))
+            damage *= 1.25f;
+
+        damage *= Random.Range(0.85f, 1.15f);
+
+        return Mathf.Max(Mathf.RoundToInt(damage), Mathf.CeilToInt(totalPower * 0.1f));
+    }
+
+    public float GetKeyStatValue(SkillKeyStat keyStat) => keyStat switch
+    {
+        SkillKeyStat.Attack => attack,
+        SkillKeyStat.Magic => magic,
+        SkillKeyStat.Defense => defense,
+        SkillKeyStat.MagicDefense => magicDefense,
+        SkillKeyStat.Hp => currentHP,
+        SkillKeyStat.Speed => speed,
+        _ => 100f
+    };
 
     public bool IsFearful()
     {
@@ -579,5 +624,10 @@ public class Runic : MonoBehaviour
     public void SetFreeze(bool state)
     {
         frozen = state;
+    }
+
+    public void ResetSkillCooldowns()
+    {
+        combat.ResetSkillCooldowns();
     }
 }

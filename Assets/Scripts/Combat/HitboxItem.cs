@@ -4,60 +4,64 @@ using System.Collections.Generic;
 public class HitboxItem : MonoBehaviour
 {
     private Runic ownerRunic;
+    private Skill skill;
     private float storedPower;
-    private float storedKnockback;
     private bool continuous;
     private readonly Dictionary<Component, float> nextDamageTime = new();
     private readonly HashSet<Component> knockedBackTargets = new();
+    private readonly HashSet<Component> hitTargets = new();
     [SerializeField] private float damageInterval = 0.25f;
 
-    private HashSet<Component> hitTargets = new HashSet<Component>();
-
-    public void Setup(Runic owner, float power, float knockback, bool continuous)
+    public void Setup(Runic owner, Skill skill, float power, bool continuous)
     {
         ownerRunic = owner;
+        this.skill = skill;
         storedPower = power;
-        storedKnockback = knockback;
         this.continuous = continuous;
         hitTargets.Clear();
         knockedBackTargets.Clear();
+        nextDamageTime.Clear();
     }
 
     private void OnTriggerEnter(Collider other) => TryApplyHit(other);
     private void OnTriggerStay(Collider other) => TryApplyHit(other);
-    
+
     private void TryApplyHit(Collider other)
     {
-        Debug.Log("Hitbox encostou em: " + other.gameObject.name);
-        if (ownerRunic == null) return;
+        if (ownerRunic == null || skill == null) return;
+
+        float knockback = skill.KnockBackValue;
 
         PlayerController playerTarget = other.GetComponentInParent<PlayerController>();
         if (playerTarget != null)
         {
-            if (ownerRunic.TameState == RunicState.Tamed || !CanHit(playerTarget)
-            || playerTarget.InvencibilityTime > 0) return;
+            if (ownerRunic.TameState == RunicState.Tamed
+                || playerTarget.InvencibilityTime > 0
+                || !CanHit(playerTarget)) return;
 
+            // TODO: aplicar defesa do jogador quando ele tiver stats
             playerTarget.TakeDamage(Mathf.RoundToInt(storedPower));
-            playerTarget.ApplyKnockback(ownerRunic.transform, storedKnockback);
+            playerTarget.ApplyKnockback(ownerRunic.transform, knockback);
             return;
         }
 
         Runic target = other.GetComponentInParent<Runic>();
-        if (target == null || target == ownerRunic || !CanHit(target) 
-            || target.InvencibilityTime > 0) return;
+        if (target == null || target == ownerRunic
+            || target.InvencibilityTime > 0
+            || !CanHit(target)) return;
 
-        int finalDamage = Mathf.Max(1, Mathf.RoundToInt(storedPower));
+        int finalDamage = target.CalculateDamage(skill, ownerRunic, storedPower);
         target.TakeDamage(finalDamage, ownerRunic);
+
         if (knockedBackTargets.Add(target))
-            target.ApplyKnockback(ownerRunic, storedKnockback);
+            target.ApplyKnockback(ownerRunic, knockback);
     }
 
     private bool CanHit(Component target)
     {
         if (!continuous) return hitTargets.Add(target);
 
-        if (nextDamageTime.TryGetValue(target, out float nextTime) &&
-            Time.time < nextTime)
+        if (nextDamageTime.TryGetValue(target, out float nextTime) && Time.time < nextTime)
             return false;
 
         nextDamageTime[target] = Time.time + damageInterval;

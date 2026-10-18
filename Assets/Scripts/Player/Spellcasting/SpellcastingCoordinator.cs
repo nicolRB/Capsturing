@@ -196,6 +196,8 @@ public class SpellcastingCoordinator : MonoBehaviour
 
     void CastSpell()
     {
+        pointTarget?.ClearPoint();
+
         player.SetCastingState(PlayerController.CastState.Casting);
         CurrentSpell.OnSpellResolved += HandleSpellResolved;
         CurrentSpell.OnSpellCast();
@@ -256,6 +258,7 @@ public class SpellcastingCoordinator : MonoBehaviour
         if (castingUI != null) castingUI.SetActive(false);
         if (player.PlayerHUD != null)
             player.PlayerHUD.SetActive(true);
+        pointTarget.SetStateOnMousePressed(PlayerController.CastState.Casting);
     }
 
     public void CancelCast()

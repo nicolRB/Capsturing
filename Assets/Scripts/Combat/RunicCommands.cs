@@ -205,4 +205,11 @@ public class RunicCommands : MonoBehaviour
         else
             Debug.LogWarning("Runic Commands: Missing Runic Skills Ui");
     }
+
+    public void ResetCooldowns()
+    {
+        dodgeTimer = 0;
+        skillTimer = 0;
+        summonedRunic.ResetSkillCooldowns();
+    }
 }

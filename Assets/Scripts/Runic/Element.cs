@@ -24,4 +24,12 @@ public class Element : ScriptableObject
     public string ElementId => elementId;
     public string ElementName => elementName;
     public Color ElementColor => elementColor;
+
+    public float GetIncomingMultiplier(Element attacking)
+    {
+        if (attacking == null) return 1f;
+        if (elementVulnerabilities.Contains(attacking)) return vulnerabilityMultiplier;
+        if (elementResistances.Contains(attacking)) return resistanceMultiplier;
+        return 1f;
+    }
 }

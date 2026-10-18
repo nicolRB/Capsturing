@@ -37,6 +37,8 @@ public class RunicStorageManager : MonoBehaviour
     private void NotifyStorageChanged()
     {
         OnStorageChanged?.Invoke();
+        if (player != null)
+            player.ApplyRunicResonance(GetPartyRunics());
     }
 
     private void Start()
@@ -198,6 +200,18 @@ public class RunicStorageManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    public List<RunicSaveData> GetPartyRunics()
+    {
+        var result = new List<RunicSaveData>();
+        foreach (string id in partyIds)
+        {
+            if (string.IsNullOrEmpty(id)) continue;
+            RunicSaveData data = GetRunicById(id);
+            if (data != null) result.Add(data);
+        }
+        return result;
     }
 
     // ============================================================

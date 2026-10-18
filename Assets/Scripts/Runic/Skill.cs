@@ -21,6 +21,13 @@ public enum SkillKeyStat
     None
 }
 
+public enum SkillDamageType 
+{ 
+    Physical, 
+    Magical, 
+    True 
+}
+
 public enum SkillHitboxType
 {
     None,
@@ -131,6 +138,8 @@ public class Skill : ScriptableObject
 
     [Header("Combat Attributes (Damage/Effect)")]
     [SerializeField] private SkillKeyStat keyStat = SkillKeyStat.Attack;
+    [SerializeField] private SkillDamageType damageType = SkillDamageType.Physical;
+
     [Tooltip("Base power of the skill multiplied by the runic's stats in the damage formula")]
     [SerializeField] private float power = 100f;
     [SerializeField] private float knockbackValue = 2f;
@@ -154,4 +163,5 @@ public class Skill : ScriptableObject
     public float KnockBackValue => knockbackValue;
     public SkillStep[] Steps => steps;
     public SkillAttackType SkillType => skillType;
+    public SkillDamageType DamageType => damageType;
 }

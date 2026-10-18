@@ -389,8 +389,14 @@ public class RunicCombat : MonoBehaviour
         if (step.HitboxType != SkillHitboxType.None
             && step.HitboxType != SkillHitboxType.JumpImpactAOE)
         {
-            float totalPower = GetKeyStatValue(skill.KeyStat) * (skill.Power / 100f);
-            hitboxRegistry.ActivateHitbox(step.HitboxType, step.HitboxSize, totalPower, skill.KnockBackValue, step.Continuous);
+            float totalPower = runic.GetKeyStatValue(skill.KeyStat) * (skill.Power / 100f);
+            hitboxRegistry.ActivateHitbox(
+                step.HitboxType, 
+                step.HitboxSize, 
+                skill, 
+                totalPower, 
+                step.Continuous
+            );
         }
     }
 
@@ -428,16 +434,16 @@ public class RunicCombat : MonoBehaviour
         // Clear any hitbox that was active during the leap.
         hitboxRegistry.ResetAllHitboxes();
 
-        float totalPower = GetKeyStatValue(pendingLandingImpactSkill.KeyStat)
+        float totalPower = runic.GetKeyStatValue(pendingLandingImpactSkill.KeyStat)
             * (pendingLandingImpactSkill.Power / 100f);
+
         hitboxRegistry.ActivateHitbox(
             pendingLandingImpactStep.HitboxType,
             pendingLandingImpactStep.HitboxSize,
+            pendingLandingImpactSkill,
             totalPower,
-            pendingLandingImpactSkill.KnockBackValue,
             pendingLandingImpactStep.Continuous
-        );
-
+);
         landingImpactResetCoroutine = StartCoroutine(ResetLandingImpactAfterDelay());
     }
 
@@ -784,22 +790,6 @@ public class RunicCombat : MonoBehaviour
         runicMovement.FaceTarget(currentTarget.transform.position);
     }
 
-
-    private float GetKeyStatValue(SkillKeyStat keyStat)
-    {
-        switch (keyStat)
-        {
-            case SkillKeyStat.Attack: return runic.Attack;
-            case SkillKeyStat.Magic: return runic.Magic;
-            case SkillKeyStat.Defense: return runic.Defense;
-            case SkillKeyStat.MagicDefense: return runic.MagicDefense;
-            case SkillKeyStat.Hp: return runic.CurrentHP;
-            case SkillKeyStat.Speed: return runic.Speed;
-            case SkillKeyStat.None: return 100f;
-            default: return 0f;
-        }
-    }
-
     public bool IsBusy()
     {
         return usingSkill || runicMovement.Leaping;
@@ -841,5 +831,14 @@ public class RunicCombat : MonoBehaviour
     public void SetPlayerTarget(){
         currentTarget = null;
         playerTarget = true;
+    }
+
+    public void ResetSkillCooldowns()
+    {
+        List<Skill> keys = new List<Skill>(skillCooldowns.Keys);
+        foreach (var skill in keys)
+        {
+            skillCooldowns[skill] = 0;
+        }
     }
 }
