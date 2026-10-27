@@ -15,6 +15,7 @@ MonoBehaviour:
   allSpecies:
   - {fileID: 11400000, guid: c014a50325299d54ebd86558c955ba3f, type: 2}
   - {fileID: 11400000, guid: 49f099674a14a6e42b6662991e8acedf, type: 2}
+  - {fileID: 11400000, guid: a06d1bb768e09fa49a0d6ed5232ba437, type: 2}
   speciesRelations:
   - speciesA: {fileID: 11400000, guid: c014a50325299d54ebd86558c955ba3f, type: 2}
     speciesB: {fileID: 11400000, guid: 49f099674a14a6e42b6662991e8acedf, type: 2}

@@ -1,0 +1,5 @@
+Stylized Medieval Building Pack is a collection of modular low-poly assets designed to create medieval-style environments such as villages, towns, and RPG worlds.
+
+This pack includes 72 individual meshes that can be combined to build a variety of structures, from small houses to large buildings. The assets feature a stylized art style with clean geometry, making them ideal for fantasy, RPG, and stylized games.
+
+All models are optimized and game-ready, suitable for mobile, PC, and indie projects. The modular design allows easy customization and flexible level creation inside Unity.

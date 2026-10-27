@@ -14,7 +14,6 @@ public class RunicWheelUI : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private SummonRunicSpell summonRunicSpell;
-    [SerializeField] private RunicStorageManager runicStorageManager;
     [SerializeField] private GameObject runicIconPrefab;
     [SerializeField] private GameObject symbol;
 
@@ -26,8 +25,8 @@ public class RunicWheelUI : MonoBehaviour
     
     void OnEnable()
     {
-        if (runicStorageManager == null) 
-            runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
+        if (RunicStorageManager.Instance == null) 
+            Debug.LogWarning("Runic Wheel: Runic Storage Manager missing.");
             
         if (summonRunicSpell == null) 
             summonRunicSpell = FindFirstObjectByType<SummonRunicSpell>();
@@ -68,13 +67,13 @@ public class RunicWheelUI : MonoBehaviour
         }
         RunicIcons.Clear();
 
-        if (runicStorageManager == null)
+        if (RunicStorageManager.Instance == null)
             return;
 
         List<RunicSaveData> partyRunics = new List<RunicSaveData>();
-        for (int i = 1; i <= runicStorageManager.GetPartyCount(); i++)
+        for (int i = 1; i <= RunicStorageManager.Instance.GetPartyCount(); i++)
         {
-            RunicSaveData runic = runicStorageManager.GetPartyRunicBySequence(i);
+            RunicSaveData runic = RunicStorageManager.Instance.GetPartyRunicBySequence(i);
             if (runic != null)
                 partyRunics.Add(runic);
         }
@@ -88,7 +87,7 @@ public class RunicWheelUI : MonoBehaviour
         for (int i = 0 ; i < runicsInParty; i++)
         {
             RunicSaveData runic = partyRunics[i];
-            Sprite runicIcon = runicStorageManager.GetRunicIcon(runic);
+            Sprite runicIcon = RunicStorageManager.Instance.GetRunicIcon(runic);
             runicIconSprites.Add(runicIcon);
 
             GameObject newIcon = Instantiate(runicIconPrefab, transform);
@@ -126,13 +125,13 @@ public class RunicWheelUI : MonoBehaviour
 
     public void SelectRunic(string runicId)
     {
-        if (summonRunicSpell == null || runicStorageManager == null)
+        if (summonRunicSpell == null || RunicStorageManager.Instance == null)
         {
             Debug.LogError("RunicWheelUI: summon spell or storage manager is missing.", this);
             return;
         }
 
-        RunicSaveData selectedRunic = runicStorageManager.GetRunicById(runicId);
+        RunicSaveData selectedRunic = RunicStorageManager.Instance.GetRunicById(runicId);
         if (selectedRunic == null)
         {
             Debug.LogWarning($"RunicWheelUI: no runic found with ID '{runicId}'.", this);

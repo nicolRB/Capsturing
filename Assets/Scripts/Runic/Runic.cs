@@ -70,6 +70,9 @@ public class Runic : MonoBehaviour
     [SerializeField] private List<Skill> basicSkills;
     [SerializeField] private List<Skill> skills;
 
+    // for when models are manually placed onto the scene without something external to call stat initialization 
+    [SerializeField] private bool applySpeciesStatsStart;
+
     [Header("Unique Features (Doesn't Rely On Species)")]
     [SerializeField] private string uniqueSpritePath;
     [SerializeField] private string uniqueModelAssetPath;
@@ -126,7 +129,6 @@ public class Runic : MonoBehaviour
     [SerializeField] private PointTargetScript pointer;
     [SerializeField] private PlayerInteraction playerInteraction;
     [SerializeField] private RunicDatabase runicDatabase;
-    [SerializeField] private RunicStorageManager runicStorageManager;
     [SerializeField] private HPBar hpBar;
     private RunicCombat combat;
     private RunicMovement movement;
@@ -229,9 +231,10 @@ public class Runic : MonoBehaviour
 
         if (runicDatabase == null) runicDatabase = FindFirstObjectByType<RunicDatabase>();
 
-        if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
-
         if (hpBar == null) hpBar = GetComponentInChildren<HPBar>();
+
+        if (applySpeciesStatsStart && species != null)
+            ApplySpeciesStats();
  
         rb = GetComponent<Rigidbody>();
 
@@ -403,14 +406,54 @@ public class Runic : MonoBehaviour
         };
     }
 
+    public void ApplySpeciesStats()
+    {
+        if (species != null)
+        {
+            runicInstanceId = string.IsNullOrEmpty(runicInstanceId) ? System.Guid.NewGuid().ToString() : runicInstanceId;
+            nickname = string.IsNullOrEmpty(nickname) ? species.SpeciesName : nickname;
+            runicIcon = runicIcon == null && species.SpeciesIcon != null
+                ? species.SpeciesIcon : runicIcon;
+            width = species.Width;
+            height = species.Height;
+            level = level == 0 ? 1 : level;
+            currentHP = species.BaseHP;
+            maxHP = species.BaseHP;
+            attack = species.BaseAttack;
+            defense = species.BaseDefense;
+
+            weight = species.BaseWeight;
+            rb.mass = weight;
+
+            knockbackResistance = species.BaseKnockbackResistance;
+            speed = species.BaseSpeed;
+            walkSpeed = species.BaseWalkSpeed;
+            sprintSpeed = species.BaseSprintSpeed;
+            magic = species.BaseMagic;
+            magicDefense = species.BaseMagicDefense;
+            recovery = species.Recovery;
+            specialRecovery = species.SpecialRecovery;
+            aggression = species.Aggression;
+            specialAggression = species.Specialaggression;
+            basicSkills = species.BasicSkills;
+            skills = species.Skills;
+            elements = species.Elements;
+
+            combatStyle = species.DefaultCombatStyle;
+            combat.SetCombatStyle(combatStyle);
+
+            nature = species.DefaultNature;
+        }
+    }
+
     public void Capture()
     {
         if (tameState != RunicState.Wild) return;
 
         RunicSaveData capturedData = ExportToSaveData();
 
-        if (runicStorageManager != null)
-            runicStorageManager.AddCapturedRunic(capturedData);
+        if (RunicStorageManager.Instance != null)
+            RunicStorageManager.Instance.AddCapturedRunic(capturedData);
         else
             Debug.LogError("Runic.Capture: RunicStorageManager não encontrado na cena.", this);
 
@@ -449,6 +492,19 @@ public class Runic : MonoBehaviour
         }
 
         activeChains.Clear();
+
+        if ((!IsFriendly() && !IsFearful()) || IsProtective())
+        {
+            actState = BehaviorState.Fighting;
+            runicWildAI.SetFightPlayer(true);
+            hpBar.UpdateBarColor();
+        }
+        else if (IsFearful())
+        {
+            actState = BehaviorState.Fleeing;
+            runicWildAI.SetFleePlayer(true);
+            hpBar.UpdateBarColor();
+        }
     }
 
     public void Dodge()
@@ -470,8 +526,8 @@ public class Runic : MonoBehaviour
         Color popupColor = damageColor.a > 0f ? damageColor : Color.white;
         popup.GetComponent<DamagePopup>().Setup(damage, popupColor, damageScale);
 
-        if (tameState == RunicState.Tamed && runicStorageManager != null)
-            runicStorageManager.UpdateRunicInBox(this);
+        if (tameState == RunicState.Tamed && RunicStorageManager.Instance != null)
+            RunicStorageManager.Instance.UpdateRunicInBox(this);
 
         if (currentHP <= 0)
         {
@@ -645,8 +701,10 @@ public class Runic : MonoBehaviour
             player.SetCommandedTarget(null);
 
         if (player != null && player.RunicUI != null && tameState == RunicState.Tamed)
+        {
             player.RunicUI.SetRunic(null);
             player.RunicUI.gameObject.SetActive(false);
+        }
 
         // handle death logic (e.g., play animation, drop loot, etc.)
         Destroy(gameObject);

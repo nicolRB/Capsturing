@@ -18,6 +18,7 @@ MonoBehaviour:
   skillType: 0
   skillElement: {fileID: 11400000, guid: 88c4aa8362db76a488f5461940776b06, type: 2}
   keyStat: 0
+  damageType: 0
   power: 80
   knockbackValue: 12
   duration: 1.3
@@ -32,6 +33,7 @@ MonoBehaviour:
     hitboxType: 9
     hitboxSize: 1.5
     continuous: 0
+    emissions: []
   - delay: 0
     movementType: 0
     force: 0
@@ -40,3 +42,15 @@ MonoBehaviour:
     hitboxType: 9
     hitboxSize: 3.5
     continuous: 0
+    emissions:
+    - emissionPrefab: {fileID: 4454671841855045795, guid: f537024bd80afb0469406a59fb57e4d6, type: 3}
+      speed: 0
+      continuousEmission: 0
+      amount: 0
+      multiFireDelay: 0
+      spreadAngles: {x: 0, y: 0, z: 0}
+      spreadRandomness: 0
+      origin: 9
+      rotateToFaceTarget: 0
+      customRotation: {x: 0, y: 0, z: 0}
+      emissionScale: 1.5

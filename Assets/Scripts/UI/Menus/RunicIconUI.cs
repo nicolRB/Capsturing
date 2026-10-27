@@ -125,8 +125,8 @@ public class RunicIconUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
 
         Image iconImage = runicIconImage.GetComponent<Image>();
 
-        Sprite runicIcon = runicData != null && runicsMenuScript.StorageManager != null
-            ? runicsMenuScript.StorageManager.GetRunicIcon(runicData)
+        Sprite runicIcon = runicData != null && RunicStorageManager.Instance != null
+            ? RunicStorageManager.Instance.GetRunicIcon(runicData)
             : null;
 
         if (runicIcon != null)
@@ -182,28 +182,28 @@ public class RunicIconUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
             }
             else if (IsPartySlot)
             {
-                runicsMenuScript.StorageManager.RemoveFromPartyBySlot(SlotNumber);
+                RunicStorageManager.Instance.RemoveFromPartyBySlot(SlotNumber);
                 SetSelected(false);
             }
             else
             {
                 if (!IsInParty)
                 {    
-                    int partySlotIndex = runicsMenuScript.StorageManager.GetNextAvailablePartySlot();
+                    int partySlotIndex = RunicStorageManager.Instance.GetNextAvailablePartySlot();
                     if (partySlotIndex != -1) 
                     {
-                        runicsMenuScript.StorageManager.MoveToPartyBySlot(SlotNumber, partySlotIndex);
+                        RunicStorageManager.Instance.MoveToPartyBySlot(SlotNumber, partySlotIndex);
                     }
                 }
                 else
                 {
                     // If already in the party, find its party slot and remove it.
-                    int partyIndex = runicsMenuScript.StorageManager.GetPartySlotIndex(
-                        runicsMenuScript.StorageManager.GetBoxRunicBySlot(SlotNumber)?.runicInstanceId
+                    int partyIndex = RunicStorageManager.Instance.GetPartySlotIndex(
+                        RunicStorageManager.Instance.GetBoxRunicBySlot(SlotNumber)?.runicInstanceId
                     );
                     if (partyIndex != -1)
                     {
-                        runicsMenuScript.StorageManager.RemoveFromPartyBySlot(partyIndex);
+                        RunicStorageManager.Instance.RemoveFromPartyBySlot(partyIndex);
                     }
                 }
             }

@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 [Serializable]
 public struct GameSettings : IEquatable<GameSettings>
@@ -35,6 +33,7 @@ public struct GameSettings : IEquatable<GameSettings>
 
 public class SettingsManager : MonoBehaviour
 {
+    public static SettingsManager Instance { get; private set; }
     const string K_MOUSE = "Settings.CameraSensitivity";
     const string K_FOV   = "Settings.FOV";
     const string K_VOLUME = "Settings.MasterVolume";
@@ -47,10 +46,15 @@ public class SettingsManager : MonoBehaviour
     static GameSettings _current;
     static bool _loaded;
 
-    public void SaveLastScene(int lastSceneIndex)
+    void Awake()
     {
-        PlayerPrefs.SetInt("LastSceneIndex", lastSceneIndex);
-        PlayerPrefs.Save();
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     public static event Action<GameSettings> OnSettingsChanged;
@@ -108,27 +112,5 @@ public class SettingsManager : MonoBehaviour
         PlayerPrefs.SetInt(K_HUDOPACITY, s.hudOpacity);
         PlayerPrefs.Save();
         OnSettingsChanged?.Invoke(s);
-    }
-
-    public void SaveActiveSaveFile(string activeSaveFilePath)
-    {
-        PlayerPrefs.SetString("ActiveSaveFile", activeSaveFilePath);
-        PlayerPrefs.Save();
-    }
-
-    public string GetActiveSaveFile()
-    {
-        if(!PlayerPrefs.HasKey("ActiveSaveFile"))
-        {
-            Debug.LogError("No ActiveSaveFile Key in PlayerPrefs");
-            return null;
-        }
-
-        return PlayerPrefs.GetString("ActiveSaveFile", "save_1");
-    }
-
-    public void ApplySettings()
-    {
-        
     }
 }

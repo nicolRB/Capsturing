@@ -9,7 +9,7 @@ public class SaveDataContainer
     public float playerRotation;
     public int playerMaxHP;
     public int playerHP;
-    public int lastSceneIndex;
+    public int sceneIndex;
     public List<float> spellCooldownList = new List<float>();
     public List<RunicSaveData> boxStorage = new List<RunicSaveData>();
     public List<string> partyIds = new List<string>();
@@ -21,8 +21,9 @@ public class SaveDataContainer
         playerPosition[1] = 1f;
         playerPosition[2] = 0f;
         playerRotation = 0f;
+        playerMaxHP = 100;
         playerHP = 100;
-        lastSceneIndex = 0;
+        sceneIndex = 0;
         spellCooldownList = new List<float>();
         boxStorage = new List<RunicSaveData>();
         partyIds = new List<string>();

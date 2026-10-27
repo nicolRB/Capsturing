@@ -16,8 +16,8 @@ public class RunicsMenu : MonoBehaviour
     private int page = 0;
 
     private int BoxSlotsPerPage => boxRows * boxColumns;
-    private int BoxTotalPages => runicStorageManager == null ? 1
-        : Mathf.Max(1, Mathf.CeilToInt((float)runicStorageManager.BoxStorage.Count / BoxSlotsPerPage));
+    private int BoxTotalPages => RunicStorageManager.Instance == null ? 1
+        : Mathf.Max(1, Mathf.CeilToInt((float)RunicStorageManager.Instance.BoxStorage.Count / BoxSlotsPerPage));
 
     [Header("Slot Sizes")]
     [SerializeField] private float boxSlotSize = 1f;
@@ -25,6 +25,7 @@ public class RunicsMenu : MonoBehaviour
 
     [Header("Inspector")]
     [SerializeField] private Image miniInspectorRunicIcon;
+    [SerializeField] private Image miniInspectorRunicIconBg;
     [SerializeField] private TextMeshProUGUI nameField;
     [SerializeField] private GameObject statsFields;
     [SerializeField] private TextMeshProUGUI hpField;
@@ -39,7 +40,6 @@ public class RunicsMenu : MonoBehaviour
     [SerializeField] private GameObject runicBox;
     [SerializeField] private GameObject runicParty;
     [SerializeField] private GameObject runicSlotPrefab;
-    [SerializeField] private RunicStorageManager runicStorageManager;
     [SerializeField] private RunicDatabase runicDatabase;
     [SerializeField] private MenuManager menuManager;
 
@@ -48,7 +48,6 @@ public class RunicsMenu : MonoBehaviour
     private GridLayoutGroup boxGridLayout;
 
     public GameObject SelectedSlot => selectedSlot;
-    public RunicStorageManager StorageManager => runicStorageManager;
 
     // Persistent slot lists avoid destroying and recreating UI objects.
     private List<RunicIconUI> boxSlotScripts = new List<RunicIconUI>();
@@ -56,8 +55,9 @@ public class RunicsMenu : MonoBehaviour
 
     void Awake()
     {
-        if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
-        
+        if (RunicStorageManager.Instance == null)
+            Debug.LogWarning("Runics Menu: Runic Storage Manager Missing");
+
         if (menuManager == null) menuManager = FindFirstObjectByType<MenuManager>();
     }
 
@@ -75,14 +75,18 @@ public class RunicsMenu : MonoBehaviour
             if (partyTransform != null) runicParty = partyTransform.gameObject;
         }
 
-        if (runicStorageManager == null || runicBox == null || runicParty == null || runicSlotPrefab == null)
+        if (RunicStorageManager.Instance == null || runicBox == null || runicParty == null || runicSlotPrefab == null)
         {
             Debug.LogError("RunicsMenu is missing a storage manager, Box, Party, or runic slot prefab.", this);
             return;
         }
 
         if (miniInspectorRunicIcon == null)
-            miniInspectorRunicIcon = transform.Find("MiniInspector/SelectedRunicIcon/IconMask/RunicSprite")
+            miniInspectorRunicIcon = transform.Find("MiniInspector/RunicIcon/IconMask/RunicSprite")
+                .GetComponent<Image>();
+
+        if (miniInspectorRunicIconBg == null)
+            miniInspectorRunicIconBg = transform.Find("MiniInspector/RunicIcon/IconMask/SpriteBackground")
                 .GetComponent<Image>();
 
         if (nameField == null)
@@ -140,8 +144,8 @@ public class RunicsMenu : MonoBehaviour
                 : selectedSlot.GetComponent<RunicIconUI>();
 
             RunicSaveData data = slotScript.IsPartySlot
-                ? StorageManager.GetPartyRunicBySlot(slotScript.SlotNumber)
-                : StorageManager.GetBoxRunicBySlot(slotScript.SlotNumber);
+                ? RunicStorageManager.Instance.GetPartyRunicBySlot(slotScript.SlotNumber)
+                : RunicStorageManager.Instance.GetBoxRunicBySlot(slotScript.SlotNumber);
 
             if (data != null)
                 menuManager.OpenRunicInspectionMenu(data);
@@ -185,8 +189,8 @@ public class RunicsMenu : MonoBehaviour
             slotScript.ConfigureSlot(globalIndex, false, this);
             slotScript.gameObject.name = $"BoxSlot_{globalIndex}";
 
-            RunicSaveData runicData = runicStorageManager.GetBoxRunicBySlot(globalIndex);
-            bool isInParty = runicData != null && runicStorageManager.IsRunicInParty(runicData.runicInstanceId);
+            RunicSaveData runicData = RunicStorageManager.Instance.GetBoxRunicBySlot(globalIndex);
+            bool isInParty = runicData != null && RunicStorageManager.Instance.IsRunicInParty(runicData.runicInstanceId);
 
             slotScript.UpdateVisuals(runicData, isInParty, instant);
         }
@@ -200,7 +204,7 @@ public class RunicsMenu : MonoBehaviour
             slotScript.ConfigureSlot(i, true, this);
             slotScript.gameObject.name = $"PartySlot_{i}";
 
-            RunicSaveData runicData = runicStorageManager.GetPartyRunicBySlot(i);
+            RunicSaveData runicData = RunicStorageManager.Instance.GetPartyRunicBySlot(i);
             
             slotScript.UpdateVisuals(runicData, false, instant);
         }
@@ -238,7 +242,7 @@ public class RunicsMenu : MonoBehaviour
         }
 
         // Create party slots based on the player's maximum party size.
-        int maxParty = runicStorageManager != null ? runicStorageManager.Player.MaxPartySize : 3;
+        int maxParty = RunicStorageManager.Instance != null ? RunicStorageManager.Instance.Player.MaxPartySize : 3;
         for (int i = 0; i < maxParty; i++)
         {
             GameObject newPartySlot = Instantiate(runicSlotPrefab, runicParty.transform);
@@ -265,7 +269,7 @@ public class RunicsMenu : MonoBehaviour
         if (selectedSlot == null)
         {
             if (!clickedSlotScript.IsPartySlot
-                && runicStorageManager.GetBoxRunicBySlot(clickedSlotScript.SlotNumber) == null)
+                && RunicStorageManager.Instance.GetBoxRunicBySlot(clickedSlotScript.SlotNumber) == null)
             {
                 UpdateMiniInspector();
                 return;
@@ -286,38 +290,38 @@ public class RunicsMenu : MonoBehaviour
         }
         else if (selectedSlotScript.IsPartySlot && clickedSlotScript.IsPartySlot)
         {
-            runicStorageManager.MovePositionInParty(
+            RunicStorageManager.Instance.MovePositionInParty(
                 selectedSlotScript.SlotNumber, 
                 clickedSlotScript.SlotNumber
             );
         }
         else if (!selectedSlotScript.IsPartySlot && clickedSlotScript.IsPartySlot)
         {
-            if (runicStorageManager.GetBoxRunicBySlot(selectedSlotScript.SlotNumber) == null) 
+            if (RunicStorageManager.Instance.GetBoxRunicBySlot(selectedSlotScript.SlotNumber) == null) 
             {
                 // If the box slot is empty, clear the selection.
                 selectedSlotScript.SetSelected(false);
                 UpdateMiniInspector();
                 return;
             }
-            if (runicStorageManager.IsRunicInParty(
-                runicStorageManager.GetBoxRunicBySlot(selectedSlotScript.SlotNumber)?.runicInstanceId
+            if (RunicStorageManager.Instance.IsRunicInParty(
+                RunicStorageManager.Instance.GetBoxRunicBySlot(selectedSlotScript.SlotNumber)?.runicInstanceId
             ))
             {
-                if (runicStorageManager.GetBoxRunicBySlot(selectedSlotScript.SlotNumber)?.runicInstanceId == 
-                runicStorageManager.GetBoxRunicBySlot(clickedSlotScript.SlotNumber)?.runicInstanceId)
+                if (RunicStorageManager.Instance.GetBoxRunicBySlot(selectedSlotScript.SlotNumber)?.runicInstanceId == 
+                RunicStorageManager.Instance.GetBoxRunicBySlot(clickedSlotScript.SlotNumber)?.runicInstanceId)
                 {
                     // If this runic is already in the clicked party slot, remove it.
-                    runicStorageManager.RemoveFromPartyBySlot(clickedSlotScript.SlotNumber);
+                    RunicStorageManager.Instance.RemoveFromPartyBySlot(clickedSlotScript.SlotNumber);
                 }
                 else {
                     // If a different runic is already in the party, swap positions.
-                    int partyIndex = runicStorageManager.GetPartySlotIndex(
-                        runicStorageManager.GetBoxRunicBySlot(selectedSlotScript.SlotNumber)?.runicInstanceId
+                    int partyIndex = RunicStorageManager.Instance.GetPartySlotIndex(
+                        RunicStorageManager.Instance.GetBoxRunicBySlot(selectedSlotScript.SlotNumber)?.runicInstanceId
                     );
                     if (partyIndex != -1)
                     {
-                        runicStorageManager.MovePositionInParty(
+                        RunicStorageManager.Instance.MovePositionInParty(
                             partyIndex,
                             clickedSlotScript.SlotNumber
                         );
@@ -326,7 +330,7 @@ public class RunicsMenu : MonoBehaviour
             }
             else
             {
-                runicStorageManager.MoveToPartyBySlot(
+                RunicStorageManager.Instance.MoveToPartyBySlot(
                     selectedSlotScript.SlotNumber,
                     clickedSlotScript.SlotNumber
                 );
@@ -334,17 +338,17 @@ public class RunicsMenu : MonoBehaviour
         }
         else if(selectedSlotScript.IsPartySlot && !clickedSlotScript.IsPartySlot)
         {   
-            if (runicStorageManager.GetBoxRunicBySlot(clickedSlotScript.SlotNumber) == null
-            || runicStorageManager.GetBoxRunicBySlot(clickedSlotScript.SlotNumber)?.runicInstanceId == null
-            || runicStorageManager.GetBoxRunicBySlot(clickedSlotScript.SlotNumber)?.runicInstanceId == 
-                runicStorageManager.GetPartyRunicBySlot(selectedSlotScript.SlotNumber)?.runicInstanceId)
+            if (RunicStorageManager.Instance.GetBoxRunicBySlot(clickedSlotScript.SlotNumber) == null
+            || RunicStorageManager.Instance.GetBoxRunicBySlot(clickedSlotScript.SlotNumber)?.runicInstanceId == null
+            || RunicStorageManager.Instance.GetBoxRunicBySlot(clickedSlotScript.SlotNumber)?.runicInstanceId == 
+                RunicStorageManager.Instance.GetPartyRunicBySlot(selectedSlotScript.SlotNumber)?.runicInstanceId)
             {
                 // If the box slot is empty, remove the runic from the party.
-                runicStorageManager.RemoveFromPartyBySlot(selectedSlotScript.SlotNumber);
+                RunicStorageManager.Instance.RemoveFromPartyBySlot(selectedSlotScript.SlotNumber);
             }
             else
             {
-                runicStorageManager.MoveToPartyBySlot(
+                RunicStorageManager.Instance.MoveToPartyBySlot(
                     clickedSlotScript.SlotNumber,
                     selectedSlotScript.SlotNumber
                 );
@@ -352,7 +356,7 @@ public class RunicsMenu : MonoBehaviour
         }
         else
         {
-            runicStorageManager.MovePositionInBoxBySlot(
+            RunicStorageManager.Instance.MovePositionInBoxBySlot(
                 selectedSlotScript.SlotNumber,
                 clickedSlotScript.SlotNumber
             );
@@ -372,7 +376,10 @@ public class RunicsMenu : MonoBehaviour
         if (selectedSlot == null)
         {
             if (miniInspectorRunicIcon != null)
-            miniInspectorRunicIcon.color = new Color(0, 0, 0, 0);
+                miniInspectorRunicIcon.color = new Color(0, 0, 0, 0);
+
+            if (miniInspectorRunicIconBg != null)
+                miniInspectorRunicIconBg.color = new Color(0, 0, 0, 0);
 
             if (nameField != null)
                 nameField.gameObject.SetActive(false);
@@ -391,8 +398,8 @@ public class RunicsMenu : MonoBehaviour
 
         if (iconScript != null)
             runicData = iconScript.IsPartySlot
-                ? runicStorageManager.GetPartyRunicBySlot(iconScript.SlotNumber)
-                : runicStorageManager.GetBoxRunicBySlot(iconScript.SlotNumber);
+                ? RunicStorageManager.Instance.GetPartyRunicBySlot(iconScript.SlotNumber)
+                : RunicStorageManager.Instance.GetBoxRunicBySlot(iconScript.SlotNumber);
         else 
         {
             if (miniInspectorRunicIcon != null)
@@ -406,14 +413,24 @@ public class RunicsMenu : MonoBehaviour
         {
             if (miniInspectorRunicIcon != null)
                 miniInspectorRunicIcon.color = new Color(0, 0, 0, 0);
+
+            if (miniInspectorRunicIconBg != null)
+                miniInspectorRunicIconBg.color = new Color(0, 0, 0, 0);
+
             return;
         }
 
         if (miniInspectorRunicIcon != null)
         {
             miniInspectorRunicIcon.color = Color.white;
-            Sprite runicSprite = runicStorageManager != null ? runicStorageManager.GetRunicIcon(runicData) : null;
+            Sprite runicSprite = RunicStorageManager.Instance != null ? 
+                RunicStorageManager.Instance.GetRunicIcon(runicData) : null;
             miniInspectorRunicIcon.sprite = runicSprite;
+        }
+
+        if (miniInspectorRunicIconBg != null)
+        {
+            miniInspectorRunicIconBg.color = Color.white;
         }
 
         if (nameField != null)
@@ -458,15 +475,15 @@ public class RunicsMenu : MonoBehaviour
 
         RunicIconUI selectedScript = selectedSlot.GetComponent<RunicIconUI>();
         string runicId = selectedScript.IsPartySlot
-            ? runicStorageManager.GetPartyRunicBySlot(selectedScript.SlotNumber)?.runicInstanceId
-            : runicStorageManager.GetBoxRunicBySlot(selectedScript.SlotNumber)?.runicInstanceId;
+            ? RunicStorageManager.Instance.GetPartyRunicBySlot(selectedScript.SlotNumber)?.runicInstanceId
+            : RunicStorageManager.Instance.GetBoxRunicBySlot(selectedScript.SlotNumber)?.runicInstanceId;
 
         if (string.IsNullOrEmpty(runicId)) return;
 
         if (selectedScript.IsPartySlot)
         {
             // contraparte fica na box, na página atual
-            int boxIdx = runicStorageManager.GetBoxSlotIndex(runicId);
+            int boxIdx = RunicStorageManager.Instance.GetBoxSlotIndex(runicId);
             int localIdx = boxIdx - (page * BoxSlotsPerPage);
             if (localIdx >= 0 && localIdx < boxSlotScripts.Count)
                 boxSlotScripts[localIdx].SetCounterpartHighlight(true);
@@ -474,7 +491,7 @@ public class RunicsMenu : MonoBehaviour
         else
         {
             // contraparte fica na party, se esse rúnico estiver nela
-            int partyIdx = runicStorageManager.GetPartySlotIndex(runicId);
+            int partyIdx = RunicStorageManager.Instance.GetPartySlotIndex(runicId);
             if (partyIdx != -1 && partyIdx < partySlotScripts.Count)
                 partySlotScripts[partyIdx].SetCounterpartHighlight(true);
         }

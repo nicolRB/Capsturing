@@ -41,6 +41,9 @@ public class RunicCombat : MonoBehaviour
     public Dictionary<Skill, float> SkillCooldowns => skillCooldowns;
     public bool AttackingPlayer => playerTarget;
 
+    private readonly List<Coroutine> activeEmissionCoroutines = new List<Coroutine>();
+    private Collider bodyCollider;
+
     public void SetPaused(bool paused)
     {
         hitboxRegistry?.SetPaused(paused);
@@ -56,6 +59,7 @@ public class RunicCombat : MonoBehaviour
         runic = GetComponent<Runic>();
         runicMovement = GetComponent<RunicMovement>();
         hitboxRegistry = GetComponent<RunicHitboxRegistry>();
+        bodyCollider = GetComponent<Collider>();
     }
 
     void Update()
@@ -252,6 +256,7 @@ public class RunicCombat : MonoBehaviour
     {
         Debug.Log(runic + " using Skill: " + skill.SkillName);
 
+        StopAllEmissions();
         ClearPendingLandingImpact();
 
         recoveryTimer = runic.Recovery + skill.Duration;
@@ -421,6 +426,8 @@ public class RunicCombat : MonoBehaviour
                 step.Continuous
             );
         }
+
+        StartEmissions(skill, step, stepDuration, false);
     }
 
     private void ExecuteStepUpdate(SkillStep step)
@@ -466,25 +473,164 @@ public class RunicCombat : MonoBehaviour
             pendingLandingImpactSkill,
             totalPower,
             pendingLandingImpactStep.Continuous
-);
+        );
+        StartEmissions(pendingLandingImpactSkill, pendingLandingImpactStep, landingImpactDuration, true);
         landingImpactResetCoroutine = StartCoroutine(ResetLandingImpactAfterDelay());
     }
 
     private void PrepareLandingImpact(Skill skill)
     {
         ClearPendingLandingImpact();
+        StopAllEmissions();
         if (skill.Steps == null)
             return;
 
+        SkillStep? best = null;
         foreach (SkillStep step in skill.Steps)
         {
             if (step.HitboxType != SkillHitboxType.JumpImpactAOE)
                 continue;
 
-            pendingLandingImpactSkill = skill;
-            pendingLandingImpactStep = step;
-            hasPendingLandingImpact = true;
-            return;
+            bool hasLandingEmission = step.Emissions != null && step.Emissions.Any(e =>
+                e.EmissionPrefab != null && e.Origin == SkillHitboxType.JumpImpactAOE);
+
+            // Prioriza o step com VFX de pouso; senão, guarda o primeiro como fallback.
+            if (hasLandingEmission) { best = step; break; }
+            if (best == null) best = step;
+        }
+
+        if (best == null) return;
+
+        pendingLandingImpactSkill = skill;
+        pendingLandingImpactStep = best.Value;
+        hasPendingLandingImpact = true;
+    }
+
+    private void StartEmissions(Skill skill, SkillStep step, float stepDuration, bool landing)
+    {
+        if (step.Emissions == null) return;
+
+        foreach (SkillEmission emission in step.Emissions)
+        {
+            if (emission.EmissionPrefab == null) continue;
+
+            // Emissions originating from JumpImpactAOE should only spawn on landing.
+            if (emission.Origin == SkillHitboxType.JumpImpactAOE != landing) continue;
+
+            activeEmissionCoroutines.Add(
+                StartCoroutine(EmissionRoutine(skill, emission, stepDuration, landing)));
+        }
+    }
+
+    private void StopAllEmissions()
+    {
+        foreach (Coroutine c in activeEmissionCoroutines)
+            if (c != null) StopCoroutine(c);
+        activeEmissionCoroutines.Clear();
+    }
+
+    private System.Collections.IEnumerator WaitUnpaused(float seconds)
+    {
+        float waited = 0f;
+        while (waited < seconds)
+        {
+            if (!runic.IsPaused)
+                waited += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private System.Collections.IEnumerator EmissionRoutine(
+        Skill skill, SkillEmission emission, float stepDuration, bool landing)
+    {
+        if (emission.ContinuousEmission)
+        {
+            // Emit at intervals throughout the step window.
+            float interval = Mathf.Max(emission.MultiFireDelay, 0.05f);
+            float elapsed = 0f;
+
+            while (elapsed < stepDuration && (landing || usingSkill))
+            {
+                SpawnEmission(skill, emission, 0, 1, true);
+                yield return WaitUnpaused(interval);
+                elapsed += interval;
+            }
+            yield break;
+        }
+
+        int count = Mathf.Max(1, emission.Amount);
+        for (int i = 0; i < count; i++)
+        {
+            if (!landing && !usingSkill) yield break;
+
+            SpawnEmission(skill, emission, i, count, false);
+
+            // A delay of 0 fires all projectiles at once (shotgun); > 0 fires them sequentially.
+            if (emission.MultiFireDelay > 0f && i < count - 1)
+                yield return WaitUnpaused(emission.MultiFireDelay);
+        }
+    }
+
+    private void SpawnEmission(Skill skill, SkillEmission emission, int index, int count, bool continuous)
+    {
+        // Origin: the selected hitbox collider (mouth, claw, etc.) or the runic itself.
+        Transform origin = transform;
+        if (emission.Origin != SkillHitboxType.None && hitboxRegistry != null)
+        {
+            Collider originCol = hitboxRegistry.GetCollider(emission.Origin);
+            if (originCol != null) origin = originCol.transform;
+        }
+        Vector3 position = origin.position;
+
+        // Landing effects originate on the ground, not at the hitbox pivot.
+        if (emission.Origin == SkillHitboxType.JumpImpactAOE)
+            position = GetFeetPoint(position);
+
+        // Direction: aim at the target when firing; without a target, use the runic's forward direction.
+        Quaternion baseRotation = transform.rotation;
+        Transform target = GetCurrentTargetTransform();
+        if (target != null)
+        {
+            Collider tc = target.GetComponent<Collider>();
+            Vector3 aimPoint = tc != null ? tc.bounds.center : target.position;
+            Vector3 dir = aimPoint - position;
+            if (dir.sqrMagnitude > 0.0001f)
+                baseRotation = Quaternion.LookRotation(dir);
+        }
+
+        // Spread: spreadAngles is the TOTAL arc (x = pitch, y = yaw) distributed across projectiles.
+        Vector3 angles = Vector3.zero;
+        bool spreads = count > 1 || continuous;
+        if (count > 1 && !continuous)
+        {
+            float t = index / (float)(count - 1) - 0.5f; // -0.5 .. +0.5
+            angles = emission.SpreadAngles * t;
+        }
+        if (spreads && emission.SpreadRandomness > 0f)
+        {
+            float r = emission.SpreadRandomness; // In degrees.
+            angles += new Vector3(Random.Range(-r, r), Random.Range(-r, r), 0f);
+        }
+
+        Quaternion rotation = emission.RotateToFaceTarget
+            ? baseRotation * Quaternion.Euler(angles)
+            : Quaternion.Euler(emission.CustomRotation) * emission.EmissionPrefab.transform.rotation;
+
+        GameObject instance = Instantiate(emission.EmissionPrefab, position, rotation);
+
+        float scaleMul = emission.EmissionScale > 0f ? emission.EmissionScale : 1f;
+        instance.transform.localScale = emission.EmissionPrefab.transform.localScale * scaleMul;
+
+        // Configure projectiles; VFX-only prefabs need no additional setup.
+        ProjectileScript projectile = instance.GetComponent<ProjectileScript>();
+        if (projectile != null)
+        {
+            projectile.Setup(
+                runic,
+                skill,
+                emission.Speed,
+                runic.GetKeyStatValue(skill.KeyStat),
+                runic.TameState == RunicState.Tamed);
         }
     }
 
@@ -512,6 +658,7 @@ public class RunicCombat : MonoBehaviour
     public void Flinch()
     {
         ClearPendingLandingImpact();
+        StopAllEmissions();
         usingSkill = false;
         preparedSkill = null;
         skillDurationTimer = 0;
@@ -535,6 +682,13 @@ public class RunicCombat : MonoBehaviour
                 skillCooldowns[skill] -= Time.deltaTime;
             }
         }
+    }
+
+    private Vector3 GetFeetPoint(Vector3 fallback)
+    {
+        if (bodyCollider == null) return fallback;
+        Bounds b = bodyCollider.bounds;
+        return new Vector3(b.center.x, b.min.y, b.center.z);
     }
 
     public void SetCombatStyle(CombatStyle style)

@@ -16686,10 +16686,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2462967295244318898}
-        m_TargetAssemblyTypeName: LoadSceneByIndex, Assembly-CSharp
-        m_MethodName: LoadScene
-        m_Mode: 3
+      - m_Target: {fileID: 7330931781768286409}
+        m_TargetAssemblyTypeName: MenuManager, GameCore
+        m_MethodName: MainMenu
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -21826,7 +21826,6 @@ MonoBehaviour:
   runicBox: {fileID: 3860429204031593412}
   runicParty: {fileID: 6400741391784321450}
   runicSlotPrefab: {fileID: 8441782574480214154, guid: 8f5a1d8b3f983054bb54db8843b2c1c4, type: 3}
-  runicStorageManager: {fileID: 0}
   runicDatabase: {fileID: 11400000, guid: 77fcf40784b31b84b9e46c9cdd3c1ad1, type: 2}
   menuManager: {fileID: 7330931781768286409}
 --- !u!1 &3965081592962918067
@@ -22836,7 +22835,6 @@ GameObject:
   - component: {fileID: 5873829736326906923}
   - component: {fileID: 3416053677814973826}
   - component: {fileID: 7330931781768286409}
-  - component: {fileID: 2462967295244318898}
   - component: {fileID: 4432673843624624405}
   m_Layer: 5
   m_Name: MenusCanvas
@@ -22950,25 +22948,9 @@ MonoBehaviour:
   settingsMenu: {fileID: 5731857908602037598}
   runicInspectionMenu: {fileID: 5438605056709509128}
   player: {fileID: 0}
-  runicStorageManager: {fileID: 0}
-  saveManager: {fileID: 0}
-  settingsManager: {fileID: 0}
   popupTextPrefab: {fileID: 5236116510788329961, guid: 87af14dd9ba51ff41a295165ea4b765d, type: 3}
   canvas: {fileID: 3505944914550807448}
   onGame: 1
---- !u!114 &2462967295244318898
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4119272645287813992}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f93ddec1b1893d14f962ddbf0fe9f9eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LoadSceneByIndex
-  loadingSceneIndex: 1
 --- !u!114 &4432673843624624405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27408,9 +27390,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveLoadMenuScript
   menuManager: {fileID: 7330931781768286409}
-  saveManager: {fileID: 0}
-  runicStorageManager: {fileID: 0}
-  settingsManager: {fileID: 0}
   saveButtonPrefab: {fileID: 7186132214183370510, guid: fa2bc5ac1e8a8204db140d534c9eb61f, type: 3}
   saveFilePrefab: {fileID: 6286291473942139236, guid: 19fca2ebe7419b841bb5842fe329785c, type: 3}
   savesList: {fileID: 8023639736029912089}
@@ -28766,12 +28745,11 @@ MonoBehaviour:
   basicSkillsList: {fileID: 5788828682581938301}
   SkillBlocks:
   - {fileID: 9131335981288653550}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 6139002715787535090}
+  - {fileID: 1937675201410448505}
   elements: []
   elementsList: {fileID: 4549074406530093801}
   database: {fileID: 11400000, guid: 77fcf40784b31b84b9e46c9cdd3c1ad1, type: 2}
-  runicStorageManager: {fileID: 0}
   menuManager: {fileID: 7330931781768286409}
   elementTagPrefab: {fileID: 5485681438990683312, guid: 43fb99d8cf9727f46a3ed881dc4948ca, type: 3}
   basicSkillPrefab: {fileID: 2305733416787144377, guid: fa811797e33249a448af576617049d51, type: 3}

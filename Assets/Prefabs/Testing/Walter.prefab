@@ -289,7 +289,7 @@ MonoBehaviour:
   tameState: 0
   species: {fileID: 11400000, guid: 49f099674a14a6e42b6662991e8acedf, type: 2}
   runicIcon: {fileID: 21300000, guid: fe101b24441923f438efe5162d6a6aba, type: 3}
-  runicModel: {fileID: 0}
+  runicModel: {fileID: 1333037246354868708, guid: 1964437cba917534dbfc382f14c6276f, type: 3}
   modelIndex: 0
   runicInstanceId: 
   nickname: Walter
@@ -962,13 +962,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11710f3f97db1c44fad03342a2b270e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  tameColor: {r: 0, g: 0, b: 0, a: 0}
-  hostileColor: {r: 0, g: 0, b: 0, a: 0}
-  threatColor: {r: 0, g: 0, b: 0, a: 0}
-  neutralColor: {r: 0, g: 0, b: 0, a: 0}
-  ownerRunic: {fileID: 0}
-  frameBar: {fileID: 0}
-  hpBar: {fileID: 0}
+  tameColor: {r: 0.21568629, g: 0.80392164, b: 0.23529413, a: 1}
+  hostileColor: {r: 0.81886786, g: 0.0787967, b: 0.0787967, a: 1}
+  threatColor: {r: 0.8784314, g: 0.61674803, b: 0.12941174, a: 1}
+  neutralColor: {r: 0, g: 0.6613477, b: 0.8037735, a: 1}
+  ownerRunic: {fileID: 7082314468020902869}
+  frameBar: {fileID: 3982262493899443431}
+  hpBar: {fileID: 403543998975759257}
 --- !u!1 &6437495382957256291
 GameObject:
   m_ObjectHideFlags: 0

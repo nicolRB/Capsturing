@@ -11,7 +11,6 @@ public class SummonRunicSpell : SpellBase
 
     [Header("Other References")]
     [SerializeField] private GameObject summonLightPrefab;
-    [SerializeField] private RunicStorageManager runicStorageManager;
     [SerializeField] private RunicDatabase runicDatabase;
     [SerializeField] private GameObject runicWheel;
     
@@ -22,9 +21,6 @@ public class SummonRunicSpell : SpellBase
     {
         base.Start();
         SetSpellType(SpellType.PointTargeted);
-
-        if (runicStorageManager == null)
-            runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
 
         if (runicDatabase == null)
         {
@@ -42,7 +38,7 @@ public class SummonRunicSpell : SpellBase
 
     public override void OnCastStart()
     {
-        if (runicStorageManager == null)
+        if (RunicStorageManager.Instance == null)
         {
             Debug.LogWarning("SummonRunicSpell: RunicStorageManager not found!");
             spellcastingCoordinator.CancelCast();
@@ -51,7 +47,7 @@ public class SummonRunicSpell : SpellBase
 
         // Check whether at least one valid runic is in the party.
         bool hasAnyRunicInParty = false;
-        foreach (string id in runicStorageManager.PartyIds)
+        foreach (string id in RunicStorageManager.Instance.PartyIds)
         {
             if (!string.IsNullOrEmpty(id))
             {
@@ -179,7 +175,7 @@ public class SummonRunicSpell : SpellBase
 
         Vector3 spawnPosition = pointTarget.IndicatedPosition + Vector3.up * (summonHeight / 2);
 
-        GameObject runicModel = runicStorageManager.GetRunicModel(selectedRunicFromWheel);
+        GameObject runicModel = RunicStorageManager.Instance.GetRunicModel(selectedRunicFromWheel);
         if (runicModel == null)
         {
             Debug.LogError($"Runic '{selectedRunicFromWheel.runicInstanceId}' has no model assigned.");

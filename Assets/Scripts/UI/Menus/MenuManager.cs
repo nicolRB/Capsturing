@@ -23,9 +23,6 @@ public class MenuManager : MonoBehaviour
 
     [Header("Other References")]
     [SerializeField] private PlayerController player;
-    [SerializeField] private RunicStorageManager runicStorageManager;
-    [SerializeField] private SaveManager saveManager;
-    [SerializeField] private SettingsManager settingsManager;
     [SerializeField] private GameObject popupTextPrefab; // "Game Saved" popup for example
     [SerializeField] private Canvas canvas;
 
@@ -40,18 +37,13 @@ public class MenuManager : MonoBehaviour
 
     void Start()
     {
-        if (saveManager == null) saveManager = FindFirstObjectByType<SaveManager>();
-        
-        if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
-
-        if (settingsManager == null) settingsManager = FindFirstObjectByType<SettingsManager>();
-
         if (player == null) player = FindFirstObjectByType<PlayerController>();
 
         if (canvas == null) canvas = gameObject.GetComponent<Canvas>();
 
         if (pauseMenu == null) pauseMenu = GameObject.Find("PauseMenu");
-            Resume();
+
+        Resume();
 
         if (saveLoadMenu != null) saveLoadMenu.SetActive(false);
 
@@ -60,6 +52,28 @@ public class MenuManager : MonoBehaviour
         if (runicInspectionMenu != null) runicInspectionMenu.SetActive(false);
 
         if (settingsMenu != null) settingsMenu.SetActive(false);
+
+        if (SaveManager.Instance != null && SaveManager.Instance.TryConsumePendingLoad(out SaveDataContainer pending)
+        && RunicStorageManager.Instance != null)
+        {
+            player.LoadPlayerData(pending);
+            RunicStorageManager.Instance.LoadPartyData(pending);
+        }
+    }
+    
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (player == null) player = FindFirstObjectByType<PlayerController>();
     }
 
     void Update()
@@ -140,9 +154,10 @@ public class MenuManager : MonoBehaviour
 
         currentMenu = null;
 
-        pauseMenu.SetActive(false);
+        if (pauseMenu != null) pauseMenu.SetActive(false);
 
-        if (player.CastingState != CastState.Channeling) player.PlayerHUD.SetActive(true);
+        if (player != null && player.PlayerHUD != null && player.CastingState != CastState.Channeling)
+            player.PlayerHUD.SetActive(true);
 
         Time.timeScale = 1f;
         
@@ -174,26 +189,20 @@ public class MenuManager : MonoBehaviour
     {
         SaveDataContainer data = new SaveDataContainer();
         player.PopulateSaveData(data);
-        runicStorageManager.PopulateSaveData(data);
-        data.lastSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        RunicStorageManager.Instance.PopulateSaveData(data);
+        data.sceneIndex = SceneManager.GetActiveScene().buildIndex;
         return data;
     }
 
     public void SaveGame()
     {
-        string saveFileName = settingsManager.GetActiveSaveFile();
-
-        if (string.IsNullOrEmpty(saveFileName))
-        {
-            // Creates a new save if there is none active
-            saveFileName = saveManager.CreateNextSaveFileName();
-            settingsManager.SaveActiveSaveFile(saveFileName);
-        }
-
-        SaveDataContainer newGameData = GetCurrentGameData();
-        saveManager.SaveGame(saveFileName, newGameData);
-        Debug.Log($"Jogo salvo com sucesso no slot: {saveFileName}");
+        SaveManager.Instance.SaveGame(GetCurrentGameData());
         PopupText(new Vector2(-800, -400), "Game Saved", 50, new Color(0.12f, 0.12f, 0.12f));
+    }
+
+    public void MainMenu()
+    {
+        SceneChanger.Instance.LoadSceneByIndex(0);
     }
 
     public void PopupText(Vector2 coordinates, string text, float fontSize, Color color)

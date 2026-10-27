@@ -8,6 +8,7 @@ TagManager:
   - Wild
   - Button
   - Tamed
+  - Projectile
   layers:
   - Default
   - TransparentFX
@@ -21,8 +22,8 @@ TagManager:
   - Interactable
   - InteractHighlight
   - Hitbox
-  - 
-  - 
+  - Hurtbox
+  - Projectile
   - 
   - 
   - 

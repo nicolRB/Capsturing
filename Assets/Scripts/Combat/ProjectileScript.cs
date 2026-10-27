@@ -14,6 +14,7 @@ public class ProjectileScript : MonoBehaviour
     [SerializeField] private bool playerProjectile;
     private Vector3 spawnPosition;
     [SerializeField] private ProjectileLimiter limiter;
+    [SerializeField] private float lifeTime = 3f;
     [SerializeField] private Runic owner;
     [SerializeField] private LayerMask hitLayerMask;
     [SerializeField] private GameObject hitEffectPrefab;
@@ -82,9 +83,33 @@ public class ProjectileScript : MonoBehaviour
         rb.linearVelocity = transform.forward * speed;
     }
 
+    public void Setup(Runic own, Skill skill, float projectileSpeed, float attackStat, bool player)
+    {
+        if (rb == null)
+            rb = GetComponent<Rigidbody>();
+
+        owner = own;
+        playerProjectile = player;
+        power = skill.Power;
+        knockback = skill.KnockBackValue;
+        damageType = skill.DamageType;
+        element = skill.SkillElement;
+        sourceAttackStat = attackStat;
+        spawnPosition = transform.position;
+
+        if (rb != null)
+            rb.linearVelocity = transform.forward * projectileSpeed;
+
+        if (limiter == ProjectileLimiter.Time)
+            Destroy(gameObject, lifeTime);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         Runic targetRunic = other.GetComponent<Runic>();
+        
+        if (owner != null && targetRunic == owner) return;
+
         if (targetRunic == null)
             targetRunic = other.GetComponentInParent<Runic>();
 

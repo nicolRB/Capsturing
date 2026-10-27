@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class RunicStorageManager : MonoBehaviour
@@ -25,6 +26,7 @@ public class RunicStorageManager : MonoBehaviour
 
     private void Awake()
     {
+        if (player == null) player = FindFirstObjectByType<PlayerController>();
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -45,6 +47,21 @@ public class RunicStorageManager : MonoBehaviour
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
         EnsurePartySize();
+    }
+    
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (player == null) player = FindFirstObjectByType<PlayerController>();
     }
 
     public Sprite GetRunicIcon(RunicSaveData runicData)

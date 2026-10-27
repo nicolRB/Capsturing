@@ -39,15 +39,12 @@ public class RunicTestInjector : MonoBehaviour
     [Header("Custom Behavior")]
 
     [Header("References")]
-    [SerializeField] private SaveManager saveManager;
-    [SerializeField] private RunicStorageManager runicStorageManager;
     [SerializeField] private RunicDatabase runicDatabase;
 
     void Start()
     {
-        if (saveManager == null) saveManager = FindFirstObjectByType<SaveManager>();
-
-        if (runicStorageManager == null) runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
+        if (RunicStorageManager.Instance == null)
+            Debug.LogWarning("Runic Test Injector: Runic Storage Manager missing.");
     }
     
     void Update()
@@ -86,7 +83,7 @@ public class RunicTestInjector : MonoBehaviour
             return;
         }
         
-        if (runicStorageManager == null || saveManager == null)
+        if (RunicStorageManager.Instance == null || SaveManager.Instance == null)
         {
             Debug.LogWarning("RunicTestInjector: storage or save manager not found in the scene.");
             return;

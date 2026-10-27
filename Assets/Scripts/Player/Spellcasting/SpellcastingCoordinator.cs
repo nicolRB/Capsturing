@@ -40,6 +40,16 @@ public class SpellcastingCoordinator : MonoBehaviour
     [SerializeField] private SpellBase.SpellType currentSpellType;
 
     public SpellBase.SpellType CurrentSpellType => currentSpellType;
+
+    void Awake()
+    {
+        if (spellList != null)
+        {
+            spells = spellList.GetComponentsInChildren<SpellBase>();
+            spellCooldowns = new List<float>(new float[spells.Length]);
+        }
+    }
+
     void Start()
     {
         if (player == null) player = FindFirstObjectByType<PlayerController>();
@@ -276,18 +286,16 @@ public class SpellcastingCoordinator : MonoBehaviour
 
     public void SetSpellCooldowns(List<float> cooldowns)
     {
-        if (cooldowns.Count == spellCooldowns.Count)
-            spellCooldowns = cooldowns;
-        else 
-            Debug.LogError("loaded cooldowns does not match spell list");
+        for (int i = 0; i < spellCooldowns.Count; i++)
+            spellCooldowns[i] = (cooldowns != null && i < cooldowns.Count) ? cooldowns[i] : 0f;
     }
 
     public void SetSpellCooldown(int spell, float cooldown)
     {
-        if (spellCooldowns.Count < spell)
+        if (spell >= 0 && spell < spellCooldowns.Count)
             spellCooldowns[spell] = cooldown;
-        else 
-            Debug.LogError("loaded cooldown does not match spell list");
+        else
+            Debug.LogError("spell index out of range");
     }
 
     void UpdateSpellCooldowns()
@@ -315,12 +323,8 @@ public class SpellcastingCoordinator : MonoBehaviour
 
     void UpdateSpellList()
     {
-        // Read SpellBase components from the spell list and update the spell array.
         if (spellList != null)
         {
-            SpellBase[] spellComponents = spellList.GetComponentsInChildren<SpellBase>();
-            spells = spellComponents;
-            spellCooldowns = new List<float>(new float[spells.Length]);
             if (spellSelectUI != null)
             {
                 spellSelectUI.Setup(this);

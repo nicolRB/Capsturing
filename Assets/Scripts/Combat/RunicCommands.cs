@@ -32,10 +32,12 @@ public class RunicCommands : MonoBehaviour
     public Runic SummonedRunic => summonedRunic;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
-        player = FindFirstObjectByType<PlayerController>();    
-        runicSkillsUI = FindFirstObjectByType<RunicSkillsUI>();    
+        if (player == null)
+            player = FindFirstObjectByType<PlayerController>();    
+        if (runicSkillsUI == null)
+            runicSkillsUI = FindFirstObjectByType<RunicSkillsUI>();    
     }
 
     // Update is called once per frame
@@ -193,7 +195,12 @@ public class RunicCommands : MonoBehaviour
         if (runicSkillsUI != null)
             runicSkillsUI.BuildSkillIcons();
         else
-            Debug.LogWarning("Runic Commands: Missing Runic Skills Ui");
+            runicSkillsUI = FindFirstObjectByType<RunicSkillsUI>();  
+            
+            if (runicSkillsUI != null)  
+                runicSkillsUI.BuildSkillIcons();
+            else
+                Debug.LogWarning("Runic Commands: Missing Runic Skills Ui");
     }   
 
     public void RemoveSummonedRunic()

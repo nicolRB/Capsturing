@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum SkillMovementType
@@ -88,6 +89,38 @@ public static class SkillDisplay
     }
 }
 
+// Projectiles and VFX
+[System.Serializable]
+public struct SkillEmission {
+    [SerializeField] private GameObject emissionPrefab;
+    [SerializeField] private float speed;
+    [SerializeField] private bool continuousEmission ;
+
+    [Tooltip("Number of projectiles per shot (ignored if continuousEmission)")]
+    [SerializeField, Min(1)] private int amount; // not used if continuousEmission  is true
+    [SerializeField] private float multiFireDelay; // not used if continuousEmission is false and amount is 1
+    [SerializeField] private Vector3 spreadAngles; // not used if continuousEmission is false and amount is 1
+    [SerializeField] private float spreadRandomness; // not used if continuousEmission is false and amount is 1
+    [SerializeField] private SkillHitboxType origin; // if it's a blast coming out of the landing hitbox or spit coming out of the bite hitbox
+
+    [Tooltip("If checked, rotates the emitted object towards the target instead of using the prefab rotation.")]
+    [SerializeField] private bool rotateToFaceTarget;
+    [SerializeField] private Vector3 customRotation;
+    [SerializeField] private float emissionScale;
+
+    public GameObject EmissionPrefab => emissionPrefab;
+    public float Speed => speed;
+    public bool ContinuousEmission => continuousEmission;
+    public int Amount => amount;
+    public float MultiFireDelay => multiFireDelay;
+    public Vector3 SpreadAngles => spreadAngles;
+    public float SpreadRandomness => spreadRandomness;
+    public SkillHitboxType Origin => origin;
+    public bool RotateToFaceTarget => rotateToFaceTarget;
+    public Vector3 CustomRotation => customRotation;
+    public float EmissionScale => emissionScale; 
+}
+
 [System.Serializable]
 public struct SkillStep
 {
@@ -116,6 +149,9 @@ public struct SkillStep
     [Tooltip("If the damage coused is constant. Only applies damage once if not.")]
     [SerializeField] private bool continuous;
 
+    [Tooltip("Projectiles and VFX")]
+    [SerializeField] private List<SkillEmission> emissions;
+
     public float Delay => delay;
     public SkillMovementType MovementType => movementType;
     public float Force => force;
@@ -124,6 +160,7 @@ public struct SkillStep
     public SkillHitboxType HitboxType => hitboxType;
     public float HitboxSize => hitboxSize;
     public bool Continuous => continuous;
+    public List<SkillEmission> Emissions => emissions;
 }
 
 [CreateAssetMenu(fileName = "NewSkill", menuName = "Runic/Skill")]

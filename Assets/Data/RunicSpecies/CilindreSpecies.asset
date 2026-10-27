@@ -46,7 +46,6 @@ MonoBehaviour:
   skills:
   - {fileID: 11400000, guid: 26a59da33935ced4197c31d7929e2ec7, type: 2}
   - {fileID: 11400000, guid: 5ec905040bd9eab4a91a3e518b10f67f, type: 2}
-  - {fileID: 11400000, guid: bd81e092aa7548d4c86af6eb9e098a0f, type: 2}
   defaultCombatStyle: 0
   defaultNature: 0
   packSpecies: 0

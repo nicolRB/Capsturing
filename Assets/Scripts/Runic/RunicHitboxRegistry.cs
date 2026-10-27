@@ -12,6 +12,7 @@ public class RunicHitboxRegistry : MonoBehaviour
 {
     [SerializeField] private List<HitboxMapping> hitboxMappings = new List<HitboxMapping>();
     [SerializeField] private List<Collider> hurtboxes = new List<Collider>();
+    [SerializeField] private bool logHitboxes = true;
     private HashSet<Collider> hurtboxSet;
 
     private Dictionary<SkillHitboxType, Collider> hitboxDict;
@@ -101,7 +102,11 @@ public class RunicHitboxRegistry : MonoBehaviour
     public void ActivateHitbox(SkillHitboxType type, float sizeMultiplier, Skill skill, float power, bool continuous)
     {
         Collider col = GetCollider(type);
-        if (col == null) return;
+        if (col == null)
+        {
+            Debug.LogWarning($"[Hitbox:{name}] ATIVAR {type} falhou: nenhum collider mapeado no Registry.", this);
+            return;
+        }
 
         SetHitboxEnabled(col, true);
         col.transform.localScale = Vector3.one * sizeMultiplier;
@@ -109,6 +114,10 @@ public class RunicHitboxRegistry : MonoBehaviour
         HitboxItem hitboxItem = col.GetComponent<HitboxItem>();
         if (hitboxItem != null)
             hitboxItem.Setup(GetComponent<Runic>(), skill, power, continuous);
+
+        Log($"ATIVADA {type} ({col.name}) | size={sizeMultiplier} | scale={col.transform.localScale} | " +
+            $"power={power:F1} | continuous={continuous} | enabled={col.enabled} | paused={paused} | " +
+            $"HitboxItem={(hitboxItem != null ? "ok" : "AUSENTE")}");
     }
 
     public void DeactivateHitbox(SkillHitboxType type)
@@ -138,9 +147,10 @@ public class RunicHitboxRegistry : MonoBehaviour
         {
             SetHitboxEnabled(col, false);
             col.transform.localScale = new Vector3(1, 1, 1);
+            Log($"Reset hitbox {type} ({col.name})");
         }
     }
-    
+
     public void ResetAllHitboxes()
     {
         foreach (var mapping in hitboxMappings)
@@ -151,5 +161,12 @@ public class RunicHitboxRegistry : MonoBehaviour
                 mapping.targetCollider.transform.localScale = new Vector3(1, 1, 1);
             }
         }
+        Log($"All hitboxes from {gameObject} reset");
     }
+
+    private void Log(string msg)
+    {
+        if (logHitboxes) Debug.Log($"[Hitbox:{name}] {msg}", this);
+    }
+
 }

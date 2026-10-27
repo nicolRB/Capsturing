@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b2c4ea137a0eb24bad9af0214a2e1ad, type: 3}
+  m_Name: Flora
+  m_EditorClassIdentifier: GameCore::Element
+  elementId: 2
+  elementName: Flora
+  elementColor: {r: 0.21324298, g: 0.7584905, b: 0.10160911, a: 1}
+  elementVulnerabilities:
+  - {fileID: 11400000, guid: 88c4aa8362db76a488f5461940776b06, type: 2}
+  vulnerabilityMultiplier: 2
+  elementResistances: []
+  resistanceMultiplier: 0.5

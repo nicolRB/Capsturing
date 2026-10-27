@@ -4,14 +4,21 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[DefaultExecutionOrder(-100)]
 public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance { get; private set; }
 
+    [SerializeField] private int firstGameplaySceneIndex = 2;
+    private SaveDataContainer pendingLoad;
+
+    private const string ActiveSaveKey = "ActiveSaveFile";
+    private string activeSaveFileName = "";   // vazio = nenhum
+    public string ActiveSaveFileName => activeSaveFileName;
+
     private const string LegacySaveFileName = "creature_save.json";
     private const string SaveFilePrefix = "save_";
     private string saveDirectory;
-    private string activeSaveFileName = "save_1";
 
     private void Awake()
     {
@@ -27,6 +34,7 @@ public class SaveManager : MonoBehaviour
         // Persistent data path initialization
         saveDirectory = Application.persistentDataPath;
         Directory.CreateDirectory(saveDirectory);
+        activeSaveFileName = PlayerPrefs.GetString(ActiveSaveKey, "");
     }
 
     public void SaveGame(string fileName, SaveDataContainer dataToSave)
@@ -42,7 +50,7 @@ public class SaveManager : MonoBehaviour
             fileName = NormalizeFileName(fileName);
             string json = JsonUtility.ToJson(dataToSave, true);
             File.WriteAllText(GetSaveFilePath(fileName), json);
-            activeSaveFileName = fileName;
+            SetActiveSave(fileName);
             Debug.Log($"Game Saved to: {GetSaveFilePath(fileName)}");
         }
         catch (Exception e)
@@ -65,7 +73,7 @@ public class SaveManager : MonoBehaviour
         {
             string json = File.ReadAllText(saveFilePath);
             SaveDataContainer loadedData = JsonUtility.FromJson<SaveDataContainer>(json);
-            activeSaveFileName = fileName;
+            SetActiveSave(fileName);
             Debug.Log("Game Loaded Successfully!");
             return loadedData ?? new SaveDataContainer();
         }
@@ -76,9 +84,43 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    public void LoadGameAndChangeScene(string fileName)
+    {
+        if (!SaveFileExists(fileName))
+        {
+            Debug.LogWarning($"Save '{fileName}' não encontrado.");
+            return;
+        }
+
+        SaveDataContainer data = LoadGame(fileName); // também define o save ativo
+
+        // Saves novos ou antigos têm sceneIndex 0 (menu): caem na primeira cena de jogo.
+        int target = data.sceneIndex;
+        if (target < firstGameplaySceneIndex || target >= SceneManager.sceneCountInBuildSettings)
+            target = firstGameplaySceneIndex;
+
+        pendingLoad = data;
+
+        if (SceneChanger.Instance != null)
+            SceneChanger.Instance.LoadSceneByIndex(target);
+        else
+            SceneManager.LoadScene(target);
+    }
+
+    // Chamado pela cena de jogo depois que ela carrega.
+    public bool TryConsumePendingLoad(out SaveDataContainer data)
+    {
+        data = pendingLoad;
+        pendingLoad = null;
+        return data != null;
+    }
+
     public void SaveGame(SaveDataContainer dataToSave)
     {
-        SaveGame(activeSaveFileName, dataToSave);
+        string target = string.IsNullOrEmpty(activeSaveFileName)
+            ? CreateNextSaveFileName()
+            : activeSaveFileName;
+        SaveGame(target, dataToSave);
     }
 
     public SaveDataContainer LoadGame()
@@ -125,7 +167,7 @@ public class SaveManager : MonoBehaviour
     public string CreateNextSaveFileName()
     {
         int slotNumber = 1;
-        while (SaveFileExists($"{SaveFilePrefix}SaveFile_{slotNumber}")) slotNumber++;
+        while (SaveFileExists($"{SaveFilePrefix}{slotNumber}")) slotNumber++;
         return $"{SaveFilePrefix}{slotNumber}";
     }
 
@@ -139,7 +181,7 @@ public class SaveManager : MonoBehaviour
                 return;
 
             File.Delete(saveFilePath);
-            if (activeSaveFileName == normalizedFileName) activeSaveFileName = "save_1";
+            if (activeSaveFileName == normalizedFileName) SetActiveSave("");
             Debug.Log("Save file deleted.");
         }
         catch (Exception e)
@@ -209,7 +251,7 @@ public class SaveManager : MonoBehaviour
 
                 if (activeSaveFileName == oldFileName)
                 {
-                    activeSaveFileName = newFileName;
+                    SetActiveSave(newFileName);
                 }
 
                 Debug.Log($"Save file renamed from {oldFileName} to {newFileName}");
@@ -223,5 +265,12 @@ public class SaveManager : MonoBehaviour
         {
             Debug.LogError($"Failed to rename save file: {e.Message}");
         }
+    }
+
+    private void SetActiveSave(string fileName)
+    {
+        activeSaveFileName = fileName;
+        PlayerPrefs.SetString(ActiveSaveKey, fileName);
+        PlayerPrefs.Save();
     }
 }

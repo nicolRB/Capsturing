@@ -86,7 +86,6 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody rb;
     private CapsuleCollider capsule;
-    private Animator animator;
 
     [Header("State Flags")]
     [SerializeField] private bool moving = false;
@@ -116,6 +115,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private SpellcastingCoordinator spellcastingCoordinator;
     [SerializeField] private RunicCommands runicCommand;
     [SerializeField] private SummonedRunicUI summonedRunicUI;
+    [SerializeField] private PlayerAnimationCoordinator animationCoordinator;
 
     private bool useAimIndicator = true;
 
@@ -131,20 +131,18 @@ public class PlayerController : MonoBehaviour
     public Runic CommandedTarget => commandedTarget;
     public RunicCommands RunicCommand => runicCommand;
     public SummonedRunicUI RunicUI => summonedRunicUI;
+    public Rigidbody Rb => rb;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         capsule = GetComponent<CapsuleCollider>();
-        animator = GetComponentInChildren<Animator>();
         runicCommand = GetComponent<RunicCommands>();
 
         if (rb == null)
             Debug.LogError("Rigidbody missing on Player!");
         if (capsule == null)
             Debug.LogError("CapsuleCollider missing on Player!");
-        if (animator == null)
-            Debug.LogError("Animator missing on Player!");
 
         SettingsManager.OnSettingsChanged += Apply;
         Apply(SettingsManager.Current);
@@ -178,6 +176,9 @@ public class PlayerController : MonoBehaviour
             summonedRunicUI = FindFirstObjectByType<SummonedRunicUI>();
             summonedRunicUI.gameObject.SetActive(false);
         }
+
+        if (animationCoordinator == null)
+            animationCoordinator = GetComponent<PlayerAnimationCoordinator>();
     }
 
     public void SetCastingState(CastState newState)
@@ -202,7 +203,6 @@ public class PlayerController : MonoBehaviour
         HandleJumpInput();
         HandleRotation();
         UpdateCooldowns();
-        UpdateAnimator();
         if (currentHP <= 0) Die();
         if (castingState == CastState.Aiming && useAimIndicator) 
         {
@@ -354,6 +354,8 @@ public class PlayerController : MonoBehaviour
             Vector3 lv = rb.linearVelocity;
             lv.y = 0f;
             rb.linearVelocity = lv;
+            
+            animationCoordinator.JumpAnimation();
 
             rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
 
@@ -396,38 +398,17 @@ public class PlayerController : MonoBehaviour
     {
         if (capsule == null) return false;
 
-        Vector3 origin = rb.position + Vector3.up * 0.05f; // offset from the center of the capsule
-        float rayLength = capsule.bounds.extents.y + 0.07f; // slightly longer than the distance from the center to the bottom of the capsule
+        // Origin point slightly above the center of the character.
+        Vector3 origin = rb.position + Vector3.up * 0.1f;
+        
+        // The sphere's radius is slightly smaller than the collider's to avoid false positives on the walls.
+        float radius = capsule.radius * 0.85f; 
+        
+        // Maximum distance slightly increased to accommodate curves and ramps.
+        float maxDistance = capsule.bounds.extents.y + 0.2f;
 
-        return Physics.Raycast(origin, Vector3.down, rayLength); // Debug ray for visualization
-    }
-
-    private void UpdateAnimator()
-    {
-        if (animator == null) return;
-
-        // -------- INPUT --------
-        Vector2 moveInput = Vector2.zero;
-
-        if (castingState != CastState.Channeling && (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) moveInput.y += 1f;
-        if (castingState != CastState.Channeling && (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)) moveInput.y -= 1f;
-        if (castingState != CastState.Channeling && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)) moveInput.x -= 1f;
-        if (castingState != CastState.Channeling && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)) moveInput.x += 1f;
-
-        float inputAmount = moveInput.magnitude;
-
-        // -------- GROUNDED --------
-        bool grounded = IsGrounded();
-
-        // -------- SPEED PARAMETER (for Blend Tree) --------
-        float normalizedSpeed = currentSpeed / sprintSpeed;
-        animator.SetFloat("Speed", normalizedSpeed);
-
-        // -------- WALKING BOOL (optional) --------
-        animator.SetBool("Walking", grounded && inputAmount > 0.1f);
-
-        // -------- ANIMATION PLAYBACK SPEED --------
-        animator.speed = Mathf.Lerp(0.8f, 1.5f, normalizedSpeed*2f); // slightly faster than actual speed for better feel
+        // SphereCast sweeps a circular area downwards, perfect for ramps and curved surfaces.
+        return Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, maxDistance);
     }
 
     private void AimIndicatorAnimation()

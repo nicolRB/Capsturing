@@ -2,20 +2,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using System.Linq;
 
 public class RunicInspectionMenu : MonoBehaviour
 {
     const int maxSkillCount = 3;
 
     [Header("Data")]
-    [SerializeField] private RunicSaveData runicData;
     [SerializeField] private RunicSpecies species;
     [SerializeField] private Sprite runicSprite;
     [SerializeField] private Sprite runeSprite;
 
     [Header("Stat/Info Fields")]
     [SerializeField] private Image runicIcon;
+    [SerializeField] private Image runicIconBg;
     [SerializeField] private Image runeIcon;
     [SerializeField] private TextMeshProUGUI nameField;
     [SerializeField] private TextMeshProUGUI speciesField;
@@ -50,20 +49,16 @@ public class RunicInspectionMenu : MonoBehaviour
     
     [Header("References")]
     [SerializeField] private RunicDatabase database;
-    [SerializeField] private RunicStorageManager runicStorageManager;
     [SerializeField] private MenuManager menuManager;
     [SerializeField] private GameObject elementTagPrefab;
     [SerializeField] private GameObject basicSkillPrefab;
 
     void Start()
     {
-        if (runicStorageManager == null)
-            runicStorageManager = FindFirstObjectByType<RunicStorageManager>();
-
         if (menuManager == null)
             menuManager = FindFirstObjectByType<MenuManager>();
 
-        if (runicStorageManager == null)
+        if (RunicStorageManager.Instance == null)
             Debug.LogWarning("Runic Inspection Menu: Storage Manager missing / not referenced");
 
         if (menuManager == null)
@@ -75,11 +70,10 @@ public class RunicInspectionMenu : MonoBehaviour
 
     public void SetupPage(RunicSaveData data)
     {
-        if (data != null && runicStorageManager && database != null)
+        if (data != null && RunicStorageManager.Instance && database != null)
         {
-            runicData = data;
             species = database.GetSpeciesById(data.speciesId);
-            runicSprite = runicStorageManager.GetRunicIcon(data);
+            runicSprite = RunicStorageManager.Instance.GetRunicIcon(data);
             // runeSprite = storageManage.GetRuneFromRunic(data);
             
             skills = database.GetSkillsByIds(data.learnedSkillIds);
@@ -89,6 +83,9 @@ public class RunicInspectionMenu : MonoBehaviour
 
             runicIcon.sprite = runicSprite;
             runicIcon.color = runicSprite != null ? Color.white : Color.black;
+
+            if (runicIconBg != null)
+                runicIconBg.color = runicSprite != null ? Color.white : new Color(0,0,0,0);
 
             string speciesName = species != null && !string.IsNullOrEmpty(species.SpeciesName)
                 ? species.SpeciesName : "?";

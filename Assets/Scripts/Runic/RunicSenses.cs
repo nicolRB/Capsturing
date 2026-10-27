@@ -107,7 +107,7 @@ public class RunicSenses : MonoBehaviour
             if (player != null)
             {
                 // Depending on the nature of the runic, either flees or attacks the player.
-                if (runic.Nature == WildNature.Fearful)
+                if (runic.Nature == WildNature.Fearful || runic.Nature == WildNature.FearfulProtective)
                 {
                     runic.SetBehaviorState(BehaviorState.Fleeing);
                     wildAI.SetFleePlayer(true);
