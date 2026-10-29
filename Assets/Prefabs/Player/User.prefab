@@ -1630,7 +1630,7 @@ MonoBehaviour:
   playerCamera: {fileID: 8979690651557234468}
   spellcastingCoordinator: {fileID: 123857611085477954}
   playerInteraction: {fileID: 5584333575778930241}
-  groundIndicator: {fileID: 0}
+  groundIndicator: {fileID: 512726419025222471}
   rayEmissionColor: {r: 0.075, g: 0.47, b: 0.75, a: 1}
   sphereRadius: 0.5
   rayEmissionIntensity: 3
@@ -1972,7 +1972,6 @@ MonoBehaviour:
   initialAngle: 180
   visualUpdateSpeed: 8
   summonRunicSpell: {fileID: 6667017635326172225}
-  runicStorageManager: {fileID: 0}
   runicIconPrefab: {fileID: 2420698643900125647, guid: 9b7615d52f3a3bd40a4ee73aaf5b5548, type: 3}
   symbol: {fileID: 5776213765721437777}
 --- !u!1 &5563720833014811255
@@ -2291,7 +2290,6 @@ MonoBehaviour:
   summonHeight: 1
   activeSummonedRunic: {fileID: 0}
   summonLightPrefab: {fileID: 1640205669387948940, guid: 500e19010efd12c4ba1f71f6978d17db, type: 3}
-  runicStorageManager: {fileID: 0}
   runicDatabase: {fileID: 11400000, guid: 77fcf40784b31b84b9e46c9cdd3c1ad1, type: 2}
   runicWheel: {fileID: 4642295494501671152}
 --- !u!114 &3203239062384122919
@@ -3571,6 +3569,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c4ede46b1f049d346b26e36bdb46085f, type: 3}
+--- !u!1 &512726419025222471 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1683491275738675402, guid: c4ede46b1f049d346b26e36bdb46085f, type: 3}
+  m_PrefabInstance: {fileID: 1171331261167018893}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4431806523969463002 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3297082561584349527, guid: c4ede46b1f049d346b26e36bdb46085f, type: 3}

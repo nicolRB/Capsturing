@@ -1195,6 +1195,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2671032878836066652, guid: daf2d72bb11e11fc32d7a8b3ddd883a9, type: 3}
   m_PrefabInstance: {fileID: 1159624557}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &170042346
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 170042347}
+  - component: {fileID: 170042348}
+  m_Layer: 0
+  m_Name: TowerEntryPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &170042347
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 170042346}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.5, z: 22}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1387566291}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &170042348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 170042346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63cc4e6c54803c74296908e1f73a875d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameCore::EntryPoint
+  id: Patio1
 --- !u!1001 &172217700
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4827,9 +4872,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 2085318203}
   - {fileID: 1479963261}
   - {fileID: 1739535427}
-  - {fileID: 2085318203}
   - {fileID: 448319641}
   - {fileID: 466602389}
   - {fileID: 993984833}
@@ -11453,6 +11498,7 @@ Transform:
   - {fileID: 355667987}
   - {fileID: 620843715}
   - {fileID: 1269729870}
+  - {fileID: 170042347}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1404049147
@@ -16055,6 +16101,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5788828682581938301, guid: a6a670e3ce8ccfb4aa3106610b84f7e8, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -97.499626
+      objectReference: {fileID: 0}
     - target: {fileID: 5832680342409213998, guid: a6a670e3ce8ccfb4aa3106610b84f7e8, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -19687,13 +19737,88 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7905438563316164846, guid: 9e851528ecf67c010398e2375609b6e9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2085318207}
+    - targetCorrespondingSourceObject: {fileID: 7905438563316164846, guid: 9e851528ecf67c010398e2375609b6e9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2085318206}
+    - targetCorrespondingSourceObject: {fileID: 7905438563316164846, guid: 9e851528ecf67c010398e2375609b6e9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2085318205}
   m_SourcePrefab: {fileID: 100100000, guid: 9e851528ecf67c010398e2375609b6e9, type: 3}
 --- !u!4 &2085318203 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7593635240128248004, guid: 9e851528ecf67c010398e2375609b6e9, type: 3}
   m_PrefabInstance: {fileID: 2085318202}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2085318204 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7905438563316164846, guid: 9e851528ecf67c010398e2375609b6e9, type: 3}
+  m_PrefabInstance: {fileID: 2085318202}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2085318205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085318204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8ba7e4b9ff2ade4a9c411cfa4c25a3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameCore::Highlight
+  pointed: 0
+  originalLayer: -1
+  highlightLayer: 14
+--- !u!114 &2085318206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085318204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4652ab4e3e29586478ba664e9a1cc8cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameCore::Interactable
+  interactionPrompt: Interagir
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2085318207}
+        m_TargetAssemblyTypeName: Passage, GameCore
+        m_MethodName: GoToLocation
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &2085318207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085318204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 638911a45c99d7b4ab2f6b5b0b28a028, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameCore::Passage
+  targetSceneIndex: 5
+  entryPointId: 
+  targetCoordinates: {x: 0, y: 0, z: 0}
+  rotation: {x: 0, y: 0, z: 0, w: 0}
+  passageZone: {fileID: 0}
+  manualCoordinates: 0
 --- !u!1001 &2100156120
 PrefabInstance:
   m_ObjectHideFlags: 0

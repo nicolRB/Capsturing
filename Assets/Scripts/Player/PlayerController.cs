@@ -15,6 +15,8 @@ public enum CastState { Idle, Channeling, Aiming, Casting }
 [RequireComponent(typeof(CapsuleCollider))]
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController Instance { get; private set; }
+
     [Header("Stats")]
     [SerializeField] private int maxHP = 100;
     [SerializeField] private int currentHP = 100;
@@ -118,6 +120,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerAnimationCoordinator animationCoordinator;
 
     private bool useAimIndicator = true;
+    private float groundedGraceTimer;
+    private bool frozen;
 
     public GameObject PlayerCharacter => playerCharacter;
     public CameraController CameraController => cameraController;
@@ -135,6 +139,18 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning(
+                $"PlayerController duplicado em '{name}' (cena '{gameObject.scene.name}'). " +
+                $"Mantendo '{Instance.name}' (cena '{Instance.gameObject.scene.name}').", this);
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
         rb = GetComponent<Rigidbody>();
         capsule = GetComponent<CapsuleCollider>();
         runicCommand = GetComponent<RunicCommands>();
@@ -198,6 +214,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (frozen) return;
+
+        if (groundedGraceTimer > 0f)
+            groundedGraceTimer -= Time.deltaTime;
+
         HandleMovementInput();
         HandleDashInput();
         HandleJumpInput();
@@ -217,6 +238,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (frozen) return;
         HandleJumpPhysics();
     }
 
@@ -396,19 +418,22 @@ public class PlayerController : MonoBehaviour
     // ---------------- GROUND CHECK ----------------
     public bool IsGrounded()
     {
+        if (frozen) return true;
         if (capsule == null) return false;
 
-        // Origin point slightly above the center of the character.
         Vector3 origin = rb.position + Vector3.up * 0.1f;
-        
-        // The sphere's radius is slightly smaller than the collider's to avoid false positives on the walls.
-        float radius = capsule.radius * 0.85f; 
-        
-        // Maximum distance slightly increased to accommodate curves and ramps.
+        float radius = capsule.radius * 0.85f;
         float maxDistance = capsule.bounds.extents.y + 0.2f;
 
-        // SphereCast sweeps a circular area downwards, perfect for ramps and curved surfaces.
-        return Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, maxDistance);
+        bool hit = Physics.SphereCast(origin, radius, Vector3.down, out _, maxDistance);
+
+        if (groundedGraceTimer > 0f)
+        {
+            if (hit) groundedGraceTimer = 0f;   // chão confirmado, não precisa mais do grace
+            return true;
+        }
+
+        return hit;
     }
 
     private void AimIndicatorAnimation()
@@ -569,6 +594,53 @@ public class PlayerController : MonoBehaviour
 
         resonantMagicDefense = Mathf.RoundToInt(
             party.Sum(r => r.magicDefense) + party.Max(r => r.magicDefense));
+    }
+
+    public void TeleportTo(Vector3 position, Quaternion rotation)
+    {
+        groundedGraceTimer = 0.3f;
+
+        // Zera a velocidade para não carregar o momento da cena anterior
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        rb.position = position;
+        rb.rotation = rotation;
+        transform.SetPositionAndRotation(position, rotation);
+
+        // Alinha a câmera com a direção do EntryPoint
+        if (cameraController != null)
+            cameraController.yRotation = rotation.eulerAngles.y;
+
+        // Cancela estados que poderiam continuar rodando
+        isDashing = false;
+        dashTimer = 0f;
+        Physics.SyncTransforms();
+
+        if (animationCoordinator != null)
+            animationCoordinator.ResetToIdle();
+
+        Debug.Log("Teleported player to: " + position);
+        Debug.Log("Local Position: " + position);
+    }
+
+    public void SetFrozen(bool value)
+    {
+        frozen = value;
+
+        if (value)
+        {
+            // Zera a velocidade ANTES de virar kinematic (senão a Unity avisa)
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            isDashing = false;
+            rb.isKinematic = true;
+        }
+        else
+        {
+            rb.isKinematic = false;
+            groundedGraceTimer = 0.3f;
+        }
     }
 
     // ---------------- Settings ---------------- 

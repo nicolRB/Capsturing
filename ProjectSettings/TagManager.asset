@@ -9,6 +9,7 @@ TagManager:
   - Button
   - Tamed
   - Projectile
+  - Passage
   layers:
   - Default
   - TransparentFX
@@ -24,7 +25,7 @@ TagManager:
   - Hitbox
   - Hurtbox
   - Projectile
-  - 
+  - PassageHighlight
   - 
   - 
   - 

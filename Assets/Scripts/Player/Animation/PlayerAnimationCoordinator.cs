@@ -42,4 +42,21 @@ public class PlayerAnimationCoordinator : MonoBehaviour
         if (animator != null)
             animator.SetTrigger("Jump");
     }
+
+    public void ResetToIdle()
+    {
+        if (animator == null) return;
+
+        animator.Rebind();
+
+        // Rebind resets the parameters; reapplies the correct values ​​BEFORE Update(0)
+        animator.SetBool("IsGrounded", true);
+        animator.SetFloat("VelocityX", 0f);
+        animator.SetFloat("VelocityY", 0f);
+
+        animator.Update(0f);
+
+        // Prevent the position jump from turning into speed in the next frame.
+        lastPosition = transform.position;
+    }
 }

@@ -1,12 +1,40 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Highlight : MonoBehaviour
 {
+    private static readonly HashSet<Highlight> activeHighlights = new HashSet<Highlight>();
+
     [Header("Highlight")]
     [SerializeField] private bool pointed = false;
     [SerializeField] private int originalLayer = -1;
     [SerializeField] private int highlightLayer = 3; // Layer number for the "Highlight" layer
-    
+
+    public int HighlightLayer => highlightLayer;
+    public static int ActiveHighlightLayerMask
+    {
+        get
+        {
+            int layerMask = 0;
+            foreach (Highlight highlight in activeHighlights)
+            {
+                if (highlight != null && highlight.highlightLayer >= 0 && highlight.highlightLayer < 32)
+                    layerMask |= 1 << highlight.highlightLayer;
+            }
+            return layerMask;
+        }
+    }
+
+    void OnEnable()
+    {
+        activeHighlights.Add(this);
+    }
+
+    void OnDisable()
+    {
+        activeHighlights.Remove(this);
+    }
+
     void Start()
     {
         originalLayer = gameObject.layer;

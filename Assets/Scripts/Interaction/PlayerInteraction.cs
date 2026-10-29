@@ -12,7 +12,7 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private float maxDistance = 7.5f;
     [Tooltip("Radius of the detection sphere cast.")]
     [SerializeField] private float sphereRadius = 1f;
-    [Tooltip("Layers containing interactable objects and their highlights.")]
+    [Tooltip("Layers containing interactable objects. Configured Highlight layers are included automatically.")]
     [SerializeField] private LayerMask interactableLayer;
 
     [Header("Interaction Input")]
@@ -49,9 +49,10 @@ public class PlayerInteraction : MonoBehaviour
             playerCamera.transform.eulerAngles.y, 0) * Vector3.forward);
 
         bool canTargetInteractable = player.CastingState == CastState.Idle;
+        int targetLayers = interactableLayer.value | Highlight.ActiveHighlightLayerMask;
 
         if (canTargetInteractable
-            && Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, interactableLayer))
+            && Physics.SphereCast(ray, sphereRadius, out RaycastHit hit, maxDistance, targetLayers))
         {
             Highlight newHighlight = hit.collider.gameObject.GetComponentInParent<Highlight>();
             Interactable newInteractable = hit.collider.gameObject.GetComponentInParent<Interactable>();

@@ -1,8 +1,8 @@
 ﻿<Solution>
-  <Project Path="GameCore.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="LineworkLite.csproj" />
+  <Project Path="GameCore.csproj" />
+  <Project Path="Assembly-CSharp-firstpass.csproj" />
   <Project Path="Tests.csproj" />
   <Project Path="LineworkLite.Editor.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Assembly-CSharp-Editor-firstpass.csproj" />
 </Solution>
